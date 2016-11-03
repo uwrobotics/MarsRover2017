@@ -1,0 +1,9 @@
+########################
+##    CAN Receiver    ##
+########################
+
+# Interface
+/CAN_Rx/receiver_interface:     "vcan0"
+
+# Topics
+/CAN_Rx/topic_list:             ["/gps_data", "/imu_data", "/bms_status"]
