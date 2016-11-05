@@ -70,8 +70,6 @@ int main(int argc, char *argv[])
         ros::spinOnce();
     }
 
-    can_receiver.cleanup();
-
     driver->shutdown();
     driver.reset();
 

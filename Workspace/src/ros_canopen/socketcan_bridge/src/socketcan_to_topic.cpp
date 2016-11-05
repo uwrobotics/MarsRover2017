@@ -45,7 +45,12 @@ namespace socketcan_bridge
         *pPub = nh_.advertise<can_msgs::Frame>("CAN_receiver", 10);
         topics_.push_back(pPub);
         topic_names_.push_back("CAN_receiver");
-    };
+    }
+
+    SocketCANToTopic::~SocketCANToTopic()
+    {
+        cleanup();
+    }
 
     void SocketCANToTopic::cleanup()
     {
@@ -56,13 +61,13 @@ namespace socketcan_bridge
         {
             delete topics_[i];
             topics_[i] = NULL;
-            topics_.pop_back();
         }
 
+        topics_.clear();
         topic_names_.clear();
 
-        ROS_INFO("CAN receiver publishers deallocated");
-    };
+        ROS_INFO("CAN receiver publishers deallocated and vectors cleared");
+    }
 
     void SocketCANToTopic::init()
     {
@@ -91,7 +96,7 @@ namespace socketcan_bridge
             return;
         }
         ROS_INFO("CAN receiver initialization complete");
-    };
+    }
 
     void SocketCANToTopic::getParams(ros::NodeHandle& nh)
     {
@@ -185,8 +190,7 @@ namespace socketcan_bridge
         }
 
         topics_[topic_idx]->publish(msg);
-    };
-
+    }
 
     void SocketCANToTopic::stateCallback(const can::State & s)
     {
@@ -200,5 +204,5 @@ namespace socketcan_bridge
         {
             ROS_ERROR("Error: %s, asio: %s", err.c_str(), s.error_code.message().c_str());
         }
-    };
+    }
 };  // namespace socketcan_bridge
