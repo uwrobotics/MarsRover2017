@@ -16,7 +16,7 @@
     <rosparam file="$(find socketcan_bridge)/config/receiver.yaml"/>
 
     <!-- CAN Receiver -->
-    <node pkg="socketcan_bridge" type="socketcan_to_topic_node" name="receiver" respawn="false" output="screen"/>
+    <node pkg="socketcan_bridge" type="socketcan_to_topic_node" name="receiver" respawn="false" output="screen" launch-prefix="valgrind"/>
 
     <!-- CAN Transmitter -->
 <!--     <node pkg="socketcan_bridge" type="topic_to_socketcan_node" name="topic_to_socketcan_node" output="screen">

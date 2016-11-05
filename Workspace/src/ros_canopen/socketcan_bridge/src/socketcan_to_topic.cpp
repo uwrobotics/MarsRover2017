@@ -34,18 +34,34 @@ namespace socketcan_bridge
     SocketCANToTopic::SocketCANToTopic(boost::shared_ptr<can::DriverInterface> driver)
     {
         driver_ = driver;
+
+        ros::Publisher* pPub = new ros::Publisher;
+        if (!pPub)
+        {
+            ROS_ERROR("Could not allocate memory for publisher");
+            return;
+        }
+
+        *pPub = nh_.advertise<can_msgs::Frame>("CAN_receiver", 10);
+        topics_.push_back(pPub);
+        topic_names_.push_back("CAN_receiver");
     };
 
-    SocketCANToTopic::~SocketCANToTopic()
+    void SocketCANToTopic::cleanup()
     {
+        nh_.shutdown();
+
         // Deallocate memory for publisher pointers
         for (int i = 0; i < topics_.size(); i++)
         {
             delete topics_[i];
+            topics_[i] = NULL;
             topics_.pop_back();
         }
 
         topic_names_.clear();
+
+        ROS_INFO("CAN receiver publishers deallocated");
     };
 
     void SocketCANToTopic::init()
@@ -53,6 +69,8 @@ namespace socketcan_bridge
         // register handler for frames and state changes.
         frame_listener_ = driver_->createMsgListener(can::CommInterface::FrameDelegate(this, &SocketCANToTopic::frameCallback));
         state_listener_ = driver_->createStateListener(can::StateInterface::StateDelegate(this, &SocketCANToTopic::stateCallback));
+
+        cleanup();
 
         if (topics_.size() > 0)
         {
@@ -72,11 +90,12 @@ namespace socketcan_bridge
             ROS_WARN("Could not publish topics");
             return;
         }
+        ROS_INFO("CAN receiver initialization complete");
     };
 
     void SocketCANToTopic::getParams(ros::NodeHandle& nh)
     {
-        nh.getParam("/CAN_Rx/topic_list", topic_names_);
+        nh.getParam("/receiver_list", topic_names_);
     }
 
     bool SocketCANToTopic::publishTopic(std::vector<std::string>& topic_list)

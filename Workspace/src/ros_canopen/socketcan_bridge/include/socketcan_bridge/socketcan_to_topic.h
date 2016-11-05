@@ -41,9 +41,8 @@ namespace socketcan_bridge
   {
     public:
       SocketCANToTopic(boost::shared_ptr<can::DriverInterface> driver);
-      ~SocketCANToTopic();
       void init();
-      void setTopic();
+      void cleanup();
 
     private:
       ros::NodeHandle nh_;

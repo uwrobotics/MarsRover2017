@@ -26,21 +26,31 @@
  */
 
 #include <ros/ros.h>
+#include <signal.h>
 #include <socketcan_bridge/socketcan_to_topic.h>
 #include <socketcan_interface/threading.h>
 #include <socketcan_interface/string.h>
 
 
+sig_atomic_t volatile request_shutdown = 0;
+
+void sigIntHandler(int sig)
+{
+    request_shutdown = 1;
+}
+
+
 int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "socketcan_to_topic_node");
-
     ros::NodeHandle nh_param;
 
-    std::string receiver_interface;
-    nh_param.param<std::string>("/CAN_Rx/receiver_interface", receiver_interface, "vcan0");
+    signal(SIGINT, sigIntHandler);
 
-    boost::shared_ptr<can::ThreadedSocketCANInterface> driver = boost::make_shared<can::ThreadedSocketCANInterface> ();
+    std::string receiver_interface;
+    nh_param.param<std::string>("/receiver_interface", receiver_interface, "vcan0");
+
+    boost::shared_ptr<can::ThreadedSocketCANInterface> driver = boost::make_shared<can::ThreadedSocketCANInterface>();
 
     if (!driver->init(receiver_interface, 0))  // initialize device at can_device, 0 for no loopback.
     {
@@ -55,10 +65,17 @@ int main(int argc, char *argv[])
     socketcan_bridge::SocketCANToTopic can_receiver(driver);
     can_receiver.init();
 
-    ros::spin();
+    while (!request_shutdown)
+    {
+        ros::spinOnce();
+    }
+
+    can_receiver.cleanup();
 
     driver->shutdown();
     driver.reset();
 
-    ros::waitForShutdown();
+    ros::shutdown();
+
+    return 0;
 }
