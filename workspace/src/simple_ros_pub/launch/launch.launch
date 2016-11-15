@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="simple_ros_pub" type="simple_ros_pub_node" name="simple_ros_pub" output="screen">
+  </node>
+</launch>
