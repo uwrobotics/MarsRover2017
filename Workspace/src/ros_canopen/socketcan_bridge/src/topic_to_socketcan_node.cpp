@@ -26,41 +26,55 @@
  */
 
 #include <ros/ros.h>
+#include <signal.h>
 #include <socketcan_bridge/topic_to_socketcan.h>
 #include <socketcan_interface/threading.h>
 #include <socketcan_interface/string.h>
 #include <string>
 
 
+sig_atomic_t volatile request_shutdown = 0;
+
+void sigIntHandler(int sig)
+{
+    request_shutdown = 1;
+}
+
 
 int main(int argc, char *argv[])
 {
-  ros::init(argc, argv, "topic_to_socketcan_node");
+    ros::init(argc, argv, "topic_to_socketcan_node");
+    ros::NodeHandle nh_param;
 
-  ros::NodeHandle nh(""), nh_param("~");
+    signal(SIGINT, sigIntHandler);
 
-  std::string can_device;
-  nh_param.param<std::string>("can_device", can_device, "can0");
+    std::string transmitter_interface;
+    nh_param.param<std::string>("/transmitter_interface", transmitter_interface, "vcan0");
 
-  boost::shared_ptr<can::ThreadedSocketCANInterface> driver = boost::make_shared<can::ThreadedSocketCANInterface> ();
+    boost::shared_ptr<can::ThreadedSocketCANInterface> driver = boost::make_shared<can::ThreadedSocketCANInterface> ();
 
-  if (!driver->init(can_device, 0))  // initialize device at can_device, 0 for no loopback.
-  {
-    ROS_FATAL("Failed to initialize can_device at %s", can_device.c_str());
-    return 1;
-  }
+    if (!driver->init(transmitter_interface, 0))  // initialize device at can_device, 0 for no loopback.
+    {
+        ROS_FATAL("Failed to initialize transmitter_interface at %s", transmitter_interface.c_str());
+        return 1;
+    }
     else
-  {
-    ROS_INFO("Successfully connected to %s.", can_device.c_str());
-  }
+    {
+        ROS_INFO("Successfully connected to %s.", transmitter_interface.c_str());
+    }
 
-  socketcan_bridge::TopicToSocketCAN to_socketcan_bridge(&nh, &nh_param, driver);
-  to_socketcan_bridge.setup();
+    socketcan_bridge::TopicToSocketCAN can_transmitter(driver);
+    can_transmitter.init();
 
-  ros::spin();
+    while (!request_shutdown)
+    {
+        ros::spinOnce();
+    }
 
-  driver->shutdown();
-  driver.reset();
+    driver->shutdown();
+    driver.reset();
 
-  ros::waitForShutdown();
+    ros::shutdown();
+
+    return 0;
 }

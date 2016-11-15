@@ -31,39 +31,29 @@
 #include <socketcan_interface/socketcan.h>
 #include <can_msgs/Frame.h>
 #include <ros/ros.h>
+#include <vector>
+#include <string>
 
 namespace socketcan_bridge
 {
-class TopicToSocketCAN
-{
-  public:
-    TopicToSocketCAN(ros::NodeHandle* nh, ros::NodeHandle* nh_param, boost::shared_ptr<can::DriverInterface> driver);
-    void setup();
+    class TopicToSocketCAN
+    {
+        public:
+            TopicToSocketCAN(boost::shared_ptr<can::DriverInterface> driver);
+            void init();
 
-  private:
-    ros::Subscriber can_topic_;
-    boost::shared_ptr<can::DriverInterface> driver_;
+        private:
+            ros::NodeHandle nh_;
+            ros::Subscriber can_topic_;
+            boost::shared_ptr<can::DriverInterface> driver_;
 
-    can::StateInterface::StateListener::Ptr state_listener_;
+            can::StateInterface::StateListener::Ptr state_listener_;
 
-    void msgCallback(const can_msgs::Frame::ConstPtr& msg);
-    void stateCallback(const can::State & s);
-};
-
-void convertMessageToSocketCAN(const can_msgs::Frame& m, can::Frame& f)
-{
-  f.id = m.id;
-  f.dlc = m.dlc;
-  f.is_error = m.is_error;
-  f.is_rtr = m.is_rtr;
-  f.is_extended = m.is_extended;
-
-  for (int i = 0; i < 8; i++)  // always copy all data, regardless of dlc.
-  {
-    f.data[i] = m.data[i];
-  }
-};
-
+            void getParams(ros::NodeHandle& nh);
+            void messageToFrame(const can_msgs::Frame& m, can::Frame& f);
+            void msgCallback(const can_msgs::Frame::ConstPtr& msg);
+            void stateCallback(const can::State & s);
+    };
 };  // namespace socketcan_bridge
 
 
