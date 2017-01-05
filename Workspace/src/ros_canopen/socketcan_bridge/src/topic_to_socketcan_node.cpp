@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        ROS_INFO("Successfully connected to %s.", transmitter_interface.c_str());
+        ROS_INFO("CAN transmitter successfully connected to %s.", transmitter_interface.c_str());
     }
 
     socketcan_bridge::TopicToSocketCAN can_transmitter(driver);
