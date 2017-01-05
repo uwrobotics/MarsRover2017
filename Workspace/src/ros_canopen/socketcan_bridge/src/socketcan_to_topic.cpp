@@ -185,7 +185,7 @@ namespace socketcan_bridge
                 break;
 
             default:
-                ROS_ERROR("Received frame has unregistered CAN ID %x", msg.id);
+                ROS_WARN("Received frame has unregistered CAN ID %x", msg.id);
                 break;
         }
 
