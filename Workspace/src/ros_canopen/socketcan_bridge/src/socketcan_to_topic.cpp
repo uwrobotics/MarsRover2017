@@ -28,6 +28,8 @@
 #include <socketcan_bridge/socketcan_to_topic.h>
 #include <socketcan_interface/string.h>
 #include <can_msgs/Frame.h>
+#include <limits.h>
+#include <linux/can.h>
 
 namespace socketcan_bridge
 {
@@ -158,7 +160,16 @@ namespace socketcan_bridge
             {
                 // can::tostring cannot be used for dlc > 8 frames. It causes an crash
                 // due to usage of boost::array for the data array. The should always work.
-                ROS_WARN("Received frame error: %s", can::tostring(f, true).c_str());
+                ROS_WARN("Received error frame: %s", can::tostring(f, true).c_str());
+                return;
+            }
+            if (f.is_rtr)
+            {
+                ROS_WARN("Received RTR frame: RTR frames not supported %s", can::tostring(f, true).c_str());
+            }
+            if (f.is_extended)
+            {
+                ROS_WARN("Received extended frame: extended frames not supported %s", can::tostring(f, true).c_str());
             }
         }
 
@@ -169,7 +180,8 @@ namespace socketcan_bridge
         msg.header.frame_id = "";  // empty frame is the de-facto standard for no frame.
         msg.header.stamp = ros::Time::now();
 
-        int topic_idx;
+        int topic_idx = INT_MAX;
+        bool valid_frame = true;
         switch (msg.id)
         {
             case CAN_RX_GPS:
@@ -186,10 +198,20 @@ namespace socketcan_bridge
 
             default:
                 ROS_WARN("Received frame has unregistered CAN ID %x", msg.id);
+                valid_frame = false;
                 break;
         }
 
-        topics_[topic_idx]->publish(msg);
+        if (valid_frame)
+        {
+	    if (topic_idx < topics_.size())
+            {
+	        if (topics_[topic_idx])
+                {
+                    topics_[topic_idx]->publish(msg);
+                }
+            }
+        }
     }
 
     void SocketCANToTopic::stateCallback(const can::State & s)

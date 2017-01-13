@@ -31,7 +31,6 @@
 #include <socketcan_interface/threading.h>
 #include <socketcan_interface/string.h>
 
-
 sig_atomic_t volatile request_shutdown = 0;
 
 void sigIntHandler(int sig)

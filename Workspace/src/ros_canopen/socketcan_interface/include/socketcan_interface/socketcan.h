@@ -194,7 +194,7 @@ protected:
                 input_.id = frame_.can_id & CAN_EFF_MASK;
                 input_.is_error = 1;
 
-                LOG("error: " << input_.id);
+                //LOG("error: " << input_.id);
                 setInternalError(input_.id);
                 setNotReady();
 

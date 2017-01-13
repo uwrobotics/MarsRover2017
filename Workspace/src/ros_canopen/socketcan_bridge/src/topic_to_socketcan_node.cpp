@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, sigIntHandler);
 
     std::string transmitter_interface;
-    nh_param.param<std::string>("/transmitter_interface", transmitter_interface, "vcan0");
+    nh_param.param<std::string>("/transmitter_interface", transmitter_interface, "can0");
 
     boost::shared_ptr<can::ThreadedSocketCANInterface> driver = boost::make_shared<can::ThreadedSocketCANInterface> ();
 
