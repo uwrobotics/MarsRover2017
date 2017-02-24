@@ -25,7 +25,7 @@ setconfig(_AMOD, 2, 1) ' Analog input 2 absolute mode
 
 ' Undervoltage/overvoltage limits (p214)
 setconfig(_OVL, 700)
-setconfig(_UVL, 280)
+setconfig(_UVL, 100)
 
 for ch = 1 andwhile ch <= MAX_CHANNELS evaluate ch++
 	' Encoder, speed config (p208, p221)
@@ -58,6 +58,7 @@ top:
 				setconfig(_KD, ch, 0)
 				setconfig(_ICAP, ch, 0)
 				setcommand(_G, ch, 0)
+				setcommand(_MSTOP, ch)
 			end if
 
 			' Motor in velocity-control mode.
@@ -67,6 +68,7 @@ top:
 				setconfig(_KI, ch, 40)
 				setconfig(_KD, ch, 10)
 				setconfig(_ICAP, ch, 100)
+				setcommand(_MGO,1)
 			end if
 
 			' Motor in position-control mode.
