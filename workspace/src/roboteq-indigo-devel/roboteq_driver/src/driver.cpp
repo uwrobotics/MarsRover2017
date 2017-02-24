@@ -51,9 +51,11 @@ int main(int argc, char **argv) {
       ROS_ASSERT(channel_namespaces[i].getType() == XmlRpc::XmlRpcValue::TypeString);
       controller.addChannel(new roboteq::Channel(1 + i, channel_namespaces[i], &controller));
     }
+    ROS_INFO("MULTIPLE CHANNELS");
   } else {
     // Default configuration is a single channel in the node's namespace.
     controller.addChannel(new roboteq::Channel(1, "~", &controller));
+    ROS_INFO("SINGLE CHANNEL");
   } 
 
   // Attempt to connect and run.

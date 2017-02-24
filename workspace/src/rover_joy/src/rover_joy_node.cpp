@@ -22,8 +22,8 @@ void twistCallback(const geometry_msgs::Twist::ConstPtr& vel)
 	left = (vel->linear.x / MAX_X * 100.0) - (vel->angular.z / MAX_Z * 100);
 	right = vel-> linear.x / MAX_X * 100.0 + (vel->angular.z / MAX_Z * 100);
 
-	left_command.setpoint = left;
-	right_command.setpoint = right;
+	left_command.setpoint = left*10;
+	right_command.setpoint = right*10;
 
 	left_pub.publish(left_command);
 	right_pub.publish(right_command);

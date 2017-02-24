@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Link to generated source from Microbasic script file.
 extern const char* script_lines[];
-extern const int script_ver = 28;
+extern const int script_ver = 31;
 
 namespace roboteq {
 
@@ -140,6 +140,7 @@ void Controller::write(std::string msg) {
 
 void Controller::flush() {
   ROS_DEBUG_STREAM_NAMED("serial", "TX: " << boost::algorithm::replace_all_copy(tx_buffer_.str(), "\r", "\\r"));
+  ROS_INFO_STREAM("TX: " << tx_buffer_.str());
   ssize_t bytes_written = serial_->write(tx_buffer_.str());
   if (bytes_written < tx_buffer_.tellp()) {
     ROS_WARN_STREAM("Serial write timeout, " << bytes_written << " bytes written of " << tx_buffer_.tellp() << ".");
@@ -154,19 +155,19 @@ void Controller::processStatus(std::string str) {
   std::vector<std::string> fields;
   boost::split(fields, str, boost::algorithm::is_any_of(":"));
   try {
-    int reported_script_ver = boost::lexical_cast<int>(fields[1]);
-    static int wrong_script_version_count = 0;
-    if (reported_script_ver == script_ver) {
-      wrong_script_version_count = 0;
-    } else {
-      if (++wrong_script_version_count > 5) {
-        ROS_WARN_STREAM("Script version mismatch. Expecting " << script_ver <<
-            " but controller consistently reports " << reported_script_ver << ". " <<
-            ". Now attempting download.");
-        downloadScript();
-      }
-      return;
-    }
+    //int reported_script_ver = boost::lexical_cast<int>(fields[1]);
+    //static int wrong_script_version_count = 0;
+    //if (reported_script_ver == script_ver) {
+    //  wrong_script_version_count = 0;
+    //} else {
+    //  if (++wrong_script_version_count > 5) {
+    //    ROS_WARN_STREAM("Script version mismatch. Expecting " << script_ver <<
+    //        " but controller consistently reports " << reported_script_ver << ". " <<
+    //        ". Now attempting download.");
+    //    downloadScript();
+    //  }
+    //  return;
+   // }
 
     if (fields.size() != 7) {
       ROS_WARN("Wrong number of status fields. Dropping message.");
@@ -229,9 +230,11 @@ bool Controller::downloadScript() {
     if (msg == "HLD\r") goto found_ack;
   }
   ROS_DEBUG("Could not enter download mode.");
+  ROS_INFO("NOT LOADING SCRIPT");
   return false;
   found_ack:
 
+  ROS_INFO("LOADING SCRIPT");
   // Send hex program, line by line, checking for an ack from each line.
   int line_num = 0;
   while(script_lines[line_num]) {
