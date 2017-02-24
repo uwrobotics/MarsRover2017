@@ -1,0 +1,23 @@
+[35m[1mScanning dependencies of target socketcan_interface_plugin
+[0m[ 33%] [ 66%] Built target socketcan_interface_string
+[32mBuilding CXX object CMakeFiles/socketcan_interface_plugin.dir/src/socketcan_interface_plugin.cpp.o
+[0m[35m[1mScanning dependencies of target socketcan_dump
+[0m[100%] [32mBuilding CXX object CMakeFiles/socketcan_dump.dir/src/candump.cpp.o
+In file included from /home/uwrt/MarsRover2017/Workspace/src/ros_canopen/socketcan_interface/include/socketcan_interface/socketcan.h:4:0,
+                 from /home/uwrt/MarsRover2017/Workspace/src/ros_canopen/socketcan_interface/src/socketcan_interface_plugin.cpp:2:
+/home/uwrt/MarsRover2017/Workspace/src/ros_canopen/socketcan_interface/include/socketcan_interface/asio_base.h: In member function ‘virtual bool can::AsioDriver<Socket>::send(const can::Frame&)’:
+/home/uwrt/MarsRover2017/Workspace/src/ros_canopen/socketcan_interface/include/socketcan_interface/asio_base.h:105:9: error: ‘else’ without a previous ‘if’
+         else
+         ^
+make[2]: *** [CMakeFiles/socketcan_interface_plugin.dir/src/socketcan_interface_plugin.cpp.o] Error 1
+make[1]: *** [CMakeFiles/socketcan_interface_plugin.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+In file included from /home/uwrt/MarsRover2017/Workspace/src/ros_canopen/socketcan_interface/include/socketcan_interface/socketcan.h:4:0,
+                 from /home/uwrt/MarsRover2017/Workspace/src/ros_canopen/socketcan_interface/src/candump.cpp:6:
+/home/uwrt/MarsRover2017/Workspace/src/ros_canopen/socketcan_interface/include/socketcan_interface/asio_base.h: In member function ‘virtual bool can::AsioDriver<Socket>::send(const can::Frame&)’:
+/home/uwrt/MarsRover2017/Workspace/src/ros_canopen/socketcan_interface/include/socketcan_interface/asio_base.h:105:9: error: ‘else’ without a previous ‘if’
+         else
+         ^
+make[2]: *** [CMakeFiles/socketcan_dump.dir/src/candump.cpp.o] Error 1
+make[1]: *** [CMakeFiles/socketcan_dump.dir/all] Error 2
+make: *** [all] Error 2
