@@ -5,6 +5,9 @@ import Gps from '../components/Gps'
 import Wheel from '../components/Wheel'
 import Battery from '../components/battery'
 
+const Line = require('rc-progress').Line;
+const Circle = require('rc-progress').Circle;
+
 function MyButton(props) {
   return (
     <button className="square" onClick={() => props.onClick()}>
@@ -21,8 +24,8 @@ class RobotPanel extends React.Component {
           {
           battery: {
             percentage: data,
-            estimateTime: 6,
-            actualRemain:20000
+            estimateTime: data,
+            actualRemain: data
           },
 
         });
@@ -31,7 +34,7 @@ class RobotPanel extends React.Component {
   changeString(data){
     this.setState(
           {
-          
+
           wheels:[{
             working: data,
             name : '1st wheel',
@@ -56,13 +59,13 @@ class RobotPanel extends React.Component {
   }
 
 //  *********************** this is our button part *******************************
-  connectButtonClick(clas) {     
+  connectButtonClick(clas) {
     var listener = new ROSLIB.Topic({
       ros : this.state.ros,
       name : '/listener',
       messageType : 'std_msgs/String'
     });                               // 5 m      this is for what will happen, if we click those 9 squares
-    
+
 
     printToScreen(function(data){
       console.log('string is '+  ': ' + data);
@@ -72,7 +75,7 @@ class RobotPanel extends React.Component {
     function printToScreen(callback){
       listener.subscribe(function(message) {
       //console.log('Received message on Int' + listener.name + ': ' + message.data);
-      callback(message.data);  
+      callback(message.data);
     });
     }
   }
@@ -94,9 +97,9 @@ class RobotPanel extends React.Component {
       //listener.unsubscribe();
     });
   }
-  
 
-  
+
+
 
   refreshState(clas){
     var listener = new ROSLIB.Topic({
@@ -111,17 +114,17 @@ class RobotPanel extends React.Component {
       clas.changeState(data);
     });
 
-   
+
     function printToScreen(callback){
       listener.subscribe(function(message) {
       //console.log('Received message on Int' + listener.name + ': ' + message.data);
       string = message.data;
-      callback(string);  
+      callback(string);
     });
     }
   }
 
-  
+
 
   renderConnectSquare() {
     return <MyButton value="connect" onClick={() => this.connectButtonClick(this)} />
@@ -134,7 +137,7 @@ class RobotPanel extends React.Component {
   renderRefreshSquare() {
     return <MyButton value="Recieveing Data" onClick={() => this.refreshState(this)} />
   }
-  
+
 //  **************************** above is button part ******************************
 
 
@@ -177,39 +180,40 @@ class RobotPanel extends React.Component {
     };
     setUpRos(this.state.ros);
     publicTopisMessage(this.state.ros);
+    this.refreshState(this);
   }
 
 
-// **************************** above is the data of the page ********************** 
-  
+// **************************** above is the data of the page **********************
+
 //{this.renderConnectSquare()}
 //{this.renderUnConnectSquare()}
 //{this.renderRefreshSquare()}
   render() {
+    const containerStyle = {
+      width: '250px',
+    };
+  const circleContainerStyle = {
+   width: '250px',
+   height: '250px',
+   };
   return(
     <div>
-        <div id="bng">
-        <div className="button">{this.renderRefreshSquare()}</div>
-          <div className="col">
-            <Battery
-              percentage={this.state.battery.percentage}
-              estimateTime={this.state.battery.estimateTime}
-              actualRemain={this.state.battery.actualRemain}
+          <p>Battery Percentage {this.state.battery.percentage}%</p>
+          <div style={circleContainerStyle}>
+            <Circle
+              percent={this.state.battery.percentage}
+              strokeWidth="6"
+              strokeLinecap="square"
+              strokeColor="#85D262"
             />
           </div>
-          <div className="col">
-           <Gps
-              latitude={this.state.gps.latitude}
-              longitude={this.state.gps.longitude}
-              />
-          </div>
-        </div>
-      <div className="Wheel">
-        <Wheel
-          wheels={this.state.wheels}
-        />
-      </div>
-      
+          <p>Temperature {this.state.battery.percentage} &#8451;</p>
+           <div style={containerStyle}>
+             <Line percent={this.state.battery.percentage} strokeWidth="4" strokeColor="#bf2020" />
+           </div>
+
+
     </div>);
   }
 }
@@ -265,10 +269,6 @@ function setUpRos(ros){
 }
 
 //*******************************ROS part *********************************************
-  
-  
-
-
 
 
 //create a topic and send a message
@@ -327,4 +327,3 @@ function publicTopisMessage(ros){
     });
     return recievedString;
   }
-

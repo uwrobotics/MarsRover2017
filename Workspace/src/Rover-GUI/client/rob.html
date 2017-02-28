@@ -19,7 +19,8 @@
 
 <body>
   <div id="background">
-  <h1 id="bigTitle">MARS ROVER GUI</h1>
+  <img src="../components/logo.jpg">
+  <!--
   <div class="instruction">
   <p>Run the following commands in the terminal then refresh this page.</p>
   <ol>
@@ -27,6 +28,7 @@
     <li><tt>roslaunch rosbridge_server rosbridge_websocket.launch</tt></li>
   </ol>
   </div>
+-->
   <div id="statusIndicator">
     <p id="connecting">
       Connecting to rosbridge...
@@ -41,6 +43,7 @@
       Connection closed.
     </p>
   </div>
+  <img src="http://localhost:8080/stream?topic=/usb_cam/image_raw" />
   <div id="container"></div>
   </div>
   <script src="../dist/bundle.js"></script>

@@ -1,16 +1,21 @@
 body{
-	background-color: #ffb366;
+	background-color: #ffffff;
 }
 
 h1{
-font-size: 57PX;
-color: #003399;
+font-size: 30PX;
+font-family: "Arial", sans-serif;
 }
 
 h2{
 font-size: 20PX;
+font-family: "Arial", sans-serif;
 }
 
+p {
+	 font-family: "Arial", sans-serif;
+}
+/*
 #background{
 	width: 80%;
 	background-image: url("uw.jpg");
@@ -19,28 +24,36 @@ font-size: 20PX;
 	margin-right: auto;
 	margin-top: 0;
 	padding-top: 0;
-}
+}*/
 
 #bigTitle{
-	text-align: center;
-	width: 500px;
+	text-align: left;
+	/*width: 500px;
 	background-color: #ffffe6;
 	border-top: 100px;
-	padding: 70px;
+	padding: 70px;*/
 	margin-left: auto;
 	margin-right: auto;
+	display:inline-block;
+	background-image: url("logo.png");
+}
 
+div.image{
+	content:url("logo.jpg");
+	display:inline-block;
 }
 
 #statusIndicator{
 	color: black;
 	height: 40px;
 	line-height: 40px;
-	background-color: #ffaa80;
-	width: 600px;
+	/*background-color: #ffaa80;
+	width: 600px;*/
 	text-align: center;
 	margin-left: auto;
 	margin-right: auto;
+	display:inline-block;
+	float: right;
 }
 
 .instruction{
@@ -60,14 +73,14 @@ font-size: 20PX;
 
 
 p.data{
-	background-color: #ff8533;
-	width: 100px;
+	/*background-color: #ff8533;
+	width: 100px;*/
 }
 
 
 div.data{
-	background-color: #ff8533;
-	width: 100px;
+	/*background-color: #ff8533;
+	width: 100px;*/
 }
 
 .button{
@@ -78,3 +91,22 @@ margin-right: auto;
 	height: 40px;
 }
 
+#progress {
+    position:relative;
+    width:250px;
+    height:20px;
+    border:1px solid red;
+}
+
+#progress .progress-bar {
+    background:blue;
+    height:20px;
+    width:0%;
+    display:inline-block;
+}
+
+#progress .progress-text {
+    position:absolute;
+    z-index:2;
+    right:0;
+}
