@@ -32,6 +32,8 @@ p {
 	background-color: #ffffe6;
 	border-top: 100px;
 	padding: 70px;*/
+	height: 100px;
+	border: 1px solid red;
 	margin-left: auto;
 	margin-right: auto;
 	display:inline-block;
@@ -70,6 +72,49 @@ div.image{
 	margin-left: auto;
 	margin-right: auto;
 }
+
+.video_stream{
+	display: inline-block;
+	margin: 5px;
+}
+
+.video_stream_container{
+	max-width: 50%;
+  float: right;
+  position: relative;
+	/*border: 1px solid red;*/
+}
+
+div.battery{
+	max-width: 50%;
+	/*border: 1px solid red;*/
+}
+
+div.battery_element{
+	min-width: 300px;
+	max-width: 33%;
+	display: inline-block;
+	/*border: 1px solid red;*/
+}
+
+div.temperature{
+	/*border:1px solid red;*/
+		max-width: 50%;
+
+}
+div.temperature_element{
+	min-width: 300px;
+	max-width: 33%;
+	/*border: 1px solid red;*/
+	display: inline-block;
+}
+
+.mapContainer{
+    float: right;
+    position: relative;
+    /*border: 1px solid red;*/
+}
+
 
 
 p.data{

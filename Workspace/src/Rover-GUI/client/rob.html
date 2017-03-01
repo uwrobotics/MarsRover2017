@@ -14,12 +14,21 @@
 <script src="../node_modules/react/lib/react.min.js"></script>
 <script src="../node_modules/react/lib/react-dom.min.js"></script>
 <script src="../node_modules/react/lib/browser.min.js"></script>
-</script>
+
+<link rel="stylesheet" href="leaflet/leaflet.css"/>
+<script src="leaflet/leaflet.js"></script>
+<script src="map.js"></script>
+<style>
+  #map{
+    height: 100%;
+  }
+</style>
+
 </head>
 
 <body>
   <div id="background">
-  <img src="../components/logo.jpg">
+  <img src="../components/logo.jpg" height="100">
   <!--
   <div class="instruction">
   <p>Run the following commands in the terminal then refresh this page.</p>
@@ -43,9 +52,26 @@
       Connection closed.
     </p>
   </div>
-  <img src="http://localhost:8080/stream?topic=/usb_cam/image_raw" />
   <div id="container"></div>
+
+
   </div>
+
+  <div class="mapContainer">
+    <div id="map"; style="width:1100px; height: 400px;";></div>
+    <script>
+      var map = init();
+    </script>
+      Lat:
+      <input type="text" id="LatF" value="43.46">
+
+      Long:
+      <input type="text" id="LongF" value="-80.52">
+    <button type="button" onclick="addMarker()">Add Marker</button>
+
+    <input type="checkbox" id="followBox">Follow Rover<br>
+  </div>
+
   <script src="../dist/bundle.js"></script>
 </body>
 </html>

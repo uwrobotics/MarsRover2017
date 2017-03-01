@@ -8,6 +8,10 @@ import Battery from '../components/battery'
 const Line = require('rc-progress').Line;
 const Circle = require('rc-progress').Circle;
 
+const MAX_VOLTAGE = 12;
+const MAX_TIME_REMAIN = 60; //minutes
+const MAX_TEMPERATURE = 50; //deg C
+
 function MyButton(props) {
   return (
     <button className="square" onClick={() => props.onClick()}>
@@ -19,111 +23,104 @@ function MyButton(props) {
 
 
 class RobotPanel extends React.Component {
-  changeState(data){
+  changeBattery(percentageData, estimateTimeData, voltageData){
     this.setState(
           {
           battery: {
-            percentage: data,
-            estimateTime: data,
-            actualRemain: data
+            percentage: +percentageData.toFixed(2),
+            estimateTime: +estimateTimeData.toFixed(2),
+            voltageRemain: +voltageData.toFixed(2),
+            estimateTimePercentage: estimateTimeData/MAX_TIME_REMAIN * 100,
+            voltageRemainPercentage: voltageData/MAX_VOLTAGE * 100,
           },
 
         });
   }
 
-  changeString(data){
+  changeTemp(outsideTempData, pcTempData, roboteqTempData){
     this.setState(
           {
+          temperature: {
+              outsideTemp: +outsideTempData.toFixed(2),
+              pcTemp: +pcTempData.toFixed(2),
+              roboteqTemp: +roboteqTempData.toFixed(2),
+          },
 
-          wheels:[{
-            working: data,
-            name : '1st wheel',
-            status :'doing good'
-          },
-          {
-            working: "not working",
-            name : '2ed wheel',
-            status :'doing good'
-          },
-          {
-            working: "working",
-            name : '3rd wheel',
-            status :'doing good'
-          },
-          {
-            working: "working",
-            name : '4st wheel',
-            status :'doing good'
-          }]
         });
   }
 
 //  *********************** this is our button part *******************************
-  connectButtonClick(clas) {
+  // connectButtonClick(clas) {
+  //   var listener = new ROSLIB.Topic({
+  //     ros : this.state.ros,
+  //     name : '/listener',
+  //     messageType : 'std_msgs/String'
+  //   });                               // 5 m      this is for what will happen, if we click those 9 squares
+  //
+  //
+  //   printToScreen(function(data){
+  //     console.log('string is '+  ': ' + data);
+  //     clas.changeString(data);
+  //   });
+  //
+  //   function printToScreen(callback){
+  //     listener.subscribe(function(message) {
+  //     //console.log('Received message on Int' + listener.name + ': ' + message.data);
+  //     callback(message.data);
+  //   });
+  //   }
+  // }
+
+  // disconnectButtonClick() {                                    // 5 m      this is for what will happen, if we click those 9 squares
+  //   //**** connect with roblisjs ************//
+  //   var listener = new ROSLIB.Topic({
+  //     ros : this.state.ros,
+  //     name : '/myListener',
+  //     messageType : 'geometry_msgs/Twist'
+  //   });
+  //
+  //   // Then we add a callback to be called every time a message is published on this topic.
+  //   listener.subscribe(function(message) {
+  //     console.log('Linear' + message.data.linear + ': ' + message.data);
+  //     string = message.data;
+  //     //console.log(' recievedString is '+recievedString);
+  //     // If desired, we can unsubscribe from the topic as well.
+  //     //listener.unsubscribe();
+  //   });
+  // }
+  //
+
+
+
+  refreshBattery(thisClass){
     var listener = new ROSLIB.Topic({
       ros : this.state.ros,
-      name : '/listener',
-      messageType : 'std_msgs/String'
-    });                               // 5 m      this is for what will happen, if we click those 9 squares
-
-
-    printToScreen(function(data){
-      console.log('string is '+  ': ' + data);
-      clas.changeString(data);
+      name : '/battery_data',
+      messageType : 'std_msgs/Float32MultiArray'
     });
-
-    function printToScreen(callback){
-      listener.subscribe(function(message) {
-      //console.log('Received message on Int' + listener.name + ': ' + message.data);
-      callback(message.data);
-    });
-    }
-  }
-
-  disconnectButtonClick() {                                    // 5 m      this is for what will happen, if we click those 9 squares
-    //**** connect with roblisjs ************//
-    var listener = new ROSLIB.Topic({
-      ros : this.state.ros,
-      name : '/myListener',
-      messageType : 'geometry_msgs/Twist'
-    });
-
-    // Then we add a callback to be called every time a message is published on this topic.
+    var percentageData;
+    var estimateTimeData;
+    var voltageData;
     listener.subscribe(function(message) {
-      console.log('Linear' + message.data.linear + ': ' + message.data);
-      string = message.data;
-      //console.log(' recievedString is '+recievedString);
-      // If desired, we can unsubscribe from the topic as well.
-      //listener.unsubscribe();
+      console.log("got battery message");
+      percentageData = message.data[0];
+      estimateTimeData = message.data[1];
+      voltageData = message.data[2];
+      thisClass.changeBattery(percentageData, estimateTimeData, voltageData);
     });
   }
 
-
-
-
-  refreshState(clas){
+  refreshTemp(thisClass){
     var listener = new ROSLIB.Topic({
       ros : this.state.ros,
-      name : '/simple_msg',
-      messageType : 'std_msgs/Int32'
+      name : '/temperature_data',
+      messageType : 'std_msgs/Float32MultiArray'
     });
-    console.log("The button works");
-    var string;
-    printToScreen(function(data){
-      console.log('Received message on Int printToScreen' + ': ' + data);
-      clas.changeState(data);
+    listener.subscribe(function(message) {
+      console.log("got temperature message");
+      thisClass.changeTemp(message.data[0],  message.data[1], message.data[2]);
     });
-
-
-    function printToScreen(callback){
-      listener.subscribe(function(message) {
-      //console.log('Received message on Int' + listener.name + ': ' + message.data);
-      string = message.data;
-      callback(string);
-    });
-    }
   }
-
 
 
   renderConnectSquare() {
@@ -135,7 +132,7 @@ class RobotPanel extends React.Component {
   }
 
   renderRefreshSquare() {
-    return <MyButton value="Recieveing Data" onClick={() => this.refreshState(this)} />
+    return <MyButton value="Recieveing Data" onClick={() => this.refreshBattery(this)} />
   }
 
 //  **************************** above is button part ******************************
@@ -150,8 +147,15 @@ class RobotPanel extends React.Component {
       ros : new ROSLIB.Ros(),
       battery: {
         percentage: 100,
-        estimateTime: 6,
-        actualRemain:20000
+        estimateTime: 60,
+        estimateTimePercentage: 100,
+        voltageRemain: 12,
+        voltageRemainPercentage: 100,
+      },
+      temperature: {
+        outsideTemp: 25,
+        pcTemp: 30,
+        roboteqTemp: 33,
       },
       gps : {
         latitude: 60,             // wei du
@@ -180,7 +184,8 @@ class RobotPanel extends React.Component {
     };
     setUpRos(this.state.ros);
     publicTopisMessage(this.state.ros);
-    this.refreshState(this);
+    this.refreshBattery(this);
+    this.refreshTemp(this);
   }
 
 
@@ -190,31 +195,87 @@ class RobotPanel extends React.Component {
 //{this.renderUnConnectSquare()}
 //{this.renderRefreshSquare()}
   render() {
-    const containerStyle = {
-      width: '250px',
+  const containerStyle = {
+    width: '250px',
+    padding:'20px',
     };
   const circleContainerStyle = {
    width: '250px',
    height: '250px',
+   padding: '20px',
+
    };
   return(
     <div>
+      <div className="video_stream_container">
+        <div className="video_stream">
+          <img src="http://localhost:8080/stream?topic=/usb_cam/image_raw" height="370"/>
+        </div>
+        <div className="video_stream">
+          <img src="http://localhost:8080/stream?topic=/usb_cam/image_raw" height="370"/>
+        </div>
+      </div>
+
+        <div className="battery">
+          <div className="battery_element">
           <p>Battery Percentage {this.state.battery.percentage}%</p>
-          <div style={circleContainerStyle}>
-            <Circle
-              percent={this.state.battery.percentage}
-              strokeWidth="6"
-              strokeLinecap="square"
-              strokeColor="#85D262"
-            />
+            <div style={circleContainerStyle}>
+              <Circle
+                percent={this.state.battery.percentage}
+                strokeWidth="6"
+                strokeLinecap="square"
+                strokeColor="#85D262"
+              />
+            </div>
           </div>
-          <p>Temperature {this.state.battery.percentage} &#8451;</p>
+
+          <div className="battery_element">
+          <p>Time Remaining: {this.state.battery.estimateTime} minutes</p>
+            <div style={circleContainerStyle}>
+              <Circle
+                percent={this.state.battery.estimateTimePercentage}
+                strokeWidth="6"
+                strokeLinecap="square"
+                strokeColor="#85D262"
+              />
+            </div>
+          </div>
+
+          <div className="battery_element">
+          <p>Voltage Level {this.state.battery.voltageRemain} V</p>
+            <div style={circleContainerStyle}>
+              <Circle
+                percent={this.state.battery.voltageRemainPercentage}
+                strokeWidth="6"
+                strokeLinecap="square"
+                strokeColor="#85D262"
+              />
+            </div>
+          </div>
+
+        </div>
+
+      <div className="temperature">
+        <div className="temperature_element">
+          <p>Outside Temp {this.state.temperature.outsideTemp} &#8451;</p>
            <div style={containerStyle}>
-             <Line percent={this.state.battery.percentage} strokeWidth="4" strokeColor="#bf2020" />
+             <Line percent={this.state.temperature.outsideTemp} strokeWidth="4" strokeColor="#bf2020" />
            </div>
-
-
-    </div>);
+        </div>
+        <div className="temperature_element">
+          <p>CPU Temp {this.state.temperature.pcTemp} &#8451;</p>
+           <div style={containerStyle}>
+             <Line percent={this.state.temperature.pcTemp} strokeWidth="4" strokeColor="#bf2020" />
+           </div>
+        </div>
+        <div className="temperature_element">
+          <p>Roboteq Temp {this.state.temperature.roboteqTemp} &#8451;</p>
+           <div style={containerStyle}>
+             <Line percent={this.state.temperature.roboteqTemp} strokeWidth="4" strokeColor="#bf2020" />
+           </div>
+        </div>
+      </div>
+    </div>  );
   }
 }
 
