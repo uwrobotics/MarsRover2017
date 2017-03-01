@@ -20,7 +20,7 @@
           <geometry>
             <heightmap>
               <uri>file://media/materials/textures/heightmap.png</uri>
-              <size>200 200 10</size>
+              <size>40 40 10</size>
               <pos>0 0 10</pos>
             </heightmap>
             <plane>
@@ -69,7 +69,7 @@
                     <fade_dist>5</fade_dist>
                   </blend>
                     <uri>file://media/materials/textures/heightmap.png</uri>
-                    <size>200 200 10</size>
+                    <size>40 40 10</size>
                     <pos>0 0 10</pos>
                 </heightmap>
             </geometry>
