@@ -3,7 +3,7 @@
 ########################
 
 # Interface
-/receiver_interface:     "vcan0"
+/receiver_interface:     "can0"
 
 # Topics
 /receiver_list:          ["/gps_data", "/imu_data", "/bms_status"]

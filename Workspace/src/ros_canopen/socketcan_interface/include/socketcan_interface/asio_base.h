@@ -7,7 +7,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
-
+    
 namespace can{
 
 
@@ -100,7 +100,15 @@ public:
         state_dispatcher_.dispatch(getState());
     }
     virtual bool send(const Frame & msg){
-        return getState().driver_state == State::ready && enqueue(msg);
+        if (getState().driver_state == State::ready)
+        {
+            LOG("READY");
+        }
+        else
+        {
+            LOG("NOT READY");
+        }
+        return enqueue(msg);
     }
     
     virtual void shutdown(){

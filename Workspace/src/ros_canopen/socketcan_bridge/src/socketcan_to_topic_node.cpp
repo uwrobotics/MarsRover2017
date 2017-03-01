@@ -31,7 +31,6 @@
 #include <socketcan_interface/threading.h>
 #include <socketcan_interface/string.h>
 
-
 sig_atomic_t volatile request_shutdown = 0;
 
 void sigIntHandler(int sig)
@@ -59,7 +58,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        ROS_INFO("Successfully connected to %s.", receiver_interface.c_str());
+        ROS_INFO("CAN receiver successfully connected to %s.", receiver_interface.c_str());
     }
 
     socketcan_bridge::SocketCANToTopic can_receiver(driver);

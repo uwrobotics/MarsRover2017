@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, sigIntHandler);
 
     std::string transmitter_interface;
-    nh_param.param<std::string>("/transmitter_interface", transmitter_interface, "vcan0");
+    nh_param.param<std::string>("/transmitter_interface", transmitter_interface, "can0");
 
     boost::shared_ptr<can::ThreadedSocketCANInterface> driver = boost::make_shared<can::ThreadedSocketCANInterface> ();
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        ROS_INFO("Successfully connected to %s.", transmitter_interface.c_str());
+        ROS_INFO("CAN transmitter successfully connected to %s.", transmitter_interface.c_str());
     }
 
     socketcan_bridge::TopicToSocketCAN can_transmitter(driver);
