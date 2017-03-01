@@ -22,8 +22,28 @@ Copyright 2017, UW Robotics Team
 #include <can_msgs/Frame.h>
 #include <vector>
 
-#define MAX_MSG_SIZE    64
+#define MAX_MSG_SIZE        64
 
-char multiframe_CAN_publish(ros::Publisher *pub, std::vector<char>& msg, int id);
+#define SINGLE_FRAME        0
+#define FIRST_FRAME         1
+#define CONSECUTIVE_FRAME   2
+#define FLOW_CONTROL        3
 
-char multiframe_CAN_subscribe();
+namespace multiframe_can
+{
+    class Multiframe_CAN
+    {
+        public:
+            Multiframe_CAN();
+            char publish(ros::Publisher *pub, std::vector<char>& msg, int id);
+            char subscribe(can::Frame msg);
+            std::vector<char> get_data();
+
+        private:
+            bool data_ready_;
+            int flow_status_;
+            int block_size_;
+            int separation_time_;
+            std::vector<char> frame_data_;
+    };
+};

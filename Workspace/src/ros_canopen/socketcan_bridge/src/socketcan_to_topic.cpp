@@ -204,9 +204,9 @@ namespace socketcan_bridge
 
         if (valid_frame)
         {
-	    if (topic_idx < topics_.size())
+           if (topic_idx < topics_.size())
             {
-	        if (topics_[topic_idx])
+                if (topics_[topic_idx])
                 {
                     topics_[topic_idx]->publish(msg);
                 }
