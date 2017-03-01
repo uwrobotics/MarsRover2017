@@ -1,9 +1,0 @@
-[35m[1mScanning dependencies of target socketcan_interface_plugin
-[0m[ 33%] Built target socketcan_interface_string
-[ 66%] [35m[1mScanning dependencies of target socketcan_dump
-[32mBuilding CXX object CMakeFiles/socketcan_interface_plugin.dir/src/socketcan_interface_plugin.cpp.o
-[0m[0m[100%] [32mBuilding CXX object CMakeFiles/socketcan_dump.dir/src/candump.cpp.o
-[0m[31m[1mLinking CXX shared library /home/uwrt/MarsRover2017/Workspace/devel/.private/socketcan_interface/lib/libsocketcan_interface_plugin.so
-[0m[100%] Built target socketcan_interface_plugin
-[31m[1mLinking CXX executable /home/uwrt/MarsRover2017/Workspace/devel/.private/socketcan_interface/lib/socketcan_interface/socketcan_dump
-[0m[100%] Built target socketcan_dump

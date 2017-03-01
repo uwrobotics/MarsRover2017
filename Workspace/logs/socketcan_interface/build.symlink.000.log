@@ -1,6 +1,0 @@
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/share/socketcan_interface/cmake/socketcan_interfaceConfig.cmake
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/share/socketcan_interface/cmake/socketcan_interfaceConfig-version.cmake
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/lib/libsocketcan_interface_plugin.so
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/lib/libsocketcan_interface_string.so
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/lib/socketcan_interface/socketcan_dump
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/lib/pkgconfig/socketcan_interface.pc

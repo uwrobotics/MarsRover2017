@@ -1,7 +1,0 @@
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/share/socketcan_bridge/cmake/socketcan_bridgeConfig.cmake
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/share/socketcan_bridge/cmake/socketcan_bridgeConfig-version.cmake
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/lib/libsocketcan_to_topic.so
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/lib/libtopic_to_socketcan.so
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/lib/socketcan_bridge/socketcan_to_topic_node
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/lib/socketcan_bridge/topic_to_socketcan_node
-Symlinking /home/uwrt/MarsRover2017/Workspace/devel/lib/pkgconfig/socketcan_bridge.pc
