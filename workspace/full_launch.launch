@@ -1,0 +1,15 @@
+<launch>
+  <include 
+  	file="$(find teleop_twist_joy)/launch/teleop.launch"
+  />
+
+  <include 
+  	file="$(find roboteq_driver)/launch/example.launch"
+  />
+  <node 
+  	pkg="rover_joy" 
+  	type="rover_joy_node" 
+  	name="rover_joy"
+  	respawn = "true"
+  />
+</launch>
