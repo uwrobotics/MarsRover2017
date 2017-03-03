@@ -14,6 +14,8 @@ font-family: "Arial", sans-serif;
 
 p {
 	 font-family: "Arial", sans-serif;
+	 margin: 0px;
+   padding: 0px;
 }
 /*
 #background{
@@ -85,6 +87,10 @@ div.image{
 	/*border: 1px solid red;*/
 }
 
+div.rosData{
+
+}
+
 div.battery{
 	max-width: 50%;
 	/*border: 1px solid red;*/
@@ -93,7 +99,9 @@ div.battery{
 div.battery_element{
 	min-width: 300px;
 	max-width: 33%;
+	min-height: 300px;
 	display: inline-block;
+	text-align: center;
 	/*border: 1px solid red;*/
 }
 
@@ -105,17 +113,40 @@ div.temperature{
 div.temperature_element{
 	min-width: 300px;
 	max-width: 33%;
+	min-height: 50px;
 	/*border: 1px solid red;*/
 	display: inline-block;
+	text-align: center;
+}
+
+div.cell_temperature{
+	padding-top: 30px;
+	max-width: 50%;
+
+}
+
+div.small_temp{
+	min-width:150px;
+	max-width:30%;
+	min-height: 50px;
+	display: inline-block;
+	text-align: center;
 }
 
 .mapContainer{
     float: right;
     position: relative;
+		margin: auto;
     /*border: 1px solid red;*/
 }
 
-
+.imuContainer{
+	float:left;
+	position:relative;
+	margin: auto;
+	margin-top:50px;
+	/*display: inline-block;*/
+}
 
 p.data{
 	/*background-color: #ff8533;

@@ -9,7 +9,8 @@ const Line = require('rc-progress').Line;
 const Circle = require('rc-progress').Circle;
 
 const MAX_VOLTAGE = 12;
-const MAX_TIME_REMAIN = 60; //minutes
+const MIN_VOLTAGE = 10;
+const MAX_CURRENT = 100;
 const MAX_TEMPERATURE = 50; //deg C
 
 function MyButton(props) {
@@ -23,15 +24,15 @@ function MyButton(props) {
 
 
 class RobotPanel extends React.Component {
-  changeBattery(percentageData, estimateTimeData, voltageData){
+  changeBattery(percentageData, currentData, voltageData){
     this.setState(
           {
           battery: {
             percentage: +percentageData.toFixed(2),
-            estimateTime: +estimateTimeData.toFixed(2),
+            current: +currentData.toFixed(2),
             voltageRemain: +voltageData.toFixed(2),
-            estimateTimePercentage: estimateTimeData/MAX_TIME_REMAIN * 100,
-            voltageRemainPercentage: voltageData/MAX_VOLTAGE * 100,
+            currentPercentage: currentData/MAX_CURRENT * 100,
+            voltageRemainPercentage: (voltageData-MIN_VOLTAGE)/(MAX_VOLTAGE-MIN_VOLTAGE) * 100,
           },
 
         });
@@ -99,14 +100,14 @@ class RobotPanel extends React.Component {
       messageType : 'std_msgs/Float32MultiArray'
     });
     var percentageData;
-    var estimateTimeData;
+    var currentData;
     var voltageData;
     listener.subscribe(function(message) {
       console.log("got battery message");
       percentageData = message.data[0];
-      estimateTimeData = message.data[1];
+      currentData = message.data[1];
       voltageData = message.data[2];
-      thisClass.changeBattery(percentageData, estimateTimeData, voltageData);
+      thisClass.changeBattery(percentageData, currentData, voltageData);
     });
   }
 
@@ -147,8 +148,8 @@ class RobotPanel extends React.Component {
       ros : new ROSLIB.Ros(),
       battery: {
         percentage: 100,
-        estimateTime: 60,
-        estimateTimePercentage: 100,
+        current: 0,
+        currentPercentage: 0,
         voltageRemain: 12,
         voltageRemainPercentage: 100,
       },
@@ -196,13 +197,20 @@ class RobotPanel extends React.Component {
 //{this.renderRefreshSquare()}
   render() {
   const containerStyle = {
-    width: '250px',
-    padding:'20px',
-    };
-  const circleContainerStyle = {
-   width: '250px',
-   height: '250px',
-   padding: '20px',
+    width: '200px',
+    padding:'0px',
+    margin:'auto',
+  };
+const smallLine = {
+  width: '90px',
+  padding:'0px',
+  margin:'auto',
+}
+    const circleContainerStyle = {
+   width: '200px',
+   height: '200px',
+   padding: '0px',
+   margin:'auto',
 
    };
   return(
@@ -212,10 +220,11 @@ class RobotPanel extends React.Component {
           <img src="http://localhost:8080/stream?topic=/usb_cam/image_raw" height="370"/>
         </div>
         <div className="video_stream">
-          <img src="http://localhost:8080/stream?topic=/usb_cam/image_raw" height="370"/>
+          <img src="http://localhost:8080/stream?topic=/usb_cam2/image_raw" height="370"/>
         </div>
       </div>
 
+      <div className="rosData">
         <div className="battery">
           <div className="battery_element">
           <p>Battery Percentage {this.state.battery.percentage}%</p>
@@ -229,17 +238,6 @@ class RobotPanel extends React.Component {
             </div>
           </div>
 
-          <div className="battery_element">
-          <p>Time Remaining: {this.state.battery.estimateTime} minutes</p>
-            <div style={circleContainerStyle}>
-              <Circle
-                percent={this.state.battery.estimateTimePercentage}
-                strokeWidth="6"
-                strokeLinecap="square"
-                strokeColor="#85D262"
-              />
-            </div>
-          </div>
 
           <div className="battery_element">
           <p>Voltage Level {this.state.battery.voltageRemain} V</p>
@@ -252,6 +250,19 @@ class RobotPanel extends React.Component {
               />
             </div>
           </div>
+
+          <div className="battery_element">
+          <p>Current: {this.state.battery.current} A</p>
+            <div style={circleContainerStyle}>
+              <Circle
+                percent={this.state.battery.currentPercentage}
+                strokeWidth="6"
+                strokeLinecap="square"
+                strokeColor="#85D262"
+              />
+            </div>
+          </div>
+
 
         </div>
 
@@ -275,6 +286,48 @@ class RobotPanel extends React.Component {
            </div>
         </div>
       </div>
+
+
+            <div className="cell_temperature">
+              <div className="small_temp">
+                <p>Cell 1: {this.state.temperature.outsideTemp} &#8451;</p>
+                 <div style={smallLine}>
+                   <Line percent={this.state.temperature.outsideTemp} strokeWidth="4" strokeColor="#bf2020" />
+                 </div>
+              </div>
+              <div className="small_temp">
+                <p>Cell 2: {this.state.temperature.pcTemp} &#8451;</p>
+                 <div style={smallLine}>
+                   <Line percent={this.state.temperature.pcTemp} strokeWidth="4" strokeColor="#bf2020" />
+                 </div>
+              </div>
+              <div className="small_temp">
+                <p>Cell 3: {this.state.temperature.roboteqTemp} &#8451;</p>
+                 <div style={smallLine}>
+                   <Line percent={this.state.temperature.roboteqTemp} strokeWidth="4" strokeColor="#bf2020" />
+                 </div>
+              </div>
+              <div className="small_temp">
+                <p>Cell 4: {this.state.temperature.roboteqTemp} &#8451;</p>
+                 <div style={smallLine}>
+                   <Line percent={this.state.temperature.roboteqTemp} strokeWidth="4" strokeColor="#bf2020" />
+                 </div>
+              </div>
+              <div className="small_temp">
+                <p>Cell 5: {this.state.temperature.roboteqTemp} &#8451;</p>
+                 <div style={smallLine}>
+                   <Line percent={this.state.temperature.roboteqTemp} strokeWidth="4" strokeColor="#bf2020" />
+                 </div>
+              </div>
+              <div className="small_temp">
+                <p>Cell 6: {this.state.temperature.roboteqTemp} &#8451;</p>
+                 <div style={smallLine}>
+                   <Line percent={this.state.temperature.roboteqTemp} strokeWidth="4" strokeColor="#bf2020" />
+                 </div>
+              </div>
+            </div>
+          </div>
+
     </div>  );
   }
 }
