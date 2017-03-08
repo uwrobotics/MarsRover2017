@@ -79,7 +79,7 @@ char Multiframe_CAN::publish(ros::Publisher *pub, std::vector<char>& msg, int id
     if (num_bytes <= 7)
     {
         frame.data[0] = (num_bytes & 0xF);
-        for (int i = 1; i < 7; i++)
+        for (int i = 1; i < 8; i++)
         {
            frame.data[i] = msg[i-1];
         }
