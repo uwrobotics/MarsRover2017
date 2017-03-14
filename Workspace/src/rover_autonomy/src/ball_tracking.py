@@ -8,12 +8,15 @@ import imutils
 import cv2
 import math
 
-do_visualization = True
+do_visualization_img_proc = False
+do_visualization_final_result = True
 
 # detection parameters
 greenLower = (15, 0, 0)
 greenUpper = (75, 255, 255)
 min_area = 10 # pixels
+
+dialation_radius_correction = 0.75
 
 min_radius_diff = 0.05 # percent in terms of ball diameter
 min_dist_diff = 0.05 # percent
@@ -22,14 +25,32 @@ min_radius = 3 # pixels
 min_fill_score = 0.05 # percent
 
 canny_score_mean = 1
-canny_score_sigma = 0.3
+canny_score_sigma = 0.2
 fill_score_mean = 1
-fill_score_sigma = 0.3
+fill_score_sigma = 0.2
 
 pos_diff_score_mean = 0
-pos_diff_score_sigma = 0.5
+pos_diff_score_sigma = 0.2
 dia_diff_score_mean = 0
-dia_diff_score_sigma = 0.25
+dia_diff_score_sigma = 0.1
+
+KF_Q_matrix = np.mat([[8, 0, 0, 0, 0, 0],
+                      [0, 4, 0, 0, 0, 0],
+                      [0, 0, 8, 0, 0, 0],
+                      [0, 0, 0, 4, 0, 0],
+                      [0, 0, 0, 0, 2, 0],
+                      [0, 0, 0, 0, 0, 1]])
+
+KF_R_matrix = np.mat([[3, 0, 0],
+                      [0, 3, 0],
+                      [0, 0, 10]])
+
+
+pixel_size = 7.26 * 10**(-6) # in m
+focal_length = 8 * 10**(-3) # in m
+tennis_ball_size = 6.54 * 10**(-2) # in m
+image_width = 664
+image_height = 524
 
 
 def normal_pdf(x, u, s):
@@ -60,6 +81,7 @@ class Hypothesis:
         self.contours = contours
         self.contours_cat = np.concatenate(self.contours)
         ((self.x, self.y), self.r) = cv2.minEnclosingCircle(self.contours_cat)
+        self.r -= dialation_radius_correction
 
         if (self.r < min_radius):
             self.is_garbage = True
@@ -87,7 +109,40 @@ class Ball_tracking:
         self.image = None
         self.curr_hypotheses = []
         self.past_hypotheses = []
+        self.best_hypothesis = None
         self.num_iterations = 0
+
+        self.ts_curr = 0
+        self.ts_prev = 0
+        self.dt = 0
+
+        # for the Kalman Filter stuff
+        self.x_k = np.mat("0; 0; 0; 0; 0; 0")
+        self.x_k_prev = self.x_k;
+        self.A = np.mat([[1, 0, 0, 0, 0, 0], 
+                         [0, 1, 0, 0, 0, 0], 
+                         [0, 0, 1, 0, 0, 0], 
+                         [0, 0, 0, 1, 0, 0], 
+                         [0, 0, 0, 0, 1, 0], 
+                         [0, 0, 0, 0, 0, 1]])
+        self.C = np.mat([[1, 0, 0, 0, 0, 0], 
+                         [0, 0, 1, 0, 0, 0], 
+                         [0, 0, 0, 0, 1, 0]])
+        self.Q = KF_Q_matrix
+        self.R = KF_R_matrix
+        self.P_k = np.mat([[1, 0, 0, 0, 0, 0], 
+                           [0, 1, 0, 0, 0, 0], 
+                           [0, 0, 1, 0, 0, 0], 
+                           [0, 0, 0, 1, 0, 0], 
+                           [0, 0, 0, 0, 1, 0], 
+                           [0, 0, 0, 0, 0, 1]])
+        self.P_k_prev = self.P_k
+        self.I_6x6 = np.mat([[1, 0, 0, 0, 0, 0], 
+                             [0, 1, 0, 0, 0, 0], 
+                             [0, 0, 1, 0, 0, 0], 
+                             [0, 0, 0, 1, 0, 0], 
+                             [0, 0, 0, 0, 1, 0], 
+                             [0, 0, 0, 0, 0, 1]])
 
     def callback(self, data):
         try:
@@ -96,16 +151,69 @@ class Ball_tracking:
             print(e)
 
     def process(self):
-        self.compute_image()
 
-    def locate_3d(self):
-        pass
+        self.ts_prev = self.ts_curr
+        self.ts_curr = rospy.get_time()
+        self.dt = self.ts_curr - self.ts_prev;
+        image = self.image.copy()
+
+        self.compute_image(image)
+        self.kalman_filter()
+
+        x = self.x_k[0, 0] # image frame x, y
+        y = self.x_k[2, 0]
+        r = self.x_k[4, 0]
+        X, Y, Z, bearing = self.locate_3d(x, y, r) # get 3D coordinate in camera frame
+
+        rospy.loginfo("Tracking: X=%.2f Y=%.2f Z=%.2f bearing=%.2f" % (X, Y, Z, bearing * 180 / math.pi))
+
+        self.num_iterations += 1
+
+        if do_visualization_final_result:
+            cv2.circle(image, (int(x), int(y)), int(r), (0, 0, 255), 2) # visualization
+            text = "Position=(%.3f,%.3f,%.3f) Bearing=%.3f, Confidence:%.1f%%" % (X, Y, Z, bearing * 180 / math.pi, self.best_hypothesis.probability * 100)
+            cv2.putText(image, text, (10, 500), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0))
+            cv2.imshow("Final Results", image)
+            cv2.waitKey(3)
+
+        return X, Y, Z, bearing
+
+    def locate_3d(self, x, y, r):
+        z_ball = (tennis_ball_size * focal_length) / (r * 2 * pixel_size)
+        x_ball = z_ball * (x - image_width / 2.0) * pixel_size / focal_length
+        y_ball = z_ball * (y - image_height / 2.0) * pixel_size / focal_length
+        bearing = math.atan(x_ball / z_ball)
+
+        return x_ball, y_ball, z_ball, bearing
 
     def kalman_filter(self):
-        pass
 
-    def compute_image(self):
-        image = self.image.copy()
+        # initialization
+        if self.num_iterations <= 0:
+            #initialize the first estimate to the measurement
+            self.x_k = np.mat("0; 0; 0; 0; 0; 0")
+            self.x_k[0] = self.best_hypothesis.x
+            self.x_k[2] = self.best_hypothesis.y
+            self.x_k[4] = self.best_hypothesis.r
+        else:
+            # prediction
+            self.A[0, 1] = self.dt
+            self.A[2, 3] = self.dt
+            self.A[4, 5] = self.dt
+            x_k_pred = self.A * self.x_k_prev
+            P_k_pred = self.A * self.P_k_prev * self.A.T + self.Q
+
+            #update
+            K = P_k_pred * self.C.T * np.linalg.inv(self.C * P_k_pred * self.C.T + self.R)
+            y_k = np.mat([[self.best_hypothesis.x], [self.best_hypothesis.y], [self.best_hypothesis.r]])
+            self.x_k = x_k_pred + K * (y_k - self.C * x_k_pred)
+            self.P_k = (self.I_6x6 - K * self.C) * P_k_pred
+
+        self.x_k_prev = self.x_k
+        self.P_k_prev = self.P_k
+
+    def compute_image(self, image):
+        # image = self.image.copy()
         canny_edges = cv2.Canny(image, 100, 150);
         kernel = np.ones((3,3),np.uint8)
         canny_edges = cv2.dilate(canny_edges, kernel, iterations=1)
@@ -119,10 +227,10 @@ class Ball_tracking:
         mask = cv2.inRange(hsv, greenLower, greenUpper)
         kernel = np.ones((2,2),np.uint8)
         mask = cv2.erode(mask, kernel, iterations=1)
-        mask = cv2.dilate(mask, kernel, iterations=2)
+        mask = cv2.dilate(mask, kernel, iterations=3)
 
         #use colored image for visualization
-        if do_visualization:
+        if do_visualization_img_proc:
             mask_clr = cv2.cvtColor(mask, cv2.COLOR_GRAY2RGB)
             canny_clr = cv2.cvtColor(canny_edges, cv2.COLOR_GRAY2RGB)
 
@@ -183,7 +291,7 @@ class Ball_tracking:
                 fill_score_prob = normal_pdf(h.fill_score, fill_score_mean, fill_score_sigma)
                 h.log_likelihood = math.log(canny_score_prob) + math.log(fill_score_prob)
 
-                if do_visualization:
+                if do_visualization_img_proc:
                     cv2.circle(image, (int(h.x), int(h.y)), int(h.r), (0, 0, 255), 1) # visualization
                     cv2.circle(mask_clr, (int(h.x), int(h.y)), int(h.r), (0, 0, 255), 1) # visualization
                     cv2.circle(canny_clr, (int(h.x), int(h.y)), int(h.r), (0, 0, 255), 1) # visualization
@@ -223,14 +331,13 @@ class Ball_tracking:
             hc.probability = math.exp(hc.log_probability)
 
         h_sel = sorted(self.curr_hypotheses, key=lambda h: h.probability, reverse=True)[0]
-        rospy.loginfo("Total %d hypotheses, best: (%d, %d, %d, %.4f)" % (len(self.curr_hypotheses), h_sel.x, h_sel.y, h_sel.r, h_sel.probability))
-
+        rospy.loginfo("Total %d hypotheses, best: (%.2f %.2f, %.2f, %.4f)" % (len(self.curr_hypotheses), h_sel.x, h_sel.y, h_sel.r, h_sel.probability))
+        self.best_hypothesis = h_sel
 
         self.past_hypotheses = self.curr_hypotheses
         self.curr_hypotheses = []
-        self.num_iterations += 1
 
-        if do_visualization:
+        if do_visualization_img_proc:
             cv2.circle(image, (int(h_sel.x), int(h_sel.y)), int(h_sel.r), (0, 255, 255), 3) # visualization
             cv2.imshow("After filtering", mask_clr)
             cv2.imshow("Input Image", image)
@@ -241,7 +348,7 @@ def main():
     node = Ball_tracking()
     rospy.init_node('ball_tracking', anonymous=True)
 
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(60)
     while not rospy.is_shutdown():
         node.process()
         rate.sleep()
