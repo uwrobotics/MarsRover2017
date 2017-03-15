@@ -12,9 +12,9 @@ do_visualization_img_proc = False
 do_visualization_final_result = True
 
 # detection parameters
-greenLower = (15, 0, 0)
-greenUpper = (75, 255, 255)
-min_area = 10 # pixels
+greenLower = (19, 0, 0)
+greenUpper = (65, 255, 255)
+min_area = 25 # pixels
 
 dialation_radius_correction = 0.75
 
@@ -25,14 +25,14 @@ min_radius = 3 # pixels
 min_fill_score = 0.05 # percent
 
 canny_score_mean = 1
-canny_score_sigma = 0.2
+canny_score_sigma = 0.3
 fill_score_mean = 1
-fill_score_sigma = 0.2
+fill_score_sigma = 0.3
 
 pos_diff_score_mean = 0
-pos_diff_score_sigma = 0.2
+pos_diff_score_sigma = 1
 dia_diff_score_mean = 0
-dia_diff_score_sigma = 0.1
+dia_diff_score_sigma = 1.5
 
 KF_Q_matrix = np.mat([[8, 0, 0, 0, 0, 0],
                       [0, 4, 0, 0, 0, 0],
@@ -106,6 +106,7 @@ class Ball_tracking:
     def __init__(self):
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/camera/image_color", Image, self.callback, queue_size=1)
+        self.initialized = False
         self.image = None
         self.curr_hypotheses = []
         self.past_hypotheses = []
@@ -147,17 +148,23 @@ class Ball_tracking:
     def callback(self, data):
         try:
             self.image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            self.initialized = True
         except CvBridgeError as e:
             print(e)
 
     def process(self):
+
+        if not self.initialized:
+            return
 
         self.ts_prev = self.ts_curr
         self.ts_curr = rospy.get_time()
         self.dt = self.ts_curr - self.ts_prev;
         image = self.image.copy()
 
-        self.compute_image(image)
+        if not self.compute_image(image):
+            return None
+
         self.kalman_filter()
 
         x = self.x_k[0, 0] # image frame x, y
@@ -171,7 +178,7 @@ class Ball_tracking:
 
         if do_visualization_final_result:
             cv2.circle(image, (int(x), int(y)), int(r), (0, 0, 255), 2) # visualization
-            text = "Position=(%.3f,%.3f,%.3f) Bearing=%.3f, Confidence:%.1f%%" % (X, Y, Z, bearing * 180 / math.pi, self.best_hypothesis.probability * 100)
+            text = "Position=(%.3f,%.3f,%.3f) Bearing=%.3f, Confidence:%.10f%%" % (X, Y, Z, bearing * 180 / math.pi, self.best_hypothesis.probability * 100)
             cv2.putText(image, text, (10, 500), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0))
             cv2.imshow("Final Results", image)
             cv2.waitKey(3)
@@ -215,7 +222,7 @@ class Ball_tracking:
     def compute_image(self, image):
         # image = self.image.copy()
         canny_edges = cv2.Canny(image, 100, 150);
-        kernel = np.ones((3,3),np.uint8)
+        kernel = np.ones((5,5),np.uint8)
         canny_edges = cv2.dilate(canny_edges, kernel, iterations=1)
         canny_edges = cv2.GaussianBlur(canny_edges, (7,7), 0)
 
@@ -259,6 +266,9 @@ class Ball_tracking:
             if not hypothesis.is_duplicate(initial_hypotheses):
                 initial_hypotheses.append(hypothesis)
 
+        if len(initial_hypotheses) == 0:
+            rospy.logwarn("No hypotheses generated")
+            return False
 
         #compute the current frame metrics
         for h in initial_hypotheses:
@@ -324,6 +334,10 @@ class Ball_tracking:
             hc.log_probability = hc.log_prior + hc.log_likelihood
             probability_sum += math.exp(hc.log_probability)
 
+        if (probability_sum < 1e-7):
+            rospy.logwarn("Normalization failed probability sum too small")
+            return False
+
         log_probability_sum = math.log(probability_sum)
 
         for hc in self.curr_hypotheses:
@@ -344,11 +358,13 @@ class Ball_tracking:
             cv2.imshow("edges", canny_clr)
             cv2.waitKey(3)
 
+        return True
+
 def main():
     node = Ball_tracking()
     rospy.init_node('ball_tracking', anonymous=True)
 
-    rate = rospy.Rate(60)
+    rate = rospy.Rate(10)
     while not rospy.is_shutdown():
         node.process()
         rate.sleep()
