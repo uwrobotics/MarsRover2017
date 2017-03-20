@@ -8,31 +8,33 @@ import imutils
 import cv2
 import math
 
-do_visualization_img_proc = False
+do_visualization_img_proc = True
 do_visualization_final_result = True
 
 # detection parameters
 greenLower = (19, 0, 0)
-greenUpper = (65, 255, 255)
-min_area = 25 # pixels
+greenUpper = (55, 255, 255)
+min_area = 0 # pixels
+max_contours = 10
 
-dialation_radius_correction = 0.75
+dialation_radius_correction = 0.5
+min_contour_area_percentage = 0.05
 
-min_radius_diff = 0.05 # percent in terms of ball diameter
-min_dist_diff = 0.05 # percent
+min_radius_diff = 0.1 # percent in terms of ball diameter
+min_dist_diff = 0.1 # percent
 
-min_radius = 3 # pixels
+min_radius = 6 # pixels
 min_fill_score = 0.05 # percent
 
-canny_score_mean = 1
-canny_score_sigma = 0.3
-fill_score_mean = 1
-fill_score_sigma = 0.3
+canny_score_mean = 0.7
+canny_score_sigma = 0.15
+fill_score_mean = 0.8
+fill_score_sigma = 0.15
 
 pos_diff_score_mean = 0
-pos_diff_score_sigma = 1
+pos_diff_score_sigma = 4
 dia_diff_score_mean = 0
-dia_diff_score_sigma = 1.5
+dia_diff_score_sigma = 2
 
 KF_Q_matrix = np.mat([[8, 0, 0, 0, 0, 0],
                       [0, 4, 0, 0, 0, 0],
@@ -55,8 +57,8 @@ image_height = 524
 
 def normal_pdf(x, u, s):
     ret = (1 / math.sqrt(2 * s**2 * math.pi)) * math.exp(-(x - u)**2 / (2 * s**2))
-    if ret < 1e-7:
-        ret = 1e-7
+    if ret < 1e-15:
+        ret = 1e-15
     return ret
 
 class Hypothesis:
@@ -81,10 +83,16 @@ class Hypothesis:
         self.contours = contours
         self.contours_cat = np.concatenate(self.contours)
         ((self.x, self.y), self.r) = cv2.minEnclosingCircle(self.contours_cat)
-        self.r -= dialation_radius_correction
+        self.contour_area = 0
+
+        for contour in contours:
+            self.contour_area += cv2.contourArea(contour)
 
         if (self.r < min_radius):
             self.is_garbage = True
+
+        self.r -= dialation_radius_correction
+
 
     def is_duplicate(self, hypotheses):
         for h2 in hypotheses:
@@ -95,7 +103,7 @@ class Hypothesis:
         return False
 
     def __str__(self):
-        return "((%d,%d),%d,%f,%f)" % (self.x, self.y, self.r, self.canny_score, self.fill_score)
+        return "((%d,%d),%d,%f,%f|%f,%f,%f)" % (self.x, self.y, self.r, self.canny_score, self.fill_score,self.log_likelihood,self.log_prior,self.log_probability)
 
     def __repr__(self):
         return str(self)
@@ -222,9 +230,10 @@ class Ball_tracking:
     def compute_image(self, image):
         # image = self.image.copy()
         canny_edges = cv2.Canny(image, 100, 150);
-        kernel = np.ones((5,5),np.uint8)
-        canny_edges = cv2.dilate(canny_edges, kernel, iterations=1)
-        canny_edges = cv2.GaussianBlur(canny_edges, (7,7), 0)
+        # kernel = np.ones((1,1),np.uint8)
+        # canny_edges = cv2.dilate(canny_edges, kernel, iterations=1)
+        canny_edges = cv2.GaussianBlur(canny_edges, (9,9), 0)
+        canny_edges = canny_edges.clip(0, 255 // 3) * 3
 
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
@@ -246,6 +255,10 @@ class Ball_tracking:
         contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2]
 
         # filter the contours by filling in the undesirable ones
+        contours = sorted(contours, key=lambda c: cv2.contourArea(c), reverse=True)
+        if len(contours) > max_contours:
+            contours = contours[0:max_contours]
+
         filtered_contours = []
         for cnt in contours:        
             area = cv2.contourArea(cnt)      
@@ -272,6 +285,11 @@ class Ball_tracking:
 
         #compute the current frame metrics
         for h in initial_hypotheses:
+
+            if h.contour_area / (math.pi * h.r**2) < min_contour_area_percentage:
+                h.is_garbage = True
+                continue
+
             # calculate canny, percent spacing and colour
             # canny
             circle_mask = np.zeros_like(mask)
@@ -281,7 +299,9 @@ class Ball_tracking:
 
             # percent empty
             cv2.circle(circle_mask, (int(h.x), int(h.y)), int(h.r), 255, -1) #fill the circle
-            fill_sum = cv2.sumElems(cv2.bitwise_and(circle_mask, mask))[0] / 255.0
+            # kernel = np.ones((5,5),np.uint8)
+            # circle_mask = cv2.dilate(circle_mask, kernel, iterations=1)
+            fill_sum = max(cv2.sumElems(cv2.bitwise_and(circle_mask, mask))[0], h.contour_area) / 255.0
             h.fill_score = fill_sum / (math.pi * h.r**2) # divide by area to normalize for circle size
 
             if (h.fill_score < min_fill_score):
@@ -334,7 +354,9 @@ class Ball_tracking:
             hc.log_probability = hc.log_prior + hc.log_likelihood
             probability_sum += math.exp(hc.log_probability)
 
-        if (probability_sum < 1e-7):
+        print(self.curr_hypotheses)
+
+        if (probability_sum < 1e-15):
             rospy.logwarn("Normalization failed probability sum too small")
             return False
 
@@ -352,7 +374,7 @@ class Ball_tracking:
         self.curr_hypotheses = []
 
         if do_visualization_img_proc:
-            cv2.circle(image, (int(h_sel.x), int(h_sel.y)), int(h_sel.r), (0, 255, 255), 3) # visualization
+            cv2.circle(image, (int(h_sel.x), int(h_sel.y)), int(h_sel.r), (0, 255, 255), 2) # visualization
             cv2.imshow("After filtering", mask_clr)
             cv2.imshow("Input Image", image)
             cv2.imshow("edges", canny_clr)
