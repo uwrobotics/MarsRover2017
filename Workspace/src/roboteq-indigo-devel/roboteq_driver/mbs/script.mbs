@@ -108,7 +108,7 @@ PrintFeedback:
 	print(":", getvalue(_BATAMPS, ch))
 	print(":", getvalue(_ANAIN, ch))
 	print(":", getvalue(_TEMP, ch+1))
-	print(":", getvalue(_ABCNTR, ch))
+	'print(":", getvalue(_ABCNTR, ch)) for absolute encoder count
 	'getvalue(_RELCNTR,ch) for relative encoder count -> counts since last time called
 	'getvalue(_ABSPEED,ch) for absolute speed in RPM -> must set Pulses per Revolution
 	'getvalue(_RELSPEED,ch) for relative speed between 0-1000 -> dependent on the MAX RPM value
