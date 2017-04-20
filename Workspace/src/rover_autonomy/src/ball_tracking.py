@@ -191,6 +191,8 @@ class Ball_tracking:
             cv2.imshow("Final Results", image)
             cv2.waitKey(3)
 
+        cv2.imwrite("/home/lichunshang/Pictures/tennis_ball frames/" + str(self.num_iterations) + ".png", image)
+
         return X, Y, Z, bearing
 
     def locate_3d(self, x, y, r):
@@ -322,7 +324,7 @@ class Ball_tracking:
                 h.log_likelihood = math.log(canny_score_prob) + math.log(fill_score_prob)
 
                 if do_visualization_img_proc:
-                    cv2.circle(image, (int(h.x), int(h.y)), int(h.r), (0, 0, 255), 1) # visualization
+                    # cv2.circle(image, (int(h.x), int(h.y)), int(h.r), (0, 0, 255), 1) # visualization
                     cv2.circle(mask_clr, (int(h.x), int(h.y)), int(h.r), (0, 0, 255), 1) # visualization
                     cv2.circle(canny_clr, (int(h.x), int(h.y)), int(h.r), (0, 0, 255), 1) # visualization
 
