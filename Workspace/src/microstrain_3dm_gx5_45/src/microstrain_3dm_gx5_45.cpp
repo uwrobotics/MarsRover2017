@@ -838,16 +838,43 @@ void Microstrain::ahrs_packet_callback(void* user_ptr, u8* packet, u16 packet_si
 
                 //For little-endian targets, byteswap the data field
                 mip_ahrs_quaternion_byteswap(&curr_ahrs_quaternion_);
+
+                double x0, y0, z0, w0, x1, y1, z1, w1, x2, y2, z2, w2;
+                x1 = curr_ahrs_quaternion_.q[1];
+                y1 = curr_ahrs_quaternion_.q[2];
+                z1 = curr_ahrs_quaternion_.q[3];
+                w1 = curr_ahrs_quaternion_.q[0];
+
+                x0 = 1/sqrt(2);
+                y0 = 1/sqrt(2);
+                z0 = 0;
+                w0 = 0;
+
+                w2 = w0*w1 - x0*x1 - y0*y1 - z0*z1;
+                x2 = w0*x1 + x0*w1 + y0*z1 - z0*y1;
+                y2 = w0*y1 - x0*z1 + y0*w1 + z0*x1;
+                z2 = w0*z1 + x0*y1 - y0*x1 + z0*w1;
+
+                imu_msg_.orientation.x = x2;
+                imu_msg_.orientation.y = y2;
+                imu_msg_.orientation.z = z2;
+                imu_msg_.orientation.w = w2;
+
+                // imu_msg_.orientation.x = curr_ahrs_quaternion_.q[1];
+                // imu_msg_.orientation.y = curr_ahrs_quaternion_.q[2];
+                // imu_msg_.orientation.z = curr_ahrs_quaternion_.q[3];
+                // imu_msg_.orientation.w = curr_ahrs_quaternion_.q[0];
+
                 // put into ENU - swap X/Y, invert Z
                 // imu_msg_.orientation.x = curr_ahrs_quaternion_.q[2];
                 // imu_msg_.orientation.y = curr_ahrs_quaternion_.q[1];
                 // imu_msg_.orientation.z = -1.0 * curr_ahrs_quaternion_.q[3];
                 // imu_msg_.orientation.w = curr_ahrs_quaternion_.q[0];
 
-                imu_msg_.orientation.x = curr_ahrs_quaternion_.q[2];
-                imu_msg_.orientation.y = curr_ahrs_quaternion_.q[1];
-                imu_msg_.orientation.z = curr_ahrs_quaternion_.q[3];
-                imu_msg_.orientation.w = curr_ahrs_quaternion_.q[0];
+                // imu_msg_.orientation.x = -curr_ahrs_quaternion_.q[1];
+                // imu_msg_.orientation.y = curr_ahrs_quaternion_.q[2];
+                // imu_msg_.orientation.z = -curr_ahrs_quaternion_.q[3];
+                // imu_msg_.orientation.w = curr_ahrs_quaternion_.q[0];
 
             } break;
 

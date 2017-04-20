@@ -27,7 +27,7 @@ void imu_callback(const sensor_msgs::Imu& msg)
 
     tf::Matrix3x3 rot_matrix(q);
     double roll, pitch, yaw;
-    rot_matrix.getEulerYPR(yaw, pitch, roll);
+    rot_matrix.getRPY(roll, pitch, yaw);
     geometry_msgs::Vector3 ang_vel = msg.angular_velocity;
     geometry_msgs::Vector3 lin_accel = msg.linear_acceleration;
 
