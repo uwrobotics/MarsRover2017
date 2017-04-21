@@ -26,19 +26,19 @@ class ArmController:
 
 		# Cap values to max. speed
 		if switchOn:
-			# for i in range(len(axes)):
-			# 	# cap duty cycle values to certain value
-			# 	axes[i] *= 0.5
-			# 	self.sendCommand(axes[i], i)
-			axes[0] *= 0.5
-			self.sendCommand(axes[0], 0)
+			for i in range(len(axes)):
+				# cap duty cycle values to certain value
+				axes[i] *= 0.5
+				self.sendCommand(axes[i], i)
+			# axes[0] *= 0.5
+			# self.sendCommand(axes[0], 0)
 			self.__sendZeros = True
 
 		# Send 0s only once if deadman's switch released
 		elif self.__sendZeros:
-			# for i in range(len(axes)):
-			# 	self.sendCommand(0, i)
-			self.sendCommand(0, 0)
+			for i in range(len(axes)):
+				self.sendCommand(0, i)
+			# self.sendCommand(0, 0)
 			self.__sendZeros = False
 
 	# Convert cmd to CAN frame msg type
