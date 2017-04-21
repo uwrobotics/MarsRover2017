@@ -196,6 +196,10 @@ namespace socketcan_bridge
                 topic_idx = 2;
                 break;
 
+            case CAN_RX_ARM:
+                topic_idx = 3;
+                break;
+
             default:
                 ROS_WARN("Received frame has unregistered CAN ID %x", msg.id);
                 valid_frame = false;
