@@ -1,4 +1,4 @@
-SCRIPT_VER=31
+SCRIPT_VER=32
 MAX_CHANNELS=2
 Dim last_mode[2] as Integer
 
@@ -34,17 +34,17 @@ setconfig(_UVL, 100)
 for ch = 1 andwhile ch <= MAX_CHANNELS evaluate ch++
 	' Encoder, speed config (p208, p221)
 	setconfig(_EPPR, ch, 512) 'encoder PPR
-	setconfig(_MXRPM, ch, 250) 'MAX RPM
+	setconfig(_MXRPM, ch, 250) 'MAX RPM 250
 	'setconfig(_CLERD, ch, 0) 'closed loop error detection
 
 	' Current limit (p216)
-	setconfig(_ALIM, ch, 1500) 'max current
+	setconfig(_ALIM, ch, 1500) 'max current 150A
 	'setconfig(_ATGA, ch, 2000) 'action to take when current is too high
 	'setconfig(_ATGD, ch, 50) 'how long to delay after the action should take place
 	'setconfig(_ATRIG, ch, 0) 'what current to trigger at
 
 	' acceleration/deceleration rate (p219)
-	setconfig(_MAC, ch, 3000) 
+	setconfig(_MAC, ch, 3000) '300 RPM/s
 	setconfig(_MDEC, ch, 3000)
 next
 
@@ -61,17 +61,17 @@ top:
 				setconfig(_KD, ch, 0)
 				setconfig(_ICAP, ch, 0)
 				setcommand(_G, ch, 0)
-				setcommand(_MSTOP, ch)
+				'setcommand(_MSTOP, ch)
 			end if
 
 			' Motor in velocity-control mode.
 			if getvalue(_VAR, ch) = 0 then
 				setconfig(_MMOD, ch, 1) '1 is closed loop speed control, 0 is open loop
-				setconfig(_KP, ch, 10)
-				setconfig(_KI, ch, 1)
-				'setconfig(_KD, ch, 10)
+				setconfig(_KP, ch, 20)'gain multiplied by 10
+				setconfig(_KI, ch, 20)
+				setconfig(_KD, ch, 20)
 				setconfig(_ICAP, ch, 100)
-				setcommand(_MGO,1)
+				'setcommand(_MGO,1)
 			end if
 
 			' Motor in position-control mode.
