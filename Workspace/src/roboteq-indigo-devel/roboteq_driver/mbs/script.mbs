@@ -23,15 +23,18 @@ setconfig(_RWD, 110) ' Watchdog timeout, milliseconds (p195)
 setconfig(_AMOD, 1, 1) ' Analog input 1 absolute mode
 setconfig(_AMOD, 2, 1) ' Analog input 2 absolute mode
 
+'set encoder mode (p315)
+setconfig(_EMOD, 1, 18)
+setconfig(_EMOD, 2, 34)
+
 ' Undervoltage/overvoltage limits (p214)
 setconfig(_OVL, 700)
 setconfig(_UVL, 100)
 
 for ch = 1 andwhile ch <= MAX_CHANNELS evaluate ch++
 	' Encoder, speed config (p208, p221)
-	setconfig(_EMOD, ch, 50) 'encoder mode 50 means use a feedback
 	setconfig(_EPPR, ch, 512) 'encoder PPR
-	setconfig(_MXRPM, ch, 5000) 'MAX RPM
+	setconfig(_MXRPM, ch, 250) 'MAX RPM
 	'setconfig(_CLERD, ch, 0) 'closed loop error detection
 
 	' Current limit (p216)
@@ -41,10 +44,8 @@ for ch = 1 andwhile ch <= MAX_CHANNELS evaluate ch++
 	'setconfig(_ATRIG, ch, 0) 'what current to trigger at
 
 	' acceleration/deceleration rate (p219)
-	setconfig(_MAC, ch, 20000) 
-	setconfig(_MDEC, ch, 40000)
-	
-	'ADJUST MXRPM MAC AND MDEC TO SET ACCELERATION
+	setconfig(_MAC, ch, 3000) 
+	setconfig(_MDEC, ch, 3000)
 next
 
 top:
@@ -65,7 +66,7 @@ top:
 
 			' Motor in velocity-control mode.
 			if getvalue(_VAR, ch) = 0 then
-				setconfig(_MMOD, ch, 0)
+				setconfig(_MMOD, ch, 1) '1 is closed loop speed control, 0 is open loop
 				setconfig(_KP, ch, 10)
 				setconfig(_KI, ch, 1)
 				'setconfig(_KD, ch, 10)
