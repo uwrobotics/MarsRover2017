@@ -2,7 +2,9 @@
     <include file="$(find socketcan_bridge)/launch/can_interface.launch"/>
 
     <!-- Joy -->
-    <node pkg="joy" type="joy_node" name="joy" respawn="true" output="screen"/>
+    <node pkg="joy" type="joy_node" name="joy" respawn="true" output="screen">
+        <param name="dev" value="/dev/input/logitech"/>
+    </node>
 
     <!-- Arm Control -->
     <node pkg="arm_control" type="arm_control.py" name="arm_control" respawn="true" output="screen"/>

@@ -102,7 +102,7 @@ public:
     virtual bool send(const Frame & msg){
         if (getState().driver_state == State::ready)
         {
-            LOG("READY");
+            //LOG("READY");
         }
         else
         {
