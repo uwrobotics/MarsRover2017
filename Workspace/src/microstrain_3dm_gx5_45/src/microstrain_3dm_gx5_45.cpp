@@ -22,6 +22,7 @@ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "microstrain_3dm_gx5_45.h"
 #include <tf2/LinearMath/Transform.h>
+#include <tf/transform_datatypes.h>
 #include <string>
 #include <algorithm>
 
@@ -754,7 +755,6 @@ void Microstrain::filter_packet_callback(void* user_ptr, u8* packet, u16 packet_
 // AHRS Packet Callback
 //
 ////////////////////////////////////////////////////////////////////////////////
-
 void Microstrain::ahrs_packet_callback(void* user_ptr, u8* packet, u16 packet_size, u8 callback_type)
 {
     mip_field_header* field_header;
@@ -798,9 +798,15 @@ void Microstrain::ahrs_packet_callback(void* user_ptr, u8* packet, u16 packet_si
                 imu_msg_.header.seq = ahrs_valid_packet_count_;
                 imu_msg_.header.stamp = ros::Time::now();
                 imu_msg_.header.frame_id = imu_frame_id_;
-                imu_msg_.linear_acceleration.x = 9.81 * curr_ahrs_accel_.scaled_accel[0];
+
+                // custom coordinate system, rotate 180 about y
+                imu_msg_.linear_acceleration.x = -9.81 * curr_ahrs_accel_.scaled_accel[0];
                 imu_msg_.linear_acceleration.y = 9.81 * curr_ahrs_accel_.scaled_accel[1];
-                imu_msg_.linear_acceleration.z = 9.81 * curr_ahrs_accel_.scaled_accel[2];
+                imu_msg_.linear_acceleration.z = -9.81 * curr_ahrs_accel_.scaled_accel[2];
+
+                // imu_msg_.linear_acceleration.x = 9.81 * curr_ahrs_accel_.scaled_accel[0];
+                // imu_msg_.linear_acceleration.y = 9.81 * curr_ahrs_accel_.scaled_accel[1];
+                // imu_msg_.linear_acceleration.z = 9.81 * curr_ahrs_accel_.scaled_accel[2];
 
             } break;
 
@@ -814,9 +820,14 @@ void Microstrain::ahrs_packet_callback(void* user_ptr, u8* packet, u16 packet_si
                 //For little-endian targets, byteswap the data field
                 mip_ahrs_scaled_gyro_byteswap(&curr_ahrs_gyro_);
 
-                imu_msg_.angular_velocity.x = curr_ahrs_gyro_.scaled_gyro[0];
+                // custom coordinate system, rotate 180 about y
+                imu_msg_.angular_velocity.x = -curr_ahrs_gyro_.scaled_gyro[0];
                 imu_msg_.angular_velocity.y = curr_ahrs_gyro_.scaled_gyro[1];
-                imu_msg_.angular_velocity.z = curr_ahrs_gyro_.scaled_gyro[2];
+                imu_msg_.angular_velocity.z = -curr_ahrs_gyro_.scaled_gyro[2];
+
+                // imu_msg_.angular_velocity.x = curr_ahrs_gyro_.scaled_gyro[0];
+                // imu_msg_.angular_velocity.y = curr_ahrs_gyro_.scaled_gyro[1];
+                // imu_msg_.angular_velocity.z = curr_ahrs_gyro_.scaled_gyro[2];
 
             } break;
 
@@ -839,41 +850,32 @@ void Microstrain::ahrs_packet_callback(void* user_ptr, u8* packet, u16 packet_si
                 //For little-endian targets, byteswap the data field
                 mip_ahrs_quaternion_byteswap(&curr_ahrs_quaternion_);
 
-                double x0, y0, z0, w0, x1, y1, z1, w1, x2, y2, z2, w2;
-                x1 = curr_ahrs_quaternion_.q[1];
-                y1 = curr_ahrs_quaternion_.q[2];
-                z1 = curr_ahrs_quaternion_.q[3];
-                w1 = curr_ahrs_quaternion_.q[0];
+                // ENU in the frame printed on sensor's enclosure
+                tf::Quaternion q_sensor(curr_ahrs_quaternion_.q[1],
+                                        curr_ahrs_quaternion_.q[2],
+                                        curr_ahrs_quaternion_.q[3],
+                                        curr_ahrs_quaternion_.q[0]);
+                tf::Quaternion q_ned_to_enu(1.0/sqrt(2), 1.0/sqrt(2), 0, 0);
+                // get the quaternion in ENU with sensor's native frame
+                tf::Quaternion q_enu_sensor = q_ned_to_enu * q_sensor;
 
-                x0 = 1/sqrt(2);
-                y0 = 1/sqrt(2);
-                z0 = 0;
-                w0 = 0;
+                // transform to ENU using custom coordinate system
+                tf::Quaternion q_to_custom_frame(0, 1, 0, 0); // 180 rotation about y
+                tf::Quaternion q_enu_custom = q_enu_sensor * q_to_custom_frame;
 
-                w2 = w0*w1 - x0*x1 - y0*y1 - z0*z1;
-                x2 = w0*x1 + x0*w1 + y0*z1 - z0*y1;
-                y2 = w0*y1 - x0*z1 + y0*w1 + z0*x1;
-                z2 = w0*z1 + x0*y1 - y0*x1 + z0*w1;
+                tf::quaternionTFToMsg(q_enu_custom, imu_msg_.orientation);
 
-                imu_msg_.orientation.x = x2;
-                imu_msg_.orientation.y = y2;
-                imu_msg_.orientation.z = z2;
-                imu_msg_.orientation.w = w2;
-
+                // NED directly from the sensor
                 // imu_msg_.orientation.x = curr_ahrs_quaternion_.q[1];
                 // imu_msg_.orientation.y = curr_ahrs_quaternion_.q[2];
                 // imu_msg_.orientation.z = curr_ahrs_quaternion_.q[3];
                 // imu_msg_.orientation.w = curr_ahrs_quaternion_.q[0];
 
-                // put into ENU - swap X/Y, invert Z
+                // *** This is wrong, this is the original code ***
+                // put into ENU - swap X/Y, invert Z - 
                 // imu_msg_.orientation.x = curr_ahrs_quaternion_.q[2];
                 // imu_msg_.orientation.y = curr_ahrs_quaternion_.q[1];
                 // imu_msg_.orientation.z = -1.0 * curr_ahrs_quaternion_.q[3];
-                // imu_msg_.orientation.w = curr_ahrs_quaternion_.q[0];
-
-                // imu_msg_.orientation.x = -curr_ahrs_quaternion_.q[1];
-                // imu_msg_.orientation.y = curr_ahrs_quaternion_.q[2];
-                // imu_msg_.orientation.z = -curr_ahrs_quaternion_.q[3];
                 // imu_msg_.orientation.w = curr_ahrs_quaternion_.q[0];
 
             } break;
