@@ -1,15 +1,13 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
 #include "rover_joy/rover_joy_node.h"
+#include "rover_joy/rover_physical_param.h"
 
 ros::Publisher left_pub;
 ros::Publisher right_pub;
 
-const float MAX_X = 2.0;   // m/s
-const float MAX_Z = 2.0; // rad/s
+
 const float SCALE = 1000;  // max value for roboteq
-const float WHEEL_DISTANCE = 0.865;
-const float RADIUS = 0.105;
 const float MAX_WHEEL_SPEED = (MAX_X + WHEEL_DISTANCE/2 * MAX_Z)/RADIUS;
 
 
