@@ -1,0 +1,31 @@
+steps to change GUI
+make changes to mainly client/rob.html, client/rob.js, and components/main.css
+run "webpack" command under Rover-GUI folder
+
+Commands to run:
+
+roscore
+roslaunch rosbridge_server rosbridge_websocket.launch
+rosrun usb_cam usb_cam_node
+rosrun usb_cam usb_cam_node _video_device:="/dev/video1" __name:="usb_cam2"
+rosrun web_video_server web_video_server
+
+Open rob.html in browser
+
+To change battery/temperature data:
+rostopic pub /temperature_data std_msgs/Float32MultiArray "layout:
+  dim:
+  - label: ''
+    size: 0
+    stride: 0
+  data_offset: 0
+data: [12.5, 35.2, 37.6]" 
+
+rostopic pub /battery_data std_msgs/Float32MultiArray "layout:
+  dim:
+  - label: ''
+    size: 0
+    stride: 0
+  data_offset: 0
+data: [70, 56, 11.7]" 
+

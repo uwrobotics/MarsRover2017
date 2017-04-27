@@ -1,0 +1,188 @@
+body{
+	background-color: #ffffff;
+}
+
+h1{
+font-size: 30PX;
+font-family: "Arial", sans-serif;
+}
+
+h2{
+font-size: 20PX;
+font-family: "Arial", sans-serif;
+}
+
+p {
+	 font-family: "Arial", sans-serif;
+	 margin: 0px;
+   padding: 0px;
+}
+/*
+#background{
+	width: 80%;
+	background-image: url("uw.jpg");
+	background-repeat: repeat-x repeat-y;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 0;
+	padding-top: 0;
+}*/
+
+#bigTitle{
+	text-align: left;
+	/*width: 500px;
+	background-color: #ffffe6;
+	border-top: 100px;
+	padding: 70px;*/
+	height: 100px;
+	border: 1px solid red;
+	margin-left: auto;
+	margin-right: auto;
+	display:inline-block;
+	background-image: url("logo.png");
+}
+
+div.image{
+	content:url("logo.jpg");
+	display:inline-block;
+}
+
+#statusIndicator{
+	color: black;
+	height: 40px;
+	line-height: 40px;
+	/*background-color: #ffaa80;
+	width: 600px;*/
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+	display:inline-block;
+	float: right;
+}
+
+.instruction{
+	width: 600px;
+	color: black;
+	font-size: 15px;
+	background-color: #ffffe6;
+	padding: 20px;
+	border-width: 2px;
+	border-color: white;
+	border-style: solid;
+	margin: 20px;
+	margin-top: 20px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.video_stream{
+	display: inline-block;
+	margin: 5px;
+}
+
+.video_stream_container{
+	max-width: 50%;
+  float: right;
+  position: relative;
+	/*border: 1px solid red;*/
+}
+
+div.rosData{
+
+}
+
+div.battery{
+	max-width: 50%;
+	/*border: 1px solid red;*/
+}
+
+div.battery_element{
+	min-width: 300px;
+	max-width: 33%;
+	min-height: 300px;
+	display: inline-block;
+	text-align: center;
+	/*border: 1px solid red;*/
+}
+
+div.temperature{
+	/*border:1px solid red;*/
+		max-width: 50%;
+
+}
+div.temperature_element{
+	min-width: 300px;
+	max-width: 33%;
+	min-height: 50px;
+	/*border: 1px solid red;*/
+	display: inline-block;
+	text-align: center;
+}
+
+div.cell_temperature{
+	padding-top: 30px;
+	max-width: 50%;
+
+}
+
+div.small_temp{
+	min-width:150px;
+	max-width:30%;
+	min-height: 50px;
+	display: inline-block;
+	text-align: center;
+}
+
+.mapContainer{
+    float: right;
+    position: relative;
+		margin: auto;
+    /*border: 1px solid red;*/
+}
+
+.imuContainer{
+	float:left;
+	position:relative;
+	margin: auto;
+	margin-top:50px;
+	/*display: inline-block;*/
+}
+
+p.data{
+	/*background-color: #ff8533;
+	width: 100px;*/
+}
+
+
+div.data{
+	/*background-color: #ff8533;
+	width: 100px;*/
+}
+
+.button{
+margin-left: auto;
+margin-right: auto;
+	color: #40ff00;
+	width: 100px;
+	height: 40px;
+}
+
+#progress {
+    position:relative;
+    width:250px;
+    height:20px;
+    border:1px solid red;
+}
+
+#progress .progress-bar {
+    background:blue;
+    height:20px;
+    width:0%;
+    display:inline-block;
+}
+
+#progress .progress-text {
+    position:absolute;
+    z-index:2;
+    right:0;
+}

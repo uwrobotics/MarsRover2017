@@ -1,0 +1,147 @@
+<html>
+	<head>	
+		<script src = "js/three.min.js"></script>
+		<script src = "js/THREE.MeshLine.js"></script>	
+	</head>
+	<body onLoad = "onLoad();">
+			"Use arrow keys to move"
+			<div id="container" style="height:400px; width:400px; background-color:#000000">
+		</div>
+		<script>
+		
+	
+		var scene, camera, renderer;
+		var geometry, material, mesh, group;
+		function onLoad(){
+			var container = document.getElementById("container");
+
+			var posx = 0;
+			var posy = 0;
+			var posz = 0;
+
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize(container.offsetWidth, container.offsetHeight);
+			container.appendChild(renderer.domElement);
+
+			scene = new THREE.Scene();
+			
+			camera = new THREE.PerspectiveCamera(45, container.offsetWidth/container.offsetHeight, 1, 1000);
+			camera.position.set(1,2,5);
+			camera.lookAt(new THREE.Vector3(posx,posy,posz));	
+			scene.add(camera);
+			var textureLoader = new THREE.TextureLoader();
+			var onload = function(texture){renderer.render(scene,camera);};
+			var texture0 = textureLoader.load('1.png',onload);
+			var texture1 = textureLoader.load('2.png',onload);
+		   	var  materials = [
+					   	 new THREE.MeshLambertMaterial( {  } ),
+						 new THREE.MeshLambertMaterial( {   } ),
+						 new THREE.MeshBasicMaterial( { map: texture0 } ),
+						 new THREE.MeshBasicMaterial( { map: texture1  } ),
+						 new THREE.MeshLambertMaterial( {   } ),
+						 new THREE.MeshLambertMaterial( {   } )];
+			var faceMaterial = new THREE.MultiMaterial( materials );
+
+			var geometry = new THREE.BoxBufferGeometry(1.5,1,2.8);//,5,5,5);
+			var mainbox = new THREE.Mesh(geometry,faceMaterial);// new THREE.MeshLambertMaterial({}));//({ color: 0xff0000, wireframe: true } ) );
+
+			//var mainbox = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({}));//({ color: 0xff0000, wireframe: true } ) );
+			group = new THREE.Group();
+			group.position.x = posx;
+			group.position.y = posy;
+			group.position.z = posz;
+			group.add(mainbox);
+			scene.add(group);
+			renderer.render(scene,camera);
+			/*/Adding the ground
+			var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+			var ground = new THREE.Mesh(new THREE.PlaneGeometry(200,200),material);
+			ground.position.y = -1.9; //lower it 
+			ground.rotation.x = -Math.PI/2; //-90 degrees around the xaxis 
+			scene.add(ground);
+			*/
+
+			//Adding some coole things
+			var grid = new THREE.GridHelper( 40, 80 );
+			grid.setColors( 0xffffff, 0xffffff );
+			scene.add(grid);
+
+			scene.fog = new THREE.FogExp2( 0xffa500, 0.089 );
+			renderer.setClearColor( scene.fog.color, 1 );
+
+			var linmat = new THREE.LineBasicMaterial({ color: 0xff0000 });
+			/*var linmat2 = new MeshLineMaterial(
+							{
+										color: new THREE.Color( 0xff0000 ),
+										opacity: 1,
+										lineWidth: 0.02
+							});*/
+			//var linegeo = new THREE.BufferGeometry();
+			var vertices = new Float32Array([
+							0,	-4,	0,
+							0,	4,	0,
+							0,	-4, 0]);
+
+			var geometry = new THREE.Geometry();
+			geometry.vertices.push(
+							new THREE.Vector3(0, -10, 0 ),
+							new THREE.Vector3( 0, 10, 0 ));
+
+			
+			//var g = new MeshLine();
+			//g.setGeometry(geometry);
+			//linegeo.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+			//var line = new THREE.Mesh(g.geometry,linmat2);
+			var line = new THREE.Line(geometry,linmat);
+			scene.add(line);
+			
+			
+			
+			// add subtle ambient lighting
+	        var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+	        scene.add(ambientLight);
+
+	        // add spotlight for the shadows
+	        var spotLight = new THREE.SpotLight(0xffffff);
+	        spotLight.position.set(container.offsetWidth/2, container.offsetHeight/2,60);//(-30, 60, 60);
+	        spotLight.castShadow = true;
+	        scene.add(spotLight);
+			var potLight = new THREE.SpotLight(0xffffff,0.5);
+            potLight.position.set(-30, 60, 60);
+			potLight.castShadow = true;
+			scene.add(potLight);
+
+			renderer.render(scene, camera);
+			 //rotate(0,-0.1,0);
+
+		}
+
+		document.onkeydown = function(evt) {
+		    evt = evt || window.event;
+		    if (evt.keyCode == 39) {
+		        //right
+		        rotate(0,0.1,0);
+		    }else if(evt.keyCode == 37){
+		        //left
+		        rotate(0,-0.1,0);
+		    }
+		    if (evt.keyCode == 38){
+		        //up
+		        rotate(-0.1,0,0);
+		    }else if (evt.keyCode == 40){
+		        //down
+		        rotate(0.1,0,0);
+		    }
+		};
+
+		function rotate(x, y, z){
+    		//requestAnimationFrame(animate);
+			group.rotation.x += x;
+			group.rotation.y += y;
+			group.rotation.z += z;
+			renderer.render( scene, camera );
+		} 
+		
+		</script>
+	</body>
+</html>
