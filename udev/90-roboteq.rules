@@ -1,0 +1,1 @@
+KERNEL=="ttyACM*", ATTRS{manufacturer}=="Roboteq", ATTRS{product}=="Motor Controller", SYMLINK+="roboteq", MODE:="0666"
