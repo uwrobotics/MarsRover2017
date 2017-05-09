@@ -21,9 +21,9 @@ int main(int argc, char** argv){
 
   ros::NodeHandle n;
 
-  ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("husky_velocity_controller/odom", 1);
-  ros::Subscriber left_feeback_sub = n.subscribe("/left/feedback", 1, left_feeback_callback);
-  ros::Subscriber right_feeback_sub = n.subscribe("/right/feedback", 1, right_feedback_callback);
+  ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("husky_velocity_controller/odom", 10);
+  ros::Subscriber left_feeback_sub = n.subscribe("/left/feedback", 10, left_feeback_callback);
+  ros::Subscriber right_feeback_sub = n.subscribe("/right/feedback", 10, right_feedback_callback);
 
   // integrated positions
   double pose_x = 0.0;
