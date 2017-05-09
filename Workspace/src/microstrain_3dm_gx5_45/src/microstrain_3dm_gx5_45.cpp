@@ -804,6 +804,10 @@ void Microstrain::ahrs_packet_callback(void* user_ptr, u8* packet, u16 packet_si
                 imu_msg_.linear_acceleration.y = 9.81 * curr_ahrs_accel_.scaled_accel[1];
                 imu_msg_.linear_acceleration.z = -9.81 * curr_ahrs_accel_.scaled_accel[2];
 
+                imu_msg_.linear_acceleration_covariance = {1e-6, 0.0, 0.0,
+                                                           0.0, 1e-6, 0.0,
+                                                           0.0, 0.0, 1e-6};
+
                 // imu_msg_.linear_acceleration.x = 9.81 * curr_ahrs_accel_.scaled_accel[0];
                 // imu_msg_.linear_acceleration.y = 9.81 * curr_ahrs_accel_.scaled_accel[1];
                 // imu_msg_.linear_acceleration.z = 9.81 * curr_ahrs_accel_.scaled_accel[2];
@@ -828,6 +832,10 @@ void Microstrain::ahrs_packet_callback(void* user_ptr, u8* packet, u16 packet_si
                 // imu_msg_.angular_velocity.x = curr_ahrs_gyro_.scaled_gyro[0];
                 // imu_msg_.angular_velocity.y = curr_ahrs_gyro_.scaled_gyro[1];
                 // imu_msg_.angular_velocity.z = curr_ahrs_gyro_.scaled_gyro[2];
+
+                imu_msg_.angular_velocity_covariance = {1e-6, 0.0, 0.0,
+                                                        0.0, 1e-6, 0.0,
+                                                        0.0, 0.0, 1e-6};
 
             } break;
 
@@ -864,6 +872,10 @@ void Microstrain::ahrs_packet_callback(void* user_ptr, u8* packet, u16 packet_si
                 tf::Quaternion q_enu_custom = q_enu_sensor * q_to_custom_frame;
 
                 tf::quaternionTFToMsg(q_enu_custom, imu_msg_.orientation);
+
+                imu_msg_.orientation_covariance = {1e-3, 0.0, 0.0,
+                                                   0.0, 1e-3, 0.0,
+                                                   0.0, 0.0, 1e-3};
 
                 // NED directly from the sensor
                 // imu_msg_.orientation.x = curr_ahrs_quaternion_.q[1];
