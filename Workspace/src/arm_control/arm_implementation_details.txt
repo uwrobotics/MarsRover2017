@@ -1,0 +1,16 @@
+joy node
+  - killswitch
+  - speed control -> 25% and 50%
+
+CAN/MCU
+  - wait for reception of all axes information (i.e. 3 axes)
+  - copy all at once to float array and handle from there
+  - use received float for duty cycle
+  - errors
+    - timeout when no messages received for X amount of time
+      - send 0s to motor controller
+
+encoders
+  - move arm components back to 0 position (limit switches)
+  - initialize encoders to 0
+  - if count ever goes from 0 to underflow/hits limit switch, reset count to 0
