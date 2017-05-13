@@ -167,12 +167,13 @@ void Microstrain::run()
 
     // ROS publishers and subscribers
     if (publish_gps_)
-        gps_pub_ = node.advertise<sensor_msgs::NavSatFix>("gps/fix", 100);
+        gps_pub_ = node.advertise<sensor_msgs::NavSatFix>("/navsat/fix", 10);
+        gps_heading_pub_ = node.advertise<sensor_msgs::Imu>("/navsat/heading/", 10);
     if (publish_imu_)
-        imu_pub_ = node.advertise<sensor_msgs::Imu>("imu/data", 100);
+        imu_pub_ = node.advertise<sensor_msgs::Imu>("imu/data", 10);
     if (publish_odom_) {
-        nav_pub_ = node.advertise<nav_msgs::Odometry>("nav/odom", 100);
-        nav_status_pub_ = node.advertise<std_msgs::Int16MultiArray>("nav/status", 100);
+        nav_pub_ = node.advertise<nav_msgs::Odometry>("nav/odom", 10);
+        nav_status_pub_ = node.advertise<std_msgs::Int16MultiArray>("nav/status", 10);
     }
     ros::ServiceServer service = node.advertiseService("reset_kf", &Microstrain::reset_callback, this);
 
@@ -875,7 +876,7 @@ void Microstrain::ahrs_packet_callback(void* user_ptr, u8* packet, u16 packet_si
 
                 imu_msg_.orientation_covariance = {1e-3, 0.0, 0.0,
                                                    0.0, 1e-3, 0.0,
-                                                   0.0, 0.0, 1e-3};
+                                                   0.0, 0.0, 2.5};
 
                 // NED directly from the sensor
                 // imu_msg_.orientation.x = curr_ahrs_quaternion_.q[1];
@@ -997,6 +998,64 @@ void Microstrain::gps_packet_callback(void* user_ptr, u8* packet, u16 packet_siz
                 //For little-endian targets, byteswap the data field
                 mip_gps_ned_vel_byteswap(&curr_ned_vel_);
 
+                // float v[3];             //(m/s)
+                // float speed;            //(m/s)
+                // float ground_speed;     //(m/s)
+                // float heading;          //(deg)
+                // float speed_accuracy;   //(m/s)
+                // float heading_accuracy; //(deg)
+                // u16   valid_flags;
+
+
+                // double abs_vel = sqrt(curr_ned_vel_.v[0]*curr_ned_vel_.v[0] + curr_ned_vel_.v[1]*curr_ned_vel_.v[1]);
+
+                double heading = curr_ned_vel_.heading * M_PI / 180;
+                double heading_accuracy = curr_ned_vel_.heading_accuracy * M_PI / 180;
+
+                ROS_INFO("v=%f (%f), h=%f (%f)", curr_ned_vel_.ground_speed, curr_ned_vel_.speed_accuracy*curr_ned_vel_.speed_accuracy,
+                    heading * 180 / M_PI, heading_accuracy*heading_accuracy);
+
+                // convert from NED to ENU
+                double yaw = -heading + M_PI / 2;
+                gps_heading_msg_.orientation = tf::createQuaternionMsgFromYaw(yaw);
+                gps_heading_msg_.orientation_covariance = {0.0, 0.0, 0.0,
+                                                           0.0, 0.0, 0.0,
+                                                           0.0, 0.0, heading_accuracy*heading_accuracy};
+
+
+                // gps_vel_msg_.
+
+                // odom.pose.pose.position.x = 0.0;
+                // odom.pose.pose.position.y = 0.0;
+                // odom.pose.pose.position.z = 0.0;
+                // odom.pose.pose.orientation = odom_quat;
+                // odom.pose.covariance = {
+                //     0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+                //     0.0, 0, 0.0, 0.0, 0.0, 0.0, 
+                //     0.0, 0.0, 0, 0.0, 0.0, 0.0, 
+                //     0.0, 0.0, 0.0, 1e-2, 0.0, 0.0, 
+                //     0.0, 0.0, 0.0, 0.0, 1e-2, 0.0, 
+                //     0.0, 0.0, 0.0, 0.0, 0.0, 1e-2
+                // };
+
+                // //set the velocity
+                // odom.child_frame_id = "base_link";
+                // odom.twist.twist.linear.x = v_x;
+                // odom.twist.twist.linear.y = v_y;
+                // odom.twist.twist.linear.z = 0;
+                // odom.twist.twist.angular.z = v_th;
+
+                // odom.twist.covariance = {
+                //     1e-2, 0.0, 0.0, 0.0, 0.0, 0.0, 
+                //     0.0, 1e-2, 0.0, 0.0, 0.0, 0.0, 
+                //     0.0, 0.0, 1e-2, 0.0, 0.0, 0.0, 
+                //     0.0, 0.0, 0.0, 0, 0.0, 0.0, 
+                //     0.0, 0.0, 0.0, 0.0, 0, 0.0, 
+                //     0.0, 0.0, 0.0, 0.0, 0.0, 0
+                // };
+
+                // gps_vel_pub_
+
             } break;
 
             ///
@@ -1041,6 +1100,7 @@ void Microstrain::gps_packet_callback(void* user_ptr, u8* packet, u16 packet_siz
     if (msgvalid) {
         // Publish the message
         gps_pub_.publish(gps_msg_);
+        gps_heading_pub_.publish(gps_heading_msg_);
     }
 
     print_packet_stats();

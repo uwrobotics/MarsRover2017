@@ -30,7 +30,7 @@
 
     <!-- GPS Settings  -45 and -35 Only -->
     <param name="gps_rate" value="4" type="int" />    
-    <param name="gps_frame_id" value="wgs84" type="str" />
+    <param name="gps_frame_id" value="base_link" type="str" />
     <param name="publish_gps" value="true" type="bool" />
 
     <!-- Filter Settings - GXx-45 Only disabled for -35 -->
