@@ -17,6 +17,7 @@
     <param name="yaw_offset" value="3.14159"/>
     <param name="zero_altitude" value="true"/>
 
+    <param name="publish_filtered_gps" value="true"/>
     <!-- input mapping -->
     <!--remap from="/imu/data" to=""/-->
     <remap from="/gps/fix" to="/navsat/fix"/>
