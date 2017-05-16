@@ -8,7 +8,7 @@ ros::Publisher right_pub;
 
 
 const float SCALE = 1000;  // max value for roboteq
-const float MAX_WHEEL_SPEED = (MAX_X + WHEEL_DISTANCE/2 * MAX_Z)/RADIUS;
+// const float MAX_WHEEL_SPEED = (MAX_X + WHEEL_DISTANCE/2 * MAX_Z)/RADIUS;
 
 
 void twistCallback(const geometry_msgs::Twist::ConstPtr& vel)
@@ -21,20 +21,37 @@ void twistCallback(const geometry_msgs::Twist::ConstPtr& vel)
 	
 	ROS_INFO("lin: %f ang: %f", vel->linear.x, vel->angular.z);
 	
-	float left = 0, right = 0;
-	left = ((vel->linear.x / MAX_X) - (vel->angular.z / MAX_Z))*SCALE;
-	right = ((vel-> linear.x / MAX_X) + (vel->angular.z / MAX_Z))*SCALE;
+	// float left = 0, right = 0;
+	// left = ((vel->linear.x / MAX_X) - (vel->angular.z / MAX_Z))*SCALE;
+	// right = ((vel-> linear.x / MAX_X) + (vel->angular.z / MAX_Z))*SCALE;
 
-	left = left > SCALE ? SCALE : left;
-	right = right > SCALE ? SCALE : right;
+	// left = left > SCALE ? SCALE : left;
+	// right = right > SCALE ? SCALE : right;
 
-	if(vel->linear.x < 0) {
-		float temp = left;
-		left = right;
-		right = temp;
-	}
+	// if(vel->linear.x < 0) {
+	// 	float temp = left;
+	// 	left = right;
+	// 	right = temp;
+	// }
 	//left = ((vel->linear.x - WHEEL_DISTANCE/2 * vel->angular.z)/RADIUS) / MAX_WHEEL_SPEED * SCALE;
 	//right = ((vel->linear.x + WHEEL_DISTANCE/2 * vel->angular.z)/RADIUS) / MAX_WHEEL_SPEED * SCALE;
+
+    double left_vel = (vel->linear.x - vel->angular.z * WHEEL_DISTANCE / 2.0);
+    double right_vel = (vel->linear.x + vel->angular.z * WHEEL_DISTANCE / 2.0);
+
+    double left_rpm = (left_vel / RADIUS) * GEAR_RATIO * RPM_PER_RAD;
+    double right_rpm = (right_vel / RADIUS) * GEAR_RATIO * RPM_PER_RAD;
+
+    double left = left_rpm / MAX_RPM * SCALE;
+    double right = right_rpm / MAX_RPM * SCALE;
+
+    if (left > SCALE) {
+        left = SCALE;
+    }
+
+    if (right > SCALE) {
+        right = SCALE;
+    }
 
 	left_command.setpoint = left;
 	right_command.setpoint = right;
