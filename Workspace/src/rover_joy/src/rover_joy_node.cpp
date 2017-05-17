@@ -10,15 +10,12 @@ ros::Publisher right_pub;
 const float SCALE = 1000;  // max value for roboteq
 // const float MAX_WHEEL_SPEED = (MAX_X + WHEEL_DISTANCE/2 * MAX_Z)/RADIUS;
 
+double left = 0;
+double right = 0;
+
 
 void twistCallback(const geometry_msgs::Twist::ConstPtr& vel)
-{
-
-	roboteq_msgs::Command left_command;
-	roboteq_msgs::Command right_command;
-	left_command.mode = MODE_VELOCITY;
-	right_command.mode = MODE_VELOCITY;
-	
+{	
 	ROS_INFO("lin: %f ang: %f", vel->linear.x, vel->angular.z);
 	
 	// float left = 0, right = 0;
@@ -42,24 +39,23 @@ void twistCallback(const geometry_msgs::Twist::ConstPtr& vel)
     double left_rpm = (left_vel / RADIUS) * GEAR_RATIO * RPM_PER_RAD;
     double right_rpm = (right_vel / RADIUS) * GEAR_RATIO * RPM_PER_RAD;
 
-    double left = left_rpm / MAX_RPM * SCALE;
-    double right = right_rpm / MAX_RPM * SCALE;
+    left = left_rpm / MAX_RPM * SCALE;
+    right = right_rpm / MAX_RPM * SCALE;
 
     if (left > SCALE) {
         left = SCALE;
     }
 
+    if (left < -SCALE) {
+        left = -SCALE;
+    }
+
     if (right > SCALE) {
         right = SCALE;
     }
-
-	left_command.setpoint = left;
-	right_command.setpoint = right;
-
-	left_pub.publish(left_command);
-	right_pub.publish(right_command);
-
-	ROS_INFO("left: %f right: %f\r\n\r\n", left, right);
+    if (right < -SCALE) {
+        right = -SCALE;
+    }
 	
 }
 
@@ -70,6 +66,25 @@ int main(int argc, char** argv)
 	ros::Subscriber sub = n.subscribe("cmd_vel", 100, twistCallback);
 	left_pub = n.advertise<roboteq_msgs::Command&>("/left/cmd",1);
 	right_pub = n.advertise<roboteq_msgs::Command&>("/right/cmd",1);
+
+    ros::Rate loop_rate(30);
+    while(ros::ok()) {
+        loop_rate.sleep(); //Maintain the loop rate
+        ros::spinOnce();   //Check for new messages
+
+        roboteq_msgs::Command left_command;
+        roboteq_msgs::Command right_command;
+        left_command.mode = MODE_VELOCITY;
+        right_command.mode = MODE_VELOCITY;
+
+        left_command.setpoint = left;
+        right_command.setpoint = right;
+
+        left_pub.publish(left_command);
+        right_pub.publish(right_command);
+    }
+
+    ROS_INFO("left: %f right: %f\r\n\r\n", left, right);
 	
 	ros::spin();
 	return 0;
