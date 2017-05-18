@@ -10,7 +10,7 @@
   <node name="microstrain_3dm_gx3_35_node" 
   pkg="microstrain_3dm_gx5_45" 
   type="microstrain_3dm_gx5_45_node" output="screen">
-    <param name="port" value="/dev/ttyACM0" type="str" />
+    <param name="port" value="/dev/microstrain" type="str" />
     <param name="baudrate" value="115200" type="int" />
 
     <param name="device_setup" value="true" type="bool" />
@@ -30,7 +30,7 @@
 
     <!-- GPS Settings  -45 and -35 Only -->
     <param name="gps_rate" value="4" type="int" />    
-    <param name="gps_frame_id" value="wgs84" type="str" />
+    <param name="gps_frame_id" value="base_link" type="str" />
     <param name="publish_gps" value="true" type="bool" />
 
     <!-- Filter Settings - GXx-45 Only disabled for -35 -->

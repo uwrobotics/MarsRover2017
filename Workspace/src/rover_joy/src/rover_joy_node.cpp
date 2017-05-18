@@ -1,50 +1,61 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
 #include "rover_joy/rover_joy_node.h"
+#include "rover_joy/rover_physical_param.h"
 
 ros::Publisher left_pub;
 ros::Publisher right_pub;
 
-const float MAX_X = 2.0;   // m/s
-const float MAX_Z = 2.0; // rad/s
+
 const float SCALE = 1000;  // max value for roboteq
-const float WHEEL_DISTANCE = 0.865;
-const float RADIUS = 0.105;
-const float MAX_WHEEL_SPEED = (MAX_X + WHEEL_DISTANCE/2 * MAX_Z)/RADIUS;
+// const float MAX_WHEEL_SPEED = (MAX_X + WHEEL_DISTANCE/2 * MAX_Z)/RADIUS;
+
+double left = 0;
+double right = 0;
 
 
 void twistCallback(const geometry_msgs::Twist::ConstPtr& vel)
-{
-
-	roboteq_msgs::Command left_command;
-	roboteq_msgs::Command right_command;
-	left_command.mode = MODE_VELOCITY;
-	right_command.mode = MODE_VELOCITY;
-	
+{	
 	ROS_INFO("lin: %f ang: %f", vel->linear.x, vel->angular.z);
 	
-	float left = 0, right = 0;
-	left = ((vel->linear.x / MAX_X) - (vel->angular.z / MAX_Z))*SCALE;
-	right = ((vel-> linear.x / MAX_X) + (vel->angular.z / MAX_Z))*SCALE;
+	// float left = 0, right = 0;
+	// left = ((vel->linear.x / MAX_X) - (vel->angular.z / MAX_Z))*SCALE;
+	// right = ((vel-> linear.x / MAX_X) + (vel->angular.z / MAX_Z))*SCALE;
 
-	left = left > SCALE ? SCALE : left;
-	right = right > SCALE ? SCALE : right;
+	// left = left > SCALE ? SCALE : left;
+	// right = right > SCALE ? SCALE : right;
 
-	if(vel->linear.x < 0) {
-		float temp = left;
-		left = right;
-		right = temp;
-	}
+	// if(vel->linear.x < 0) {
+	// 	float temp = left;
+	// 	left = right;
+	// 	right = temp;
+	// }
 	//left = ((vel->linear.x - WHEEL_DISTANCE/2 * vel->angular.z)/RADIUS) / MAX_WHEEL_SPEED * SCALE;
 	//right = ((vel->linear.x + WHEEL_DISTANCE/2 * vel->angular.z)/RADIUS) / MAX_WHEEL_SPEED * SCALE;
 
-	left_command.setpoint = left;
-	right_command.setpoint = right;
+    double left_vel = (vel->linear.x - vel->angular.z * WHEEL_DISTANCE / 2.0);
+    double right_vel = (vel->linear.x + vel->angular.z * WHEEL_DISTANCE / 2.0);
 
-	left_pub.publish(left_command);
-	right_pub.publish(right_command);
+    double left_rpm = (left_vel / RADIUS) * GEAR_RATIO * RPM_PER_RAD;
+    double right_rpm = (right_vel / RADIUS) * GEAR_RATIO * RPM_PER_RAD;
 
-	ROS_INFO("left: %f right: %f\r\n\r\n", left, right);
+    left = left_rpm / MAX_RPM * SCALE;
+    right = right_rpm / MAX_RPM * SCALE;
+
+    if (left > SCALE) {
+        left = SCALE;
+    }
+
+    if (left < -SCALE) {
+        left = -SCALE;
+    }
+
+    if (right > SCALE) {
+        right = SCALE;
+    }
+    if (right < -SCALE) {
+        right = -SCALE;
+    }
 	
 }
 
@@ -55,6 +66,29 @@ int main(int argc, char** argv)
 	ros::Subscriber sub = n.subscribe("cmd_vel", 100, twistCallback);
 	left_pub = n.advertise<roboteq_msgs::Command&>("/left/cmd",1);
 	right_pub = n.advertise<roboteq_msgs::Command&>("/right/cmd",1);
+
+    double alpha = 0.95;
+
+    roboteq_msgs::Command left_command;
+    roboteq_msgs::Command right_command;
+
+    ros::Rate loop_rate(60);
+    while(ros::ok()) {
+        loop_rate.sleep(); //Maintain the loop rate
+        ros::spinOnce();   //Check for new messages
+
+
+        left_command.mode = MODE_VELOCITY;
+        right_command.mode = MODE_VELOCITY;
+
+        left_command.setpoint = left * alpha + left_command.setpoint * (1 - alpha);
+        right_command.setpoint = right * alpha + right_command.setpoint * (1 - alpha);
+
+        left_pub.publish(left_command);
+        right_pub.publish(right_command);
+    }
+
+    ROS_INFO("left: %f right: %f\r\n\r\n", left, right);
 	
 	ros::spin();
 	return 0;

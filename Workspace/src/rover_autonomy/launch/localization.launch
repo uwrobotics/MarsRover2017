@@ -12,9 +12,12 @@
   </node>
 
   <node pkg="robot_localization" type="navsat_transform_node" name="rover_navsat_transform" respawn="true">
-    <param name="magnetic_declination_radians" value="0"/>
-    <param name="yaw_offset" value="1.5707963"/>
+    <param name="magnetic_declination_radians" value="-9.652"/> <!--Waterloo-->
+    <!-- <param name="magnetic_declination_radians" value="-10.715"/--> <!--Waterloo-->
+    <param name="yaw_offset" value="3.14159"/>
+    <param name="zero_altitude" value="true"/>
 
+    <param name="publish_filtered_gps" value="true"/>
     <!-- input mapping -->
     <!--remap from="/imu/data" to=""/-->
     <remap from="/gps/fix" to="/navsat/fix"/>
