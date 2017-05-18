@@ -1,0 +1,38 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(arm_control)
+
+## Find catkin and any catkin packages
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs can_msgs genmsg message_generation)
+
+## Declare ROS messages and services
+add_message_files(FILES Num.msg)
+add_service_files(FILES AddTwoInts.srv)
+
+## Generate added messages and services
+generate_messages(DEPENDENCIES std_msgs can_msgs)
+
+## Declare a catkin package
+catkin_package()
+
+## Build talker and listener
+include_directories(include ${catkin_INCLUDE_DIRS})
+
+add_executable(talker_arm src/talker_arm.cpp)
+target_link_libraries(talker_arm ${catkin_LIBRARIES})
+add_dependencies(talker_arm arm_control_generate_messages_cpp)
+
+add_executable(listener_arm src/listener_arm.cpp)
+target_link_libraries(listener_arm ${catkin_LIBRARIES})
+add_dependencies(listener_arm arm_control_generate_messages_cpp)
+
+add_executable(arm_controlv1 src/arm_controlv1.cpp)
+target_link_libraries(arm_controlv1 ${catkin_LIBRARIES})
+add_dependencies(arm_controlv1 arm_control_generate_messages_cpp)
+
+add_executable(arm_controlv2 src/arm_controlv2.cpp)
+target_link_libraries(arm_controlv2 ${catkin_LIBRARIES})
+add_dependencies(arm_controlv2 arm_control_generate_messages_cpp)
+
+add_executable(arm_controlv3 src/arm_controlv3.cpp)
+target_link_libraries(arm_controlv3 ${catkin_LIBRARIES})
+add_dependencies(arm_controlv3 arm_control_generate_messages_cpp)
