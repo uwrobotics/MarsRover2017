@@ -1,15 +1,25 @@
 <launch>
+
+  <machine 
+    name="uwrt" 
+    address="192.168.3.2" 
+    env-loader="/opt/ros/indigo/env.sh"
+  />
+
   <include 
-  	file="$(find teleop_twist_joy)/launch/teleop.launch"
+    file="$(find teleop_twist_joy)/launch/teleop.launch"
   />
 
   <include 
   	file="$(find roboteq_driver)/launch/example.launch"
+    machine = "uwrt"
   />
+
   <node 
   	pkg="rover_joy" 
   	type="rover_joy_node" 
   	name="rover_joy"
   	respawn = "true"
   />
+
 </launch>
