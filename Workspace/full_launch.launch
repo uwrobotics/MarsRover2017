@@ -1,19 +1,11 @@
 <launch>
 
-  <machine 
-    name="uwrt" 
-    address="192.168.3.2" 
-    env-loader="/opt/ros/indigo/env.sh"
-  />
+<!-- local launch below -->
 
   <include 
     file="$(find teleop_twist_joy)/launch/teleop.launch"
   />
 
-  <include 
-  	file="$(find roboteq_driver)/launch/example.launch"
-    machine = "uwrt"
-  />
 
   <node 
   	pkg="rover_joy" 
@@ -21,5 +13,26 @@
   	name="rover_joy"
   	respawn = "true"
   />
+
+<!-- nodes/includes from rover below -->
+
+<group>
+  <machine 
+    name="uwrt" 
+    address="192.168.3.2" 
+    env-loader="/opt/ros/indigo/env.sh"
+  />
+
+  <include 
+    file="$(find roboteq_driver)/launch/example.launch"
+  />
+</group>
+
+<!-- 
+reference to machine tags 
+http://answers.ros.org/question/41413/how-to-include-a-launch-file-on-a-remote-machine-from-a-launch-file/
+-->
+
+
 
 </launch>
