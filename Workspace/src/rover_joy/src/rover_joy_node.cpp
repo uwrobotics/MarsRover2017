@@ -67,18 +67,22 @@ int main(int argc, char** argv)
 	left_pub = n.advertise<roboteq_msgs::Command&>("/left/cmd",1);
 	right_pub = n.advertise<roboteq_msgs::Command&>("/right/cmd",1);
 
-    ros::Rate loop_rate(30);
+    double alpha = 0.95;
+
+    roboteq_msgs::Command left_command;
+    roboteq_msgs::Command right_command;
+
+    ros::Rate loop_rate(60);
     while(ros::ok()) {
         loop_rate.sleep(); //Maintain the loop rate
         ros::spinOnce();   //Check for new messages
 
-        roboteq_msgs::Command left_command;
-        roboteq_msgs::Command right_command;
+
         left_command.mode = MODE_VELOCITY;
         right_command.mode = MODE_VELOCITY;
 
-        left_command.setpoint = left;
-        right_command.setpoint = right;
+        left_command.setpoint = left * alpha + left_command.setpoint * (1 - alpha);
+        right_command.setpoint = right * alpha + right_command.setpoint * (1 - alpha);
 
         left_pub.publish(left_command);
         right_pub.publish(right_command);
