@@ -12,4 +12,8 @@
   	name="rover_joy"
   	respawn = "true"
   />
+
+  <include 
+    file="$(find twist_mux)/launch/rover_twist_mux.launch"
+  />
 </launch>
