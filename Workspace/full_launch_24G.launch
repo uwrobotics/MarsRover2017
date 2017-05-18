@@ -1,0 +1,43 @@
+<launch>
+<!-- local launch below -->
+
+   <node 
+    pkg="rqt_reconfigure"
+    type="rqt_reconfigure"
+    name="rqt_reconfigure"
+    respawn="true"  
+  />   
+
+  <!--
+  <include 
+    file="$(find Rover-GUI)/launch/gui_launch.launch"
+  />
+  -->
+
+<!-- nodes/includes from rover below -->
+
+<group>
+  <machine 
+    name="uwrt" 
+    address="192.168.3.2" 
+    env-loader="/opt/ros/indigo/env.sh"
+  />
+
+  <!-- TODO: SPAWN POINTGRY DRIVER 4 TIME AND MAP TO DIFFERENT TOPICS -->
+  <node 
+    pkg="pointgrey_camera_driver"
+    type="camera_node"
+    name="camera_node"
+    respawn="true"  
+    machine="uwrt"
+  />   
+
+  <!-- TODO: SPAWN 2X USB_CAM_NODE -->
+</group>
+
+<!-- 
+reference to machine tags 
+http://answers.ros.org/question/41413/how-to-include-a-launch-file-on-a-remote-machine-from-a-launch-file/
+-->
+</launch>
+
