@@ -4,13 +4,6 @@
     file="$(find teleop_twist_joy)/launch/teleop.launch"
   />
 
-  <node 
-  	pkg="rover_joy" 
-  	type="rover_joy_node" 
-  	name="rover_joy"
-  	respawn = "true"
-  />
-
 <!-- nodes/includes from rover below -->
 
 <group>
@@ -27,7 +20,16 @@
     type="driver_node"
     name="driver_node"
     respawn="true"
-  />   
+  /> 
+  <node 
+    pkg="rover_joy" 
+    type="rover_joy_node" 
+    name="rover_joy"
+    respawn = "true"
+  />
+  <include 
+    file="$(find twist_mux)/launch/rover_twist_mux.launch"
+  />
 </group>
 
 <!-- 
