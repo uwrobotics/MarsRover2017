@@ -16,7 +16,7 @@
 #include "can_msgs/Frame.h"
 
 
-const float DUTY_SAFETY_FACTOR =1.0 //Safety factor to ensure microcontroller not outputting full duty cycle (set to 1.0 if not desired)
+const float DUTY_SAFETY_FACTOR =1.0; //Safety factor to ensure microcontroller not outputting full duty cycle (set to 1.0 if not desired)
 const int JOYSTICK_DEADZONE = 0;
 const int NUM_DATA = 6; //Number of pieces of data to send to the arduino
 const int CLAW_OPEN = 1.0; //Must either be 1 or -1, change so that pressing Right joystick, button 2 in claw mode OPENS the claw and button 3 CLOSES the claw
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 	
 	
 	//ros::Publisher chatter_pub = n.advertise<std_msgs::Int32MultiArray>("chatter", 1);
-	ros::Publisher chatter_pub = n.advertise<can_msgs::Frame>("chatter", 1);
+	ros::Publisher chatter_pub = n.advertise<can_msgs::Frame>("CAN_Transmitter", 1);
 	ros::Publisher chatter_pub2 = n.advertise<can_msgs::Frame>("chatter2", 1);
 	ros::Publisher chatter_pub3 = n.advertise<can_msgs::Frame>("chatter3", 1);
 
