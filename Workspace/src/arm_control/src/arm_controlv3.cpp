@@ -73,348 +73,389 @@ void getMessageButtonsData(const sensor_msgs::Joy& joy_msg, float arr[], int siz
 void float2Bytes(float val,uint8_t* bytes_array);
 can_msgs::Frame populateFrame(can_msgs::Frame frameMsg, uint8_t bytesArray1[NUM_BYTES_IN_FLOAT], uint8_t bytesArray2[NUM_BYTES_IN_FLOAT]);
 void frameFormerHelper();
+void frameFormerWrist();
+void frameFormerLimbs();
+void frameFormerOther();
 
-void chatterCallback0(const sensor_msgs::Joy& joy_msgR){
-	//dutyWriteArray.data.clear();
-	for (int k = 0; k < NUM_DATA; k++) {
-		outputPWM[k] = 0;
-	}
-	getMessageAxesData(joy_msgR,axesRight,NUM_AXES_DATA);
-	getMessageButtonsData(joy_msgR,buttonsRight,NUM_BUTTONS_DATA);
-	
-	//if !deadman swtich
-	//Do not run any arm controls
-	if (buttonsLeft[INDEX_LS_1] == 1) {
-			
-		//if fine control
-		//insert function calls
-		chatterHelper();
-		
-		outputPWM[0] = dutyWriteWristL;
-		outputPWM[1] = dutyWriteWristR;
-		outputPWM[2] = dutyWriteElbow;
-		outputPWM[3] = dutyWriteShoulder;
-		outputPWM[4] = dutyWriteTurntable;
-		outputPWM[5] = dutyWriteClaw;
-	}
+void chatterCallback0(const sensor_msgs::Joy& joy_msgR)
+{
+    memset(&outputPWM, 0, NUM_DATA*4);
+
+    getMessageAxesData(joy_msgR, axesRight, NUM_AXES_DATA);
+    getMessageButtonsData(joy_msgR, buttonsRight, NUM_BUTTONS_DATA);
+
+    //if !deadman swtich
+    //Do not run any arm controls
+    if (buttonsLeft[INDEX_LS_1] == 1)
+    {
+
+        //if fine control
+        //insert function calls
+        chatterHelper();
+
+        outputPWM[0] = dutyWriteWristL;
+        outputPWM[1] = dutyWriteWristR;
+        outputPWM[2] = dutyWriteElbow;
+        outputPWM[3] = dutyWriteShoulder;
+        outputPWM[4] = dutyWriteTurntable;
+        outputPWM[5] = dutyWriteClaw;
+    }
 
 }
 
-void chatterCallback1(const sensor_msgs::Joy& joy_msgL){
-	//dutyWriteArray.data.clear();
-	for (int k = 0; k < NUM_DATA; k++) {
-		outputPWM[k] = 0;
-	}
-	getMessageAxesData(joy_msgL,axesLeft,NUM_AXES_DATA);
-	getMessageButtonsData(joy_msgL,buttonsLeft,NUM_BUTTONS_DATA);
-	
-	//if !deadman swtich
-	//Do not run any arm controls
-	if (buttonsLeft[INDEX_LS_1] == 1) {
-			
-		//if fine control
-		//insert function calls
-		chatterHelper();
-		
-		outputPWM[0] = dutyWriteWristL;
-		outputPWM[1] = dutyWriteWristR;
-		outputPWM[2] = dutyWriteElbow;
-		outputPWM[3] = dutyWriteShoulder;
-		outputPWM[4] = dutyWriteTurntable;
-		outputPWM[5] = dutyWriteClaw;
-	}
+void chatterCallback1(const sensor_msgs::Joy& joy_msgL)
+{
+    memset(&outputPWM, 0, NUM_DATA*4);
+
+    getMessageAxesData(joy_msgL, axesLeft, NUM_AXES_DATA);
+    getMessageButtonsData(joy_msgL, buttonsLeft, NUM_BUTTONS_DATA);
+
+    //if !deadman swtich
+    //Do not run any arm controls
+    if (buttonsLeft[INDEX_LS_1] == 1)
+    {
+
+        //if fine control
+        //insert function calls
+        chatterHelper();
+
+        outputPWM[0] = dutyWriteWristL;
+        outputPWM[1] = dutyWriteWristR;
+        outputPWM[2] = dutyWriteElbow;
+        outputPWM[3] = dutyWriteShoulder;
+        outputPWM[4] = dutyWriteTurntable;
+        outputPWM[5] = dutyWriteClaw;
+    }
 }
 
 
-int main(int argc, char **argv) {
-	ros::init(argc, argv, "arm_controlv3");
-	ros::NodeHandle n;
-	//dutyWriteArray.data.resize(NUM_DATA,0);
-	
-	
-	//ros::Publisher chatter_pub = n.advertise<std_msgs::Int32MultiArray>("chatter", 1);
-	ros::Publisher chatter_pub = n.advertise<can_msgs::Frame>("CAN_Transmitter", 1);
-	ros::Publisher chatter_pub2 = n.advertise<can_msgs::Frame>("chatter2", 1);
-	ros::Publisher chatter_pub3 = n.advertise<can_msgs::Frame>("chatter3", 1);
+int main(int argc, char **argv)
+{
+    ros::init(argc, argv, "arm_controlv3");
+    ros::NodeHandle n;
 
-	ros::Subscriber sub0 = n.subscribe("/joy0/joy", 1, chatterCallback0);
-	ros::Subscriber sub1 = n.subscribe("/joy1/joy", 1, chatterCallback1);
-  
+    ros::Publisher chatter_pub = n.advertise<can_msgs::Frame>("CAN_transmitter", 30);
+
+    ros::Subscriber sub0 = n.subscribe("/joy0/joy", 1, chatterCallback0);
+    ros::Subscriber sub1 = n.subscribe("/joy1/joy", 1, chatterCallback1);
+
     ros::Rate loop_rate(10);
     int count = 0;
-	while (ros::ok()) {
-		ros::spinOnce();
-		
-		frameFormerHelper();
-		chatter_pub.publish(wristsCANFrame);
-		chatter_pub.publish(limbsCANFrame);
-		chatter_pub.publish(othersCANFrame);
-		
-		loop_rate.sleep();
-		++count;
-	}
+    while (ros::ok())
+    {
+        ros::spinOnce();
+
+        frameFormerWrist();
+        chatter_pub.publish(wristsCANFrame);
+        frameFormerLimbs();
+        chatter_pub.publish(limbsCANFrame);
+        frameFormerOther();
+        chatter_pub.publish(othersCANFrame);
+
+        loop_rate.sleep();
+        ++count;
+    }
 
   return 0;
 }
 
-void clawCalculationsCoarse(){
-	//Controls Algorithm for the Coarse Claw Movement (Default)
+void clawCalculationsCoarse(void)
+{
+    //Controls Algorithm for the Coarse Claw Movement (Default)
     //
     //
-	//Control the speed of the motor by sending a PWM signal via the microcontroller
-	//Output a value for a duty cycle on the range [-1,1], negative numbers correspond to a negative voltage
-	//which gives the motor a negative velocity (the microcontroller handles this calculation)
-	//
-	//Default to output 0 (including initially writing a value of 0 in case of errors
-	//Safety checks:
-	////1. Deadman Switch (not implemented)
-	////2. Kill Switch (not implemented)
-	
-	dutyWriteClaw = 0;
-	if (buttonsRight[INDEX_RS_1] == 1) {
-		//Right trigger/button IS held down indicating claw mode
-		if (buttonsRight[INDEX_RS_2] == 1) { 
-			//If both buttons pressed at the same time, overrides to openning for safety of claw
-			dutyWriteClaw = CLAW_OPEN*DUTY_SAFETY_FACTOR; //Should OPEN the claw, change CLAW_OPEN if this isn't the case
-		}
-		else if (buttonsRight[INDEX_RS_3] == 1) {
-			dutyWriteClaw = (-1)*CLAW_OPEN*DUTY_SAFETY_FACTOR; //Should CLOSE the claw, change CLAW_OPEN if this isn't the case
-		}
-		else {
-			dutyWriteClaw = 0;
-		}
-	}
-	else { 
-		//Right trigger/button 1 IS NOT held down, indicating it is in the default mode
-		dutyWriteClaw = 0;
-	}
+    //Control the speed of the motor by sending a PWM signal via the microcontroller
+    //Output a value for a duty cycle on the range [-1,1], negative numbers correspond to a negative voltage
+    //which gives the motor a negative velocity (the microcontroller handles this calculation)
+    //
+    //Default to output 0 (including initially writing a value of 0 in case of errors
+    //Safety checks:
+    ////1. Deadman Switch (not implemented)
+    ////2. Kill Switch (not implemented)
+
+    dutyWriteClaw = 0;
+    if (buttonsRight[INDEX_RS_1] == 1)
+    {
+        //Right trigger/button IS held down indicating claw mode
+        if (buttonsRight[INDEX_RS_2] == 1)
+        { 
+            //If both buttons pressed at the same time, overrides to openning for safety of claw
+            dutyWriteClaw = CLAW_OPEN*DUTY_SAFETY_FACTOR; //Should OPEN the claw, change CLAW_OPEN if this isn't the case
+        }
+        else if (buttonsRight[INDEX_RS_3] == 1)
+        {
+            dutyWriteClaw = (-1)*CLAW_OPEN*DUTY_SAFETY_FACTOR; //Should CLOSE the claw, change CLAW_OPEN if this isn't the case
+        }
+        else
+        {
+            dutyWriteClaw = 0;
+        }
+    }
+    else
+    {
+        //Right trigger/button 1 IS NOT held down, indicating it is in the default mode
+        dutyWriteClaw = 0;
+    }
 }
 
-void wristCalculationsCoarse() {
-	//Controls Algorithm for the Coarse Claw Roll and Pitch Movement (Default)
+void wristCalculationsCoarse(void)
+{
+    //Controls Algorithm for the Coarse Claw Roll and Pitch Movement (Default)
     //
     //
-	//Control the speed of the motor by sending a PWM signal via the microcontroller
-	//Output a value for a duty cycle on the range [-1,1], negative numbers correspond to a negative voltage
-	//which gives the motor a negative velocity (the microcontroller handles this calculation)
-	//
-	//Default to output 0 (including initially writing a value of 0 in case of errors
-	//Safety checks:
-	////1. Deadman Switch (not implemented)
-	////2. Kill Switch (not implemented)
-	
-	dutyWriteWristL = 0;
-	dutyWriteWristR = 0;
-	
-	//Controls Algorithm for the Wrist Motors
+    //Control the speed of the motor by sending a PWM signal via the microcontroller
+    //Output a value for a duty cycle on the range [-1,1], negative numbers correspond to a negative voltage
+    //which gives the motor a negative velocity (the microcontroller handles this calculation)
+    //
+    //Default to output 0 (including initially writing a value of 0 in case of errors
+    //Safety checks:
+    ////1. Deadman Switch (not implemented)
+    ////2. Kill Switch (not implemented)
+
+    dutyWriteWristL = 0;
+    dutyWriteWristR = 0;
+
+    //Controls Algorithm for the Wrist Motors
     //The left analog stick is used to control both motors to achieve rotation in forward and lateral axes
-	if (buttonsRight[INDEX_RS_1] == 1) {
-		//Right trigger/button IS held down indicating claw mode
-		if ((abs(axesRight[INDEX_RS_UD]) >= JOYSTICK_DEADZONE) || (abs(axesRight[INDEX_RS_LR]) >= JOYSTICK_DEADZONE)) { 
-			if ((abs(axesRight[INDEX_RS_UD]) >= JOYSTICK_DEADZONE)){//Detection criteria for up/down movement
-				dutyWriteWristL = dutyWriteWristL + axesRight[INDEX_RS_UD];
-				dutyWriteWristR = dutyWriteWristR + axesRight[INDEX_RS_UD];
-			}
-			if ((abs(axesRight[INDEX_RS_LR]) >= JOYSTICK_DEADZONE)){//Detection criteria for left/right movement
-				dutyWriteWristL = dutyWriteWristL + axesRight[INDEX_RS_LR];
-				dutyWriteWristR = dutyWriteWristR - axesRight[INDEX_RS_LR];
-			}
-			
-			//Code that details the magnitude of the voltage sent to the motors
-			//If up/down or left/right movement NOT detected, will not be considered in the calculation
-			//If the analog stick is positioned straight up or down, there will only be rotation about the lateral axis, but
-			//if the analog stick is positioned straight left or right, there will only be rotation about the forward axis
-			dutyWriteWristL = (DUTY_SAFETY_FACTOR)*(dutyWriteWristL)/2;
-			dutyWriteWristR = (DUTY_SAFETY_FACTOR)*(dutyWriteWristR)/2;
-		}
-		else {
-			dutyWriteWristL = 0;
-			dutyWriteWristR = 0;
-		}
-	}
-	else { 
-		//Right trigger/button 1 IS NOT held down, indicating it is in the default mode
-		//The wrist is only capable of changing its pitch
-		if ((abs(axesRight[INDEX_RS_LR]) >= JOYSTICK_DEADZONE)) { 
-			dutyWriteWristL = DUTY_SAFETY_FACTOR*axesRight[INDEX_RS_LR];
-			dutyWriteWristR = DUTY_SAFETY_FACTOR*axesRight[INDEX_RS_LR];
-		}
-		else {
-			dutyWriteWristL = 0;
-			dutyWriteWristR = 0;
-		}
-	}
-	
-	//Code use to error check for illegal values of dutyWriteWristL and dutyWriteWristR
-	if (abs(dutyWriteWristL) > 1) {
-		dutyWriteWristL = 1;
-	}
-	if (abs(dutyWriteWristR) > 1) {
-		dutyWriteWristR = 1;
-	}
+    if (buttonsRight[INDEX_RS_1] == 1) {
+        //Right trigger/button IS held down indicating claw mode
+        if ((abs(axesRight[INDEX_RS_UD]) >= JOYSTICK_DEADZONE) || (abs(axesRight[INDEX_RS_LR]) >= JOYSTICK_DEADZONE)) { 
+            if ((abs(axesRight[INDEX_RS_UD]) >= JOYSTICK_DEADZONE)){//Detection criteria for up/down movement
+                dutyWriteWristL += axesRight[INDEX_RS_UD];
+                dutyWriteWristR += axesRight[INDEX_RS_UD];
+            }
+            if ((abs(axesRight[INDEX_RS_LR]) >= JOYSTICK_DEADZONE)){//Detection criteria for left/right movement
+                dutyWriteWristL += axesRight[INDEX_RS_LR];
+                dutyWriteWristR -= axesRight[INDEX_RS_LR];
+            }
+
+            //Code that details the magnitude of the voltage sent to the motors
+            //If up/down or left/right movement NOT detected, will not be considered in the calculation
+            //If the analog stick is positioned straight up or down, there will only be rotation about the lateral axis, but
+            //if the analog stick is positioned straight left or right, there will only be rotation about the forward axis
+            dutyWriteWristL = (DUTY_SAFETY_FACTOR)*(dutyWriteWristL)/2;
+            dutyWriteWristR = (DUTY_SAFETY_FACTOR)*(dutyWriteWristR)/2;
+        }
+        else {
+            dutyWriteWristL = 0;
+            dutyWriteWristR = 0;
+        }
+    }
+    else {
+        //Right trigger/button 1 IS NOT held down, indicating it is in the default mode
+        //The wrist is only capable of changing its pitch
+        if ((abs(axesRight[INDEX_RS_LR]) >= JOYSTICK_DEADZONE)) { 
+            dutyWriteWristL = DUTY_SAFETY_FACTOR*axesRight[INDEX_RS_LR];
+            dutyWriteWristR = DUTY_SAFETY_FACTOR*axesRight[INDEX_RS_LR];
+        }
+        else {
+            dutyWriteWristL = 0;
+            dutyWriteWristR = 0;
+        }
+    }
+
+    //Code use to error check for illegal values of dutyWriteWristL and dutyWriteWristR
+    if (abs(dutyWriteWristL) > 1) {
+        dutyWriteWristL = 1;
+    }
+    if (abs(dutyWriteWristR) > 1) {
+        dutyWriteWristR = 1;
+    }
 }
 
 
-void shoulderCalculationsCoarse(){
-	//Controls Algorithm for the Coarse Shoulder Movement (Default)
+void shoulderCalculationsCoarse(void)
+{
+    //Controls Algorithm for the Coarse Shoulder Movement (Default)
     //
     //
-	//Control the speed of the motor by sending a PWM signal via the microcontroller
-	//Output a value for a duty cycle on the range [-1,1], negative numbers correspond to a negative voltage
-	//which gives the motor a negative velocity (the microcontroller handles this calculation)
-	//
-	//Default to output 0 (including initially writing a value of 0 in case of errors
-	//Safety checks:
-	////1. Deadman Switch (not implemented)
-	////2. Kill Switch (not implemented)
-	
-	dutyWriteShoulder = 0;
-	if (buttonsRight[INDEX_RS_1] == 1) {
-		//Right trigger/button IS held down indicating claw mode
-		if ((abs(axesLeft[INDEX_LS_UD]) >= JOYSTICK_DEADZONE)) { 
-			dutyWriteShoulder = DUTY_SAFETY_FACTOR*axesLeft[INDEX_LS_UD];
-		}
-		else {
-			dutyWriteShoulder = 0;
-		}
-	}
-	else { 
-		//Right trigger/button 1 IS NOT held down, indicating it is in the default mode
-		if ((abs(axesLeft[INDEX_LS_UD]) >= JOYSTICK_DEADZONE)) { 
-			dutyWriteShoulder = DUTY_SAFETY_FACTOR*axesLeft[INDEX_LS_UD];
-		}
-		else {
-			dutyWriteShoulder = 0;
-		}
-	}
+    //Control the speed of the motor by sending a PWM signal via the microcontroller
+    //Output a value for a duty cycle on the range [-1,1], negative numbers correspond to a negative voltage
+    //which gives the motor a negative velocity (the microcontroller handles this calculation)
+    //
+    //Default to output 0 (including initially writing a value of 0 in case of errors
+    //Safety checks:
+    ////1. Deadman Switch (not implemented)
+    ////2. Kill Switch (not implemented)
+
+    dutyWriteShoulder = 0;
+    if (buttonsRight[INDEX_RS_1] == 1) {
+        //Right trigger/button IS held down indicating claw mode
+        if ((abs(axesLeft[INDEX_LS_UD]) >= JOYSTICK_DEADZONE)) { 
+            dutyWriteShoulder = DUTY_SAFETY_FACTOR*axesLeft[INDEX_LS_UD];
+        }
+        else {
+            dutyWriteShoulder = 0;
+        }
+    }
+    else {
+        //Right trigger/button 1 IS NOT held down, indicating it is in the default mode
+        if ((abs(axesLeft[INDEX_LS_UD]) >= JOYSTICK_DEADZONE)) { 
+            dutyWriteShoulder = DUTY_SAFETY_FACTOR*axesLeft[INDEX_LS_UD];
+        }
+        else {
+            dutyWriteShoulder = 0;
+        }
+    }
 }
 
-void elbowCalculationsCoarse(){
-	//Controls Algorithm for the Coarse Elbow Movement (Default)
+void elbowCalculationsCoarse(void)
+{
+    //Controls Algorithm for the Coarse Elbow Movement (Default)
     //
     //
-	//Control the speed of the motor by sending a PWM signal via the microcontroller
-	//Output a value for a duty cycle on the range [-1,1], negative numbers correspond to a negative voltage
-	//which gives the motor a negative velocity (the microcontroller handles this calculation)
-	//
-	//Default to output 0 (including initially writing a value of 0 in case of errors
-	//Safety checks:
-	////1. Deadman Switch (not implemented)
-	////2. Kill Switch (not implemented)
-	
-	dutyWriteElbow = 0;
-	if (buttonsRight[INDEX_RS_1] == 1) {
-		//Right trigger/button IS held down indicating claw mode
-		dutyWriteElbow = 0;
-	}
-	else { 
-		//Right trigger/button 1 IS NOT held down, indicating it is in the default mode
-		if ((abs(axesRight[INDEX_RS_UD]) >= JOYSTICK_DEADZONE)) { 
-			dutyWriteElbow = DUTY_SAFETY_FACTOR*axesRight[INDEX_RS_UD];
-		}
-		else {
-			dutyWriteElbow = 0;
-		}
-	}
+    //Control the speed of the motor by sending a PWM signal via the microcontroller
+    //Output a value for a duty cycle on the range [-1,1], negative numbers correspond to a negative voltage
+    //which gives the motor a negative velocity (the microcontroller handles this calculation)
+    //
+    //Default to output 0 (including initially writing a value of 0 in case of errors
+    //Safety checks:
+    ////1. Deadman Switch (not implemented)
+    ////2. Kill Switch (not implemented)
+
+    dutyWriteElbow = 0;
+    if (buttonsRight[INDEX_RS_1] == 1)
+    {
+        //Right trigger/button IS held down indicating claw mode
+        dutyWriteElbow = 0;
+    }
+    else
+    { 
+        //Right trigger/button 1 IS NOT held down, indicating it is in the default mode
+        if ((abs(axesRight[INDEX_RS_UD]) >= JOYSTICK_DEADZONE))
+        { 
+            dutyWriteElbow = DUTY_SAFETY_FACTOR*axesRight[INDEX_RS_UD];
+        }
+        else
+        {
+            dutyWriteElbow = 0;
+        }
+    }
 }
 
-void turntableCalculationsCoarse() {
-	//Controls Algorithm for the Coarse TurnTable Movement (Default)
+void turntableCalculationsCoarse(void)
+{
+    //Controls Algorithm for the Coarse TurnTable Movement (Default)
     //
     //
-	//Control the speed of the motor by sending a PWM signal via the microcontroller
-	//Output a value for a duty cycle on the range [-1,1], negative numbers correspond to a negative voltage
-	//which gives the motor a negative velocity (the microcontroller handles this calculation)
-	//
-	//Default to output 0 (including initially writing a value of 0 in case of errors
-	//Safety checks:
-	////1. Deadman Switch (not implemented)
-	////2. Kill Switch (not implemented)
-	
-	dutyWriteTurntable = 1.0;
-	if (buttonsRight[INDEX_RS_1] == 1) {
-		//Right trigger/button IS held down indicating claw mode
-		if ((abs(axesLeft[INDEX_LS_LR]) >= JOYSTICK_DEADZONE)) { 
-			dutyWriteTurntable = DUTY_SAFETY_FACTOR*axesLeft[INDEX_LS_LR];
-		}
-		else {
-			dutyWriteTurntable = 1.0;
-		}
-	}
-	else { 
-		//Right trigger/button 1 IS NOT held down, indicating it is in the default mode
-		if ((abs(axesLeft[INDEX_LS_LR]) >= JOYSTICK_DEADZONE)) { 
-			dutyWriteTurntable = DUTY_SAFETY_FACTOR*axesLeft[INDEX_LS_LR];
-		}
-		else {
-			dutyWriteTurntable = 1.0;
-		}
-	}
+    //Control the speed of the motor by sending a PWM signal via the microcontroller
+    //Output a value for a duty cycle on the range [-1,1], negative numbers correspond to a negative voltage
+    //which gives the motor a negative velocity (the microcontroller handles this calculation)
+    //
+    //Default to output 0 (including initially writing a value of 0 in case of errors
+    //Safety checks:
+    ////1. Deadman Switch (not implemented)
+    ////2. Kill Switch (not implemented)
+
+    dutyWriteTurntable = 1.0;
+    if (buttonsRight[INDEX_RS_1] == 1)
+    {
+        //Right trigger/button IS held down indicating claw mode
+        if ((abs(axesLeft[INDEX_LS_LR]) >= JOYSTICK_DEADZONE))
+        { 
+            dutyWriteTurntable = DUTY_SAFETY_FACTOR*axesLeft[INDEX_LS_LR];
+        }
+        else
+        {
+            dutyWriteTurntable = 1.0;
+        }
+    }
+    else
+    { 
+        //Right trigger/button 1 IS NOT held down, indicating it is in the default mode
+        if ((abs(axesLeft[INDEX_LS_LR]) >= JOYSTICK_DEADZONE))
+        { 
+            dutyWriteTurntable = DUTY_SAFETY_FACTOR*axesLeft[INDEX_LS_LR];
+        }
+        else
+        {
+            dutyWriteTurntable = 1.0;
+        }
+    }
 }
 
-void chatterHelper(){
-	clawCalculationsCoarse();
-	wristCalculationsCoarse();
-	shoulderCalculationsCoarse();
-	elbowCalculationsCoarse();
-	turntableCalculationsCoarse();
+void chatterHelper(void)
+{
+    clawCalculationsCoarse();
+    wristCalculationsCoarse();
+    shoulderCalculationsCoarse();
+    elbowCalculationsCoarse();
+    turntableCalculationsCoarse();
 }
 
 //Set the values of the global array to the values in the joy_msg
-void getMessageAxesData(const sensor_msgs::Joy& joy_msg, float arr[], int size) {
-	for (int i=0; i <= size; i++) {
-		arr[i] = joy_msg.axes[i];
-	}
+void getMessageAxesData(const sensor_msgs::Joy& joy_msg, float arr[], int size)
+{
+    for (int i=0; i <= size; i++)
+    {
+        arr[i] = joy_msg.axes[i];
+    }
 }
 
 //Set the values of the global array to the values in the joy_msg
-void getMessageButtonsData(const sensor_msgs::Joy& joy_msg, float arr[], int size) {
-	for (int i=0; i <= size; i++) {
-		arr[i] = joy_msg.buttons[i];
-	}
+void getMessageButtonsData(const sensor_msgs::Joy& joy_msg, float arr[], int size)
+{
+    for (int i=0; i <= size; i++)
+    {
+        arr[i] = joy_msg.buttons[i];
+    }
 }
 
-void float2Bytes(float val,uint8_t* bytes_array){
-  // Create union of shared memory space
-  union {
-    float float_variable;
-    uint8_t temp_array[4];
-  } u;
-  // Overite bytes of union with float variable
-  u.float_variable = val;
-  // Assign bytes to input array
-  memcpy(bytes_array, u.temp_array, 4);
+// void float2Bytes(float* val, uint8_t* bytes_array){
+//   // Create union of shared memory space
+//   union {
+//     float float_variable;
+//     uint8_t temp_array[4];
+//   } u;
+//   // Overite bytes of union with float variable
+//   u.float_variable = val;
+//   // Assign bytes to input array
+//   memcpy((void*)bytes_array, (void*)val, 4);
+// }
+
+void populateFrame(can_msgs::Frame *frameMsg, float val1, float val2)
+{
+    memcpy(&frameMsg->data[0], (unsigned char*) (&val1), 4);
+    memcpy(&frameMsg->data[4], (unsigned char*) (&val2), 4);
 }
 
-can_msgs::Frame populateFrame(can_msgs::Frame frameMsg, uint8_t bytesArray1[NUM_BYTES_IN_FLOAT], uint8_t bytesArray2[NUM_BYTES_IN_FLOAT]){
-	frameMsg.data[0] = (bytesArray1[0]);
-	frameMsg.data[1] = (bytesArray1[1]);
-	frameMsg.data[2] = (bytesArray1[2]);
-	frameMsg.data[3] = (bytesArray1[3]);
-	frameMsg.data[4] = (bytesArray2[0]);
-	frameMsg.data[5] = (bytesArray2[1]);
-	frameMsg.data[6] = (bytesArray2[2]);
-	frameMsg.data[7] = (bytesArray2[3]);
-	return frameMsg;
+
+void frameFormerWrist(void)
+{
+        struct motorBytesStruct{
+            uint8_t firstMotorBytes[NUM_BYTES_IN_FLOAT], secondMotorBytes[NUM_BYTES_IN_FLOAT];
+        } wristMotorBytes;
+
+        //float2Bytes(&outputPWM[0], &wristMotorBytes.firstMotorBytes[0]);
+        //float2Bytes(&outputPWM[1], &wristMotorBytes.secondMotorBytes[0]);
+        populateFrame(&wristsCANFrame, outputPWM[0], outputPWM[1]);
+        //wristsCANFrame = populateFrame(wristsCANFrame, wristMotorBytes.firstMotorBytes, wristMotorBytes.secondMotorBytes);
+
+        wristsCANFrame.id = ID_WRIST_FRAME;
 }
 
-void frameFormerHelper(){
-			
-		struct motorBytesStruct{
-			uint8_t firstMotorBytes[NUM_BYTES_IN_FLOAT], secondMotorBytes[NUM_BYTES_IN_FLOAT];
-		} wristMotorBytes, limbMotorBytes, otherMotorBytes;
-		
-		float2Bytes(outputPWM[0],&wristMotorBytes.firstMotorBytes[0]);
-		float2Bytes(outputPWM[1],&wristMotorBytes.secondMotorBytes[0]);
-		float2Bytes(outputPWM[2],&limbMotorBytes.firstMotorBytes[0]);
-		float2Bytes(outputPWM[3],&limbMotorBytes.secondMotorBytes[0]);
-		float2Bytes(outputPWM[4],&otherMotorBytes.firstMotorBytes[0]);
-		float2Bytes(outputPWM[5],&otherMotorBytes.secondMotorBytes[0]);
-		wristsCANFrame = populateFrame(wristsCANFrame, wristMotorBytes.firstMotorBytes, wristMotorBytes.secondMotorBytes);
-		limbsCANFrame = populateFrame(limbsCANFrame, limbMotorBytes.firstMotorBytes, limbMotorBytes.secondMotorBytes);
-		othersCANFrame = populateFrame(othersCANFrame, otherMotorBytes.firstMotorBytes, otherMotorBytes.secondMotorBytes);
+void frameFormerLimbs(void)
+{
+        struct motorBytesStruct{
+            uint8_t firstMotorBytes[NUM_BYTES_IN_FLOAT], secondMotorBytes[NUM_BYTES_IN_FLOAT];
+        } limbMotorBytes;
 
-		wristsCANFrame.id = ID_WRIST_FRAME;
-		limbsCANFrame.id = ID_LIMBS_FRAME;
-		othersCANFrame.id = ID_OTHERS_FRAME;
+        //float2Bytes(&outputPWM[2],&limbMotorBytes.firstMotorBytes[0]);
+        //float2Bytes(&outputPWM[3],&limbMotorBytes.secondMotorBytes[0]);
+        //limbsCANFrame = populateFrame(limbsCANFrame, limbMotorBytes.firstMotorBytes, limbMotorBytes.secondMotorBytes);
+
+        //limbsCANFrame.id = ID_LIMBS_FRAME;
+}
+
+void frameFormerOther(void)
+{
+        struct motorBytesStruct{
+            uint8_t firstMotorBytes[NUM_BYTES_IN_FLOAT], secondMotorBytes[NUM_BYTES_IN_FLOAT];
+        } otherMotorBytes;
+
+        //float2Bytes(&outputPWM[4],&otherMotorBytes.firstMotorBytes[0]);
+        //float2Bytes(&outputPWM[5],&otherMotorBytes.secondMotorBytes[0]);
+        //othersCANFrame = populateFrame(othersCANFrame, otherMotorBytes.firstMotorBytes, otherMotorBytes.secondMotorBytes);
+
+        //othersCANFrame.id = ID_OTHERS_FRAME;
 }
