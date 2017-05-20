@@ -1012,8 +1012,8 @@ void Microstrain::gps_packet_callback(void* user_ptr, u8* packet, u16 packet_siz
                 double heading = curr_ned_vel_.heading * M_PI / 180;
                 double heading_accuracy = curr_ned_vel_.heading_accuracy * M_PI / 180;
 
-                ROS_INFO("v=%f (%f), h=%f (%f)", curr_ned_vel_.ground_speed, curr_ned_vel_.speed_accuracy*curr_ned_vel_.speed_accuracy,
-                    heading * 180 / M_PI, heading_accuracy*heading_accuracy);
+                // ROS_INFO("v=%f (%f), h=%f (%f)", curr_ned_vel_.ground_speed, curr_ned_vel_.speed_accuracy*curr_ned_vel_.speed_accuracy,
+                //     heading * 180 / M_PI, heading_accuracy*heading_accuracy);
 
                 // convert from NED to ENU
                 double yaw = -heading + M_PI / 2;
