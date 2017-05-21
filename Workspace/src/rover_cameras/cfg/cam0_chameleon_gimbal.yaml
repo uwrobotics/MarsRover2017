@@ -3,7 +3,7 @@ dictitems:
   auto_exposure: true
   auto_gain: true
   auto_shutter: false
-  auto_white_balance: true
+  auto_white_balance: false
   brightness: 1.3671875
   enable_strobe1: false
   enable_trigger: false
@@ -22,7 +22,7 @@ dictitems:
       auto_exposure: true
       auto_gain: true
       auto_shutter: false
-      auto_white_balance: true
+      auto_white_balance: false
       brightness: 1.3671875
       enable_strobe1: false
       enable_trigger: false
@@ -57,8 +57,8 @@ dictitems:
       trigger_source: gpio0
       type: ''
       video_mode: format7_mode0
-      white_balance_blue: 800
-      white_balance_red: 550
+      white_balance_blue: 990
+      white_balance_red: 502
     state: []
   pan: 0
   shutter_speed: 0.030008613586425783
@@ -72,6 +72,6 @@ dictitems:
   trigger_polarity: 0
   trigger_source: gpio0
   video_mode: format7_mode0
-  white_balance_blue: 800
-  white_balance_red: 550
+  white_balance_blue: 990
+  white_balance_red: 502
 state: []

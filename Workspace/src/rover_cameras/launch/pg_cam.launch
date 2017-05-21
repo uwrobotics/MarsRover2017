@@ -14,6 +14,8 @@
     <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
           args="load image_proc/debayer camera_nodelet_manager">
     </node>
+
+    <!-- <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load camera_nodelet $(find rover_cameras)/cfg/cam0_chameleon_gimbal.yaml" /> -->
   </group>
 
   <group ns="cam1"> <!--USB2 FireFly-->
@@ -27,6 +29,8 @@
     <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
           args="load image_proc/debayer camera_nodelet_manager">
     </node>
+
+    <!-- <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load camera_nodelet $(find rover_cameras)/cfg/cam1_firefly.yaml" /> -->
   </group>
 
   <group ns="cam2"> <!--USB2 FireFly-->
@@ -40,6 +44,8 @@
     <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
           args="load image_proc/debayer camera_nodelet_manager">
     </node>
+
+    <!-- <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load camera_nodelet $(find rover_cameras)/cfg/cam1_firefly.yaml" /> -->
   </group>
 
   <group ns="cam3"> <!--USB2 FireFly-->
@@ -53,6 +59,8 @@
     <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
           args="load image_proc/debayer camera_nodelet_manager">
     </node>
+
+    <!-- <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load camera_nodelet $(find rover_cameras)/cfg/cam1_firefly.yaml" /> -->
   </group>
 
 </launch>
