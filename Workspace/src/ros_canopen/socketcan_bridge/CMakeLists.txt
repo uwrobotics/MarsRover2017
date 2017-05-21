@@ -14,6 +14,7 @@ catkin_package(
   LIBRARIES
     socketcan_to_topic
     topic_to_socketcan
+    sensor_data
   CATKIN_DEPENDS
     can_msgs
     roscpp

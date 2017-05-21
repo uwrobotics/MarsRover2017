@@ -1,0 +1,454 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"limi",
+				"limitSwitchRead"
+			],
+			[
+				"cur",
+				"currentSensors"
+			],
+			[
+				"LED",
+				"LED_Init"
+			],
+			[
+				"En",
+				"ENCODER_Test"
+			],
+			[
+				"UAR",
+				"UART_LIB_PRINT_INT"
+			],
+			[
+				"UART",
+				"UART_LIB_INIT"
+			],
+			[
+				"uin",
+				"uint8_t"
+			],
+			[
+				"Ha",
+				"HAL_Delay"
+			],
+			[
+				"read",
+				"readIn"
+			],
+			[
+				"pid",
+				"pid_controller"
+			],
+			[
+				"ac",
+				"adc_id"
+			],
+			[
+				"PWM",
+				"PWM_ID"
+			],
+			[
+				"AD",
+				"ADC_ID"
+			],
+			[
+				"pulse",
+				"pulse_width"
+			],
+			[
+				"adc",
+				"adc_id"
+			],
+			[
+				"pi",
+				"pid_controller"
+			],
+			[
+				"readi",
+				"readingPerDegree"
+			],
+			[
+				"PWMLI",
+				"PWMLIB_WriteContinuousServo"
+			],
+			[
+				"puls",
+				"pulseWidth"
+			],
+			[
+				"ui",
+				"uint16_t"
+			],
+			[
+				"pwm",
+				"pwm_id"
+			],
+			[
+				"UART_LIB_PRIN",
+				"UART_LIB_PRINT_INT"
+			],
+			[
+				"de",
+				"readingPerDegree"
+			],
+			[
+				"uint",
+				"uint16_t"
+			],
+			[
+				"ADC",
+				"ADC_ID"
+			],
+			[
+				"u",
+				"uint16_t"
+			],
+			[
+				"pul",
+				"pulseWidth"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/aditya/catkin_ws/src/MarsRover2017/Workspace/src/ros_canopen/can_msgs/CMakeLists.txt",
+		"/home/aditya/catkin_ws/src/MarsRover2017/Workspace/src/ros_canopen/ros_canopen/CMakeLists.txt",
+		"/home/aditya/catkin_ws/src/MarsRover2017/Workspace/src/ros_canopen/multiframe_can/src/multiframe_can.cpp",
+		"/home/aditya/catkin_ws/src/MarsRover2017/Workspace/src/ros_canopen/socketcan_bridge/src/socketcan_to_topic.cpp",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/stm32f072b-disco_hal_lib/HAL_Driver/Src/stm32f0xx_hal_tim.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/stm32f072b-disco_hal_lib/HAL_Driver/Src/stm32f0xx_hal_cortex.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/stm32f072b-disco_hal_lib/HAL_Driver/Inc/stm32f0xx_hal_tim.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/stm32f072b-disco_hal_lib/HAL_Driver/Inc/stm32f0xx_hal_rcc.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/pwm_test/makefile",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/pwmin/src/main.c",
+		"/home/aditya/Desktop/newest backup/lib/pwmin/src/pwmin.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/pwmlib/src/pwmlib.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/pwmin/inc/pwmin.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/can_test/src/main.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/blinky/src/main.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/pwm_test/src/pwm_test.c",
+		"/home/aditya/Desktop/newest backup/app/pwmin/src/main.c",
+		"/home/aditya/catkin_ws/src/MarsRover2017/Workspace/src/ros_canopen/can_msgs/msg/Frame.msg",
+		"/home/aditya/catkin_ws/src/MarsRover2017/Workspace/src/ros_canopen/socketcan_bridge/src/socketcan_to_topic_node.cpp",
+		"/home/aditya/catkin_ws/src/MarsRover2017/Workspace/src/ros_canopen/socketcan_bridge/src/topic_to_socketcan.cpp",
+		"/home/aditya/catkin_ws/src/MarsRover2017/Workspace/src/ros_canopen/socketcan_bridge/src/topic_to_socketcan_node.cpp",
+		"/home/aditya/Desktop/newest backup/MarsRover2017-firmware/app/encoder/src/main.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/stm32f072b-disco_hal_lib/HAL_Driver/Src/stm32f0xx_hal_gpio.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/pwmin/makefile",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/pwmin/src/pwmin.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/stm32f072b-disco_hal_lib/CMSIS/device/stm32f070xb.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/stm32f072b-disco_hal_lib/CMSIS/device/stm32f072xb.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/servo_lib/inc/servo_lib.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/servo_lib/src/servo_lib.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/gimbal/src/main.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/pwmlib/inc/pwmlib.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/uart_lib/src/uart_lib.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/uart_lib/inc/uart_lib.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/common_lib/inc/pins.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/pwmin/src/pwmin.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/encoder/src/main.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/stm32f072b-disco_hal_lib/startup/startup_stm32f072xb.S",
+		"/home/aditya/Desktop/firmware backup/main.c",
+		"/home/aditya/Desktop/firmware backup/main (copy).c",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/encoder/src/main (copy).c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/encoderlib/src/encoderlib.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/encoderlib/inc/encoderlib.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/pid_lib/inc/pidlib.h",
+		"/home/aditya/Desktop/servo stuff.txt",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/pid_lib/src/pidlib.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/adc_lib/inc/adclib.h",
+		"/home/aditya/Desktop/firmware backup/MarsRover2017-firmware-most recent backup (copy)/lib/pwmlib/src/pwmlib.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/adc_lib/src/adclib.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/makefile",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/gimbal/makefile",
+		"/home/aditya/Desktop/newest backup/MarsRover2017-firmware/lib/servo_lib/src/servo_lib.c",
+		"/home/aditya/Desktop/firmware backup/pwmlib/inc/pwmlib.h",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/adc/src/main.c",
+		"/home/aditya/Desktop/servo stuff",
+		"/home/aditya/firmware/MarsRover2017-firmware/.git/gitconfig",
+		"/home/aditya/Desktop/firmware backup/MarsRover2017-firmware/app/gimbal/src/main.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/lib/pwmlib/src/pwmlib.c.orig",
+		"/home/aditya/Desktop/firmware backup/pwmlib/src/pwmlib.c",
+		"/home/aditya/firmware/MarsRover2017-firmware/app/can_test/makefile",
+		"/opt/ros/indigo/include/robot_localization/navsat_conversions.h",
+		"/home/aditya/catkin_ws/src/simple_navigation_goals/src/simple_navigation_goals.cpp",
+		"/home/aditya/catkin_ws/src/simple_navigation_goals/src/node_listener.cpp",
+		"/home/aditya/catkin_ws/src/simple_navigation_goals/gps_log.txt",
+		"/home/aditya/catkin_ws/src/simple_navigation_goals/CMakeLists.txt",
+		"/home/aditya/.cache/.fr-y1K8or/tm_stm32f4_pwm.c",
+		"/home/aditya/catkin_ws/src/MarsRover2017/Workspace/src/rover_autonomy/src/ball_tracking.py",
+		"/home/aditya/arm-tools/stlink/flashloaders/stm32f0.s",
+		"/home/aditya/catkin_ws/src/MarsRover2017/Workspace/src/rover_autonomy/src/gps_navigation.cpp"
+	],
+	"find":
+	{
+		"height": 25.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"HAL_TIM_IC_Start_IT",
+			"__HAL_RCC_TIMx_CLK_ENABLE",
+			"HAL_SYSTICK_Config",
+			"__HAL_RCC_TIMx_CLK_ENABLE",
+			"CCMR1",
+			"TIM_CCMR1_CC1S",
+			"htim",
+			"\n                                     ",
+			"                                     ",
+			"static",
+			"/**",
+			"GPIO_PIN_",
+			"Timer_Init",
+			"ENCODERLIB_ConfigChannel",
+			"while",
+			"HAL_TIM_IC_CaptureCallback",
+			"TIM1_CC_IRQHandler",
+			"TIM_CCxChannelCmd",
+			"HAL_TIM_IC_Start",
+			"CHANNEL_3",
+			"TIM_CHANNEL_1",
+			"HAL_TIM_IC_Start_IT",
+			"ENCODERLIB_ConfigChannel",
+			"HAL_TIM_IC_Start_IT",
+			"__HAL_TIM_GET_FLAG",
+			"channel_1",
+			"__HAL_TIM_SET_COUNTER",
+			"__HAL_TIM_GET_COMPARE",
+			"s_Timer1Instance",
+			"HAL_TIM_IC_CaptureCallback",
+			"TIM1_Handler",
+			"sConfigIC",
+			"__TIM1_CLK_ENABLE",
+			"__HAL_RCC_GPIOA_CLK_ENABLE",
+			"HAL_TIM_IC_Init",
+			"ENCODERLIB_ConfigChannel",
+			"HAL_TIM_IC_Start",
+			"HAL_TIM_IC_ConfigChannel",
+			"configChannel",
+			"ENCODERLIB_ConfigChannel",
+			"PWMLIB_ConfigChannel",
+			"htim",
+			"TIM1_Handler",
+			"htim",
+			"prev_time",
+			"count",
+			"pulse_length",
+			"sICConfig",
+			"UART",
+			"UART_LIB_INIT",
+			"\\s*HAL_NVIC_SetPriority(TIM1_CC_IRQn, 1, 1);\n\\s*HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);",
+			"     HAL_NVIC_SetPriority(TIM1_CC_IRQn, 1, 1);\n     HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);",
+			"irq",
+			"HAL_TIM_IC_CaptureCallback",
+			"GPIO_PIN_7",
+			"2",
+			"tim2",
+			"TIM1_Handler",
+			"ENCODERLIB_ConfigChannel",
+			"GPIO_PIN_7",
+			"TIM1_Handler",
+			"TIM2",
+			"HAL_TIM_IC_Init",
+			"pulse",
+			"TIM_ICPolarity_Rising",
+			"sConfig",
+			"pulse_width",
+			"PWMLIB_TimerInit",
+			"OC",
+			"configchannel",
+			"TIM_OC1_SetConfig",
+			"HAL_TIM_IC_ConfigChannel",
+			"PWMLIB_ConfigChannel",
+			"readingPerDegree",
+			"pin_6",
+			"6",
+			"configchannel",
+			"pulse",
+			"PWM_CON",
+			"TIM14_IRQHandler",
+			"s_TimerInstance",
+			"HAL_TIM_PWM_ConfigChannel()",
+			"PWMLIB_ChangePeriod",
+			"write",
+			"pulse_width",
+			"TIM14_IRQHandler",
+			");\n",
+			"PWMLIB_ConfigChannel",
+			"sConfig",
+			"pulse_width",
+			"fraction",
+			"sConfig",
+			"timer_in",
+			"tim14",
+			"ADC_CHANNEL_1",
+			"GPIO_InitTypeDef",
+			"HAL_Delay(10000);",
+			"clockwise",
+			"changeP",
+			"PWMLIB_ConfigChannel",
+			"PWM_PERIOD",
+			"PWMLIB_TimerInit",
+			"period",
+			"PWMLIB_ConfigChannel",
+			"TM_SERVO_SetDegrees"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+			"CHANNEL_4",
+			"tim1",
+			"sICConfig",
+			"IC",
+			"ENCODERLIB_ConfigChannel",
+			"READING_PER_DEGREE",
+			"servo_TimerInstance",
+			"pulseWidth",
+			"HAL_Delay(1000);"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 25.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "socketcan_bridge_node.sublime-project",
+	"replace":
+	{
+		"height": 46.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 364.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

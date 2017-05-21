@@ -28,11 +28,20 @@
 #include <socketcan_bridge/socketcan_to_topic.h>
 #include <socketcan_interface/string.h>
 #include <can_msgs/Frame.h>
+#include <can_msgs/can_array.h>
 #include <limits.h>
 #include <linux/can.h>
+#include <vector>
+#include <sensor_data.h>
 
 namespace socketcan_bridge
 {
+	
+    // std::vector <std_msgs::bool> limit_switches;
+    // std::vector <can_msgs::can_array> i2c_messages; //TODO
+    // std::vector <std_msgs::int32> current_sensors;
+    // std::vector <std_msgs::int32> thermistors;
+
     SocketCANToTopic::SocketCANToTopic(boost::shared_ptr<can::DriverInterface> driver)
     {
         driver_ = driver;
@@ -130,6 +139,15 @@ namespace socketcan_bridge
         return true;
     }
 
+    uint32_t SocketCANToTopic::readData(uint8_t message[], uint8_t dlc)
+    {
+        uint32_t result = 0;
+        for (int x = 0; x < dlc; x++){
+            result |= input[x] << 4 * (4-dlc);
+        }
+        return result;
+    }
+
     void SocketCANToTopic::frameToMessage(const can::Frame& f, can_msgs::Frame& m)
     {
         m.id = f.id;
@@ -138,7 +156,7 @@ namespace socketcan_bridge
         m.is_rtr = f.is_rtr;
         m.is_extended = f.is_extended;
 
-        for (int i = 0; i < 8; i++)  // always copy all data, regardless of dlc.
+        for (int i = 0; i < m.dlc; i++)  // always copy all data, regardless of dlc.
         {
             m.data[i] = f.data[i];
         }
@@ -180,12 +198,56 @@ namespace socketcan_bridge
         msg.header.frame_id = "";  // empty frame is the de-facto standard for no frame.
         msg.header.stamp = ros::Time::now();
 
-        int topic_idx = INT_MAX;
+        // int topic_idx = INT_MAX;
+        int data = 0;
         bool valid_frame = true;
+        uint8_t[8] input= msg.data;
+    //     uint8_t bit8;
+    //     uint16_t bit16;
+    //     uint32_t bit32;
+    //     switch (msg.dlc)
+  		// {
+  		// 	case 2:
+  		// 		memcpy(&data.thermistors[msg.id%LIMIT_SWITCHES], &bit8, 2);
+  		// 	case 4:
+  		// 		memcpy(&data.thermistors[msg.id%LIMIT_SWITCHES], &bit16, 4);
+  		// 	case 8:
+  		// 		memcpy(&data.thermistors[msg.id%LIMIT_SWITCHES], &bit32, 8);
+  		// }
+
+
+
+        switch(msg.id/100){
+            case LIMIT_SWITCHES: // bool array, index for each switch
+                //data.thermistors[msg.id%LIMIT_SWITCHES];
+                memcpy(&data.thermistors[msg.id%LIMIT_SWITCHES], msg.data, msg.dlc);
+                break;
+
+            case I2C:
+                i2c_messages[msg.id%LIMIT_SWITCHES] = msg;
+                break;
+
+            case CURRENT_SENSORS: // Current uint
+                data.currentSensors[msg.id%LIMIT_SWITCHES] = readData(msg.data, msg.dlc);
+                break;
+
+            case THERMISTORS: // Temp uint
+                data.thermistors[msg.id%LIMIT_SWITCHES] = readData(msg.data, msg.dlc);
+                break;
+
+            default:
+                ROS_WARN("Received frame has unregistered CAN ID %x", msg.id);
+                valid_frame=false;
+                break;
+        }
+
+
+
+/*
         switch (msg.id)
         {
             case CAN_RX_GPS:
-                topic_idx = 0;
+                topic_idx = 0
                 break;
 
             case CAN_RX_IMU:
@@ -205,7 +267,7 @@ namespace socketcan_bridge
                 valid_frame = false;
                 break;
         }
-
+*/
         if (valid_frame)
         {
             if (topic_idx < topics_.size())
