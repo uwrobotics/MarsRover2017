@@ -2,28 +2,37 @@
 
 from python_service_test.srv import *
 import rospy
+import struct
+from can_msgs.msg import Frame
 
+# service callback
 def run_pano_handle(req):
-    print "1st position"
-    #move gimbal to first position
-    rospy.sleep(2.) #sleep for a certain amount of time
-    #take picture here
+    pan = Frame()
+    pan.id = 600
+    pan.is_rtr = False
+    pan.is_extended = False
+    pan.is_error = False
+    pan.dlc = 4
+    # angles the gimbal will move to
+    angles = [0, 45, 90, 135, 180]
+    for angle in angles:
+    	# print "Angle: " + angle
+        pan.data = str(bytearray(struct.pack('i', angle)))
+        data = str(struct.unpack('i', pan.data))
+        print "Data: " + data
+        # move gimbal to desired positions
+        pub.publish(pan)
+        print "published"
+        # sleep for a certain amount of time
+        rospy.sleep(2.) 
+        # take picture here
 
-    print "2nd position"
-    #move gimbal to second position
-    rospy.sleep(2.)
-    #take picture
-
-    print "3rd position"
-    #move gimbal to third position 
-    rospy.sleep(2.)
-    #take picture
-
-    #repeat as needed
     return 1
 
 def pano_server():
-    rospy.init_node('pano_server') #name of the service to me run, doesn't really matter
+    global pub
+    pub = rospy.Publisher('/CAN_transmitter', Frame, 10)
+    rospy.init_node('pano_server') #name of the service to be run, doesn't really matter
     s = rospy.Service('run_pano', PanoService, run_pano_handle)
 #"run_pano" is the thing that you call in a rosservice call (e.g. rosservice call /run_pano 1)
 #PanoService is the name of the .srv file in the srv folder
@@ -33,3 +42,4 @@ def pano_server():
 
 if __name__ == "__main__":
     pano_server()
+

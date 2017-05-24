@@ -1,0 +1,8 @@
+prefix=/home/ivy/marsrover/MarsRover2017/Workspace/install
+
+Name: simple_ros_pub
+Description: Description of simple_ros_pub
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ivy/marsrover/MarsRover2017/Workspace/install/lib 
+Requires: 

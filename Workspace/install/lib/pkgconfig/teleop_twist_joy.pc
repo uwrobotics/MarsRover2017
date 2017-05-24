@@ -1,0 +1,8 @@
+prefix=/home/ivy/marsrover/MarsRover2017/Workspace/install
+
+Name: teleop_twist_joy
+Description: Description of teleop_twist_joy
+Version: 0.1.2
+Cflags: -I/home/ivy/marsrover/MarsRover2017/Workspace/install/include
+Libs: -L/home/ivy/marsrover/MarsRover2017/Workspace/install/lib -lteleop_twist_joy
+Requires: geometry_msgs roscpp sensor_msgs
