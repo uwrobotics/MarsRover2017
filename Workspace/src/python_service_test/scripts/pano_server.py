@@ -31,7 +31,7 @@ def run_pano_handle(req):
 
 def pano_server():
     global pub
-    pub = rospy.Publisher('/CAN_transmitter', Frame, 10)
+    pub = rospy.Publisher('/CAN_transmitter', Frame)
     rospy.init_node('pano_server') #name of the service to be run, doesn't really matter
     s = rospy.Service('run_pano', PanoService, run_pano_handle)
 #"run_pano" is the thing that you call in a rosservice call (e.g. rosservice call /run_pano 1)
