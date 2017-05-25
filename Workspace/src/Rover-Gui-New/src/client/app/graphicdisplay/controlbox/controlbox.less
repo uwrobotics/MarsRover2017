@@ -1,0 +1,51 @@
+.controlbox {
+    width: 100%;
+    height: 70px;
+    background-color: #eee;
+    margin: 6px 0 3px 0;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    .subbox {
+        width: 100px;
+        height: 100%;
+        border-left: 4px solid #0E1820;
+        border-right: 4px solid #0E1820;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-around;
+        .panobutton {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #eee;
+            width: 86%;
+            height: 60px;
+            background-color: #006600;
+            border-radius: 6px;
+            border: 3px solid #0E1820;
+            cursor: pointer;
+            text-align: center;
+            &:hover {
+                background-color: #009933;
+            }
+        }
+        &.feeds {
+            justify-content: flex-start;
+            padding: 0px 10px 0px 10px;
+            p {
+                display: block;
+                font-size: 14px;
+                text-align: center;
+                padding: 0;
+                margin: 4px 0 4px 0;
+            }
+            select {
+                margin-bottom: 4px;
+            }
+        }
+    }
+}
