@@ -12,17 +12,18 @@ def run_pano_handle(req):
     pan.is_rtr = False
     pan.is_extended = False
     pan.is_error = False
-    pan.dlc = 4
-    # angles the gimbal will move to
-    angles = [0, 45, 90, 135, 180]
-    for angle in angles:
-    	# print "Angle: " + angle
+    pan.dlc = 8
+    params = rospy.get_param('pano_params') #[start_angle, stop_angle, num_photos]
+    step = (params[1] - params[0]) / (params[2] - 1)
+    for n in range(params[2]):
+        # angle the gimbal will move to
+        angle = params[0] + n * step
         pan.data = str(bytearray(struct.pack('i', angle)))
         data = str(struct.unpack('i', pan.data))
         print "Data: " + data
         # move gimbal to desired positions
         pub.publish(pan)
-        print "published"
+        print "Published", "angle", n + 1
         # sleep for a certain amount of time
         rospy.sleep(2.) 
         # take picture here
@@ -43,3 +44,10 @@ def pano_server():
 if __name__ == "__main__":
     pano_server()
 
+
+# - rosrun python_service_test pano_server.py
+# 
+# - roscd python_service_test
+# - rosparam load config/pano_config.yaml
+# 
+# - rosservice call /run_pano 1
