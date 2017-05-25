@@ -1,3 +1,33 @@
+##########################################################
+# 
+# Description:
+# Panorama service that sends angles to CAN for the gimbal 
+# to turn to. 
+# 
+# Request:
+# int32  doesn't do anything
+# 
+# Response:
+# 1      doesn't do anything
+# 
+# How to run this service:
+# - rosrun python_service_test pano_server.py
+# 
+# - roscd python_service_test
+# - rosparam load config/pano_config.yaml
+# 
+# - rosservice call /run_pano 1
+# 
+# Note:
+# Angles are calculated by start angle, stop angle, and 
+# number of photos to take. These three values are set in 
+# config/pano_config.YAML as a list. To change the angles,
+# change the corresponding values in the YAML file, save it, 
+# and load the params again.
+#
+##########################################################
+
+
 #!/usr/bin/env python
 
 from python_service_test.srv import *
@@ -44,10 +74,3 @@ def pano_server():
 if __name__ == "__main__":
     pano_server()
 
-
-# - rosrun python_service_test pano_server.py
-# 
-# - roscd python_service_test
-# - rosparam load config/pano_config.yaml
-# 
-# - rosservice call /run_pano 1
