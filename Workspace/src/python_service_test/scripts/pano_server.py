@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 ##########################################################
 # 
 # Description:
@@ -27,8 +29,6 @@
 #
 ##########################################################
 
-
-#!/usr/bin/env python
 
 from python_service_test.srv import *
 import rospy
