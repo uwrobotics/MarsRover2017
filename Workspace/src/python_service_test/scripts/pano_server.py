@@ -23,7 +23,8 @@
 # Note:
 # Angles are calculated by start angle, stop angle, and 
 # number of photos to take. These three values are set in 
-# config/pano_config.YAML as a list. To change the angles,
+# config/pano_config.YAML as a list. To change the angles
+# or the time to wait after angles for each step is sent,
 # change the corresponding values in the YAML file, save it, 
 # and load the params again.
 #
@@ -54,9 +55,11 @@ def run_pano_handle(req):
         # move gimbal to desired positions
         pub.publish(pan)
         print "Published", "angle", n + 1
+
         # sleep for a certain amount of time
-        rospy.sleep(2.) 
-        # take picture here
+        wait_time = rospy.get_param('wait_time')
+        rospy.sleep(wait_time) 
+        # take picture here (manually)
 
     return 1
 
