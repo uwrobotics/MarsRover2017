@@ -165,7 +165,8 @@ void switchCallbackWrist(const std_msgs::UInt8& wristSwitches) {
 }
 
 void switchCallbackForearm(const std_msgs::UInt8& forearmSwitches) {
-	uint8_t temp = forearmSwitches.data;
+	/*
+    uint8_t temp = forearmSwitches.data;
 	temp &= SWITCHES_MASK_BASE;
 	
 	//Bits in the byte message from shoulder board should be organized as such:
@@ -184,10 +185,11 @@ void switchCallbackForearm(const std_msgs::UInt8& forearmSwitches) {
 	else {
 		isLimitElbBackwardTrip = false;		
 	}
+    */
 }
 
 void switchCallbackShoulder(const std_msgs::UInt8& shoulderSwitches) {
-	uint8_t temp = shoulderSwitches.data;
+	/*uint8_t temp = shoulderSwitches.data;
 	temp &= SWITCHES_MASK_BASE;
 	
 	
@@ -219,6 +221,7 @@ void switchCallbackShoulder(const std_msgs::UInt8& shoulderSwitches) {
 	else {
 		isLimitShBackwardTrip = false;		
 	}
+    */
 }
 
 
@@ -232,9 +235,9 @@ int main(int argc, char **argv) {
 
     ros::Subscriber sub0 = n.subscribe("/joy0/joy", 1, chatterCallback0);
     ros::Subscriber sub1 = n.subscribe("/joy1/joy", 1, chatterCallback1);
-    ros::Subscriber switchSub1 = n.subscribe("switchesWristFlags", 1, switchCallbackWrist);
-    ros::Subscriber switchSub2 = n.subscribe("switchesForearmFlags", 1, switchCallbackForearm);
-    ros::Subscriber switchSub3 = n.subscribe("switchesShoulderFlags", 1, switchCallbackShoulder);
+    ros::Subscriber switchSub1 = n.subscribe("/switchesWristFlags", 1, switchCallbackWrist);
+    ros::Subscriber switchSub2 = n.subscribe("/switchesForearmFlags", 1, switchCallbackForearm);
+    ros::Subscriber switchSub3 = n.subscribe("/switchesShoulderFlags", 1, switchCallbackShoulder);
   
   
     ros::Rate loop_rate(10);
@@ -246,8 +249,8 @@ int main(int argc, char **argv) {
 		
         frameFormerHelper();
         chatter_pub.publish(wristsCANFrame);
-        //chatter_pub.publish(forearmCANFrame);
-        //chatter_pub.publish(shoulderCANFrame);
+        chatter_pub.publish(forearmCANFrame);
+        chatter_pub.publish(shoulderCANFrame);
 		testPub.publish(testMsg);
         
         loop_rate.sleep();
@@ -271,7 +274,8 @@ void clawCalculationsCoarse(){
     ////2. Kill Switch (not implemented)
     
     dutyWriteClaw = 0;
-    if (buttonsRight[INDEX_RS_1] == 1) {
+    //Right trigger seems to be faulty DO NOT USE!!!!
+    if (buttonsLeft[INDEX_LS_2] == 1) {
         //Right trigger/button IS held down indicating claw mode
         if (buttonsRight[INDEX_RS_2] == 1) { 
             //If both buttons pressed at the same time, overrides to openning for safety of claw
@@ -308,16 +312,17 @@ void wristCalculationsCoarse() {
     
     //Controls Algorithm for the Wrist Motors
     //The left analog stick is used to control both motors to achieve rotation in forward and lateral axes
-    if (buttonsRight[INDEX_RS_1] == 1) {
+    //Right trigger seems to be faulty DO NOT USE!!!!
+    if (buttonsLeft[INDEX_LS_2] == 1) {
         //Right trigger/button IS held down indicating claw mode
         if ((abs(axesRight[INDEX_RS_UD]) >= JOYSTICK_DEADZONE) || (abs(axesRight[INDEX_RS_LR]) >= JOYSTICK_DEADZONE)) { 
             if ((abs(axesRight[INDEX_RS_UD]) >= JOYSTICK_DEADZONE)){//Detection criteria for up/down movement
-                dutyWriteWristL = dutyWriteWristL + axesRight[INDEX_RS_UD];
-                dutyWriteWristR = dutyWriteWristR + axesRight[INDEX_RS_UD];
+                dutyWriteWristL = (dutyWriteWristL - axesRight[INDEX_RS_UD]);
+                dutyWriteWristR = (dutyWriteWristR - axesRight[INDEX_RS_UD]);
             }
             if ((abs(axesRight[INDEX_RS_LR]) >= JOYSTICK_DEADZONE)){//Detection criteria for left/right movement
-                dutyWriteWristL = dutyWriteWristL + axesRight[INDEX_RS_LR];
-                dutyWriteWristR = dutyWriteWristR - axesRight[INDEX_RS_LR];
+                dutyWriteWristL = (dutyWriteWristL - axesRight[INDEX_RS_LR]);
+                dutyWriteWristR = (dutyWriteWristR + axesRight[INDEX_RS_LR]);
             }
             
             //Code that details the magnitude of the voltage sent to the motors
@@ -374,7 +379,8 @@ void shoulderCalculationsCoarse(){
     ////2. Kill Switch (not implemented)
     
     dutyWriteShoulder = 0;
-    if (buttonsRight[INDEX_RS_1] == 1) {
+    //Right trigger seems to be faulty DO NOT USE!!!!
+    if (buttonsLeft[INDEX_LS_2] == 1) {
         //Right trigger/button IS held down indicating claw mode
         if ((abs(axesLeft[INDEX_LS_UD]) >= JOYSTICK_DEADZONE)) { 
             dutyWriteShoulder = axesLeft[INDEX_LS_UD];
@@ -416,7 +422,8 @@ void elbowCalculationsCoarse(){
     ////2. Kill Switch (not implemented)
     
     dutyWriteElbow = 0;
-    if (buttonsRight[INDEX_RS_1] == 1) {
+    //Right trigger seems to be faulty DO NOT USE!!!!
+    if (buttonsLeft[INDEX_LS_2] == 1) {
         //Right trigger/button IS held down indicating claw mode
         dutyWriteElbow = 0;
     }
@@ -452,10 +459,11 @@ void turntableCalculationsCoarse() {
     ////2. Kill Switch (not implemented)
     
     dutyWriteTurntable = 0;
-    if (buttonsRight[INDEX_RS_1] == 1) {
+    //Right trigger seems to be faulty DO NOT USE!!!!
+    if (buttonsLeft[INDEX_LS_2] == 1) {
         //Right trigger/button IS held down indicating claw mode
         if ((abs(axesLeft[INDEX_LS_LR]) >= JOYSTICK_DEADZONE)) { 
-            dutyWriteTurntable = axesLeft[INDEX_LS_LR];
+            dutyWriteTurntable = -axesLeft[INDEX_LS_LR];
         }
         else {
             dutyWriteTurntable = 0;
@@ -464,7 +472,7 @@ void turntableCalculationsCoarse() {
     else { 
         //Right trigger/button 1 IS NOT held down, indicating it is in the default mode
         if ((abs(axesLeft[INDEX_LS_LR]) >= JOYSTICK_DEADZONE)) { 
-            dutyWriteTurntable = axesLeft[INDEX_LS_LR];
+            dutyWriteTurntable = -axesLeft[INDEX_LS_LR];
         }
         else {
             dutyWriteTurntable = 0;
@@ -522,7 +530,7 @@ void frameFormerHelper() {
         forearmCANFrame.is_rtr = 0;
         forearmCANFrame.is_extended = 0;
 
-        populateFrame(&shoulderCANFrame, outputPWM[4], outputPWM[5]);
+        populateFrame(&shoulderCANFrame, outputPWM[5], outputPWM[4]);
         shoulderCANFrame.id = ID_SHOULDER_FRAME;
         shoulderCANFrame.dlc = 8;
         shoulderCANFrame.is_error = 0;

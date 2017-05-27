@@ -8,5 +8,5 @@
 		<param name="dev" value="/dev/input/js1"/>
 	</node>
 
-	<node pkg="arm_control" type="arm_controlv3" name="arm_controlv3" respawn="true" output="screen"/>
+	<node pkg="arm_control" type="arm_controlv4" name="arm_controlv4" respawn="true" output="screen"/>
 </launch>

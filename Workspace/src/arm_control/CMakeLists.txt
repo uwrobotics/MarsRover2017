@@ -36,3 +36,7 @@ add_dependencies(arm_controlv2 arm_control_generate_messages_cpp)
 add_executable(arm_controlv3 src/arm_controlv3.cpp)
 target_link_libraries(arm_controlv3 ${catkin_LIBRARIES})
 add_dependencies(arm_controlv3 arm_control_generate_messages_cpp)
+
+add_executable(arm_controlv4 src/arm_controlv4.cpp)
+target_link_libraries(arm_controlv4 ${catkin_LIBRARIES})
+add_dependencies(arm_controlv4 arm_control_generate_messages_cpp)
