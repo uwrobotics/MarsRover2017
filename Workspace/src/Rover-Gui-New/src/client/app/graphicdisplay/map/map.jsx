@@ -102,8 +102,8 @@ class MapBox extends React.Component {
             map: null,
             robotMarker: null,
             markers: [],
-            lat: 43.461,
-            long: -80.52,
+            lat: 38.405905,
+            long: -110.792088,
             angle: 0,
         }
     };
@@ -170,9 +170,9 @@ class MapBox extends React.Component {
                 <div className='mapsettings'>
                     <div className='section'>
                         <p>Lat:</p>
-                        <input type="text" ref="LatF" defaultValue="43.46" />
+                        <input type="text" ref="LatF" defaultValue="38.405905" />
                         <p>Long:</p>
-                        <input type="text" ref="LongF" defaultValue="-80.52" />
+                        <input type="text" ref="LongF" defaultValue="-110.792088" />
                         <button onClick={this.addMarker.bind(this)}>Add Marker</button>
                     </div>
                     <div className='section'>

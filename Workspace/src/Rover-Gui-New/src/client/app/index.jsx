@@ -26,8 +26,8 @@ class App extends React.Component {
                 z: 32,
             },
             gps: {
-                lat: 43.461,
-                lon: -80.52,
+                lat: 38.405905, 
+                lon: -110.792088,
             },
             battery: {
                 percent: 0,
