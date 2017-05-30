@@ -153,7 +153,7 @@ namespace socketcan_bridge
         m.is_rtr = f.is_rtr;
         m.is_extended = f.is_extended;
 
-        for (int i = 0; i < m.dlc; i++)  // always copy all data, regardless of dlc.
+        for (int i = 0; i < m.dlc; i++)  // copy data based on dlc
         {
             m.data[i] = f.data[i];
         }
@@ -198,7 +198,6 @@ namespace socketcan_bridge
         int topic_idx = INT_MAX;
         bool valid_frame = true;
 
-		//temp = msg.data;
 		ROS_INFO ("dlc: %x", msg.dlc);
 
         ros::NodeHandle handle;
@@ -213,7 +212,7 @@ namespace socketcan_bridge
         science_msgs::Sci_Container science_msg;
 
         switch((msg.id)/100){
-            case LIMIT_SWITCHES: // bool array, index for each switch
+            case LIMIT_SWITCHES: // Bit vector corresponding to each pair of limit switches
                 ROS_INFO("Evaluating arm limit switches");
                 uint8_t intResult;
                 memcpy (&intResult, &msg.data, msg.dlc);
@@ -234,7 +233,7 @@ namespace socketcan_bridge
                     topics_[topic_idx]->publish(switch_msg);
                 break;
 
-            case SCIENCE:
+            case SCIENCE: // Custom object containing limit switch and sensor information
             ROS_INFO ("Evaluating science");
                 if (msg.id%SCIENCE == 2)
                 {
@@ -262,7 +261,7 @@ namespace socketcan_bridge
                 topics_[3]->publish(science_msg);
                 break;
 
-            case CURRENT_SENSORS:
+            case CURRENT_SENSORS: // float for current sensor readings
                 ROS_INFO("Evaluating current sensors");
                 float currentResult;
                 memcpy (&currentResult, &msg.data, msg.dlc);
@@ -272,7 +271,7 @@ namespace socketcan_bridge
                 topics_[4]->publish(current_msg);
                 break;
 
-            case THERMISTORS:
+            case THERMISTORS: // float for thermistor readings
                 ROS_INFO("Evaluating thermistors");
                 float thermResult;
                 memcpy (&thermResult, &msg.data, msg.dlc);
@@ -286,7 +285,6 @@ namespace socketcan_bridge
                 ROS_WARN("Received frame has unregistered CAN ID %x", msg.id);
                 valid_frame = false;
                 break;
-
         }
 		ROS_INFO("Finished sending");
     }
@@ -306,6 +304,3 @@ namespace socketcan_bridge
     }
 };  // namespace socketcan_bridge
 
-
-// cansend vcan0 384#1122334455667788
-// cansend vcan0 001#1111111111111111
