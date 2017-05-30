@@ -26,26 +26,26 @@
  */
 
 #include <socketcan_bridge/socketcan_to_topic.h>
+#include <socketcan_bridge/sensor_data.h>
 #include <socketcan_interface/string.h>
 #include <can_msgs/Frame.h>
-#include <can_msgs/can_array.h>
+#include <science_msgs/Sci_Container.h>
+#include <science_msgs/Sensor.h>
+#include <std_msgs/Float32MultiArray.h>
+#include <std_msgs/UInt8.h>
 #include <limits.h>
 #include <linux/can.h>
 #include <vector>
-#include <sensor_data.h>
 
 namespace socketcan_bridge
 {
-	
-    // std::vector <std_msgs::bool> limit_switches;
-    // std::vector <can_msgs::can_array> i2c_messages; //TODO
-    // std::vector <std_msgs::int32> current_sensors;
-    // std::vector <std_msgs::int32> thermistors;
+
+    can_msgs::Frame msg;
 
     SocketCANToTopic::SocketCANToTopic(boost::shared_ptr<can::DriverInterface> driver)
     {
         driver_ = driver;
-
+        sensorData_ = SensorData(3, 20, 20); // In order: limit switch, current sensor, thermistor
         ros::Publisher* pPub = new ros::Publisher;
         if (!pPub)
         {
@@ -132,20 +132,17 @@ namespace socketcan_bridge
             }
 
             // Advertise topic and push into vector of pointers
-            *pPub = nh_.advertise<can_msgs::Frame>(topic_list[i], 10);
+            // Change publisher type based on topic id
+            if (i==3)
+                *pPub = nh_.advertise<science_msgs::Sci_Container>(topic_list[i], 10);
+            else if (i>3)
+                *pPub = nh_.advertise<std_msgs::Float32MultiArray>(topic_list[i], 10);
+            else
+                *pPub = nh_.advertise<std_msgs::UInt8>(topic_list[i], 10);
             topics_.push_back(pPub);
         }
 
         return true;
-    }
-
-    uint32_t SocketCANToTopic::readData(uint8_t message[], uint8_t dlc)
-    {
-        uint32_t result = 0;
-        for (int x = 0; x < dlc; x++){
-            result |= input[x] << 4 * (4-dlc);
-        }
-        return result;
     }
 
     void SocketCANToTopic::frameToMessage(const can::Frame& f, can_msgs::Frame& m)
@@ -192,92 +189,106 @@ namespace socketcan_bridge
         }
 
         can_msgs::Frame msg;
-        // converts the can::Frame (socketcan.h) to can_msgs::Frame (ROS msg)
+        converts the can::Frame (socketcan.h) to can_msgs::Frame (ROS msg)
         frameToMessage(frame, msg);
 
         msg.header.frame_id = "";  // empty frame is the de-facto standard for no frame.
         msg.header.stamp = ros::Time::now();
 
-        // int topic_idx = INT_MAX;
-        int data = 0;
+        int topic_idx = INT_MAX;
         bool valid_frame = true;
-        uint8_t[8] input= msg.data;
-    //     uint8_t bit8;
-    //     uint16_t bit16;
-    //     uint32_t bit32;
-    //     switch (msg.dlc)
-  		// {
-  		// 	case 2:
-  		// 		memcpy(&data.thermistors[msg.id%LIMIT_SWITCHES], &bit8, 2);
-  		// 	case 4:
-  		// 		memcpy(&data.thermistors[msg.id%LIMIT_SWITCHES], &bit16, 4);
-  		// 	case 8:
-  		// 		memcpy(&data.thermistors[msg.id%LIMIT_SWITCHES], &bit32, 8);
-  		// }
 
+		//temp = msg.data;
+		ROS_INFO ("dlc: %x", msg.dlc);
 
+        ros::NodeHandle handle;
+        
+        ros::Publisher intPub;
+        ros::Publisher sciencePub;
+        ros::Publisher floatPub;
 
-        switch(msg.id/100){
+        std_msgs::UInt8 switch_msg;
+        std_msgs::Float32MultiArray current_msg;
+        std_msgs::Float32MultiArray thermistor_msg;
+        science_msgs::Sci_Container science_msg;
+
+        switch((msg.id)/100){
             case LIMIT_SWITCHES: // bool array, index for each switch
-                //data.thermistors[msg.id%LIMIT_SWITCHES];
-                memcpy(&data.thermistors[msg.id%LIMIT_SWITCHES], msg.data, msg.dlc);
+                ROS_INFO("Evaluating arm limit switches");
+                uint8_t intResult;
+                memcpy (&intResult, &msg.data, msg.dlc);
+                ROS_INFO("limit switch: %x", intResult);
+                switch_msg.data = intResult;
+                if (msg.id%LIMIT_SWITCHES == 0)
+                {
+                    topic_idx = 0;
+                }
+                else if (msg.id%LIMIT_SWITCHES == 1)
+                {
+                    topic_idx = 1;
+                }
+                else if (msg.id%LIMIT_SWITCHES == 2)
+                {
+                    topic_idx = 2;
+                }
+                    topics_[topic_idx]->publish(switch_msg);
                 break;
 
-            case I2C:
-                i2c_messages[msg.id%LIMIT_SWITCHES] = msg;
+            case SCIENCE:
+            ROS_INFO ("Evaluating science");
+                if (msg.id%SCIENCE == 2)
+                {
+                    ROS_INFO ("Processing science limit switch data");
+                    uint32_t scienceLimitSwitch;
+                    memcpy (&scienceLimitSwitch, &msg.data, msg.dlc);
+                    sensorData_.setScienceContainer(scienceLimitSwitch);
+                }
+                else // Sensor
+                {
+                    ROS_INFO ("Processing sensor data");
+                    float sensorValue;
+                    uint32_t timeStamp;
+                    memcpy (&sensorValue, &msg.data, 4);
+                    ROS_INFO ("Sensor value: %f", sensorValue);
+                    memcpy (&timeStamp, &msg.data[4], 4);
+                    ROS_INFO ("Sensor time stamp: %x", timeStamp);
+                    science_msgs::Sensor sensor;
+                    sensor.data = sensorValue;
+                    sensor.stamp = timeStamp;
+                    sensorData_.setScienceContainer(sensor, msg.id%SCIENCE);
+                }
+                science_msg = sensorData_.getScienceContainer();
+                ROS_INFO ("Publishing science data");
+                topics_[3]->publish(science_msg);
                 break;
 
-            case CURRENT_SENSORS: // Current uint
-                data.currentSensors[msg.id%LIMIT_SWITCHES] = readData(msg.data, msg.dlc);
+            case CURRENT_SENSORS:
+                ROS_INFO("Evaluating current sensors");
+                float currentResult;
+                memcpy (&currentResult, &msg.data, msg.dlc);
+                ROS_INFO("current data: %f", currentResult);
+                sensorData_.setCurrentSensors(currentResult, msg.id%CURRENT_SENSORS);
+                current_msg.data = sensorData_.getCurrentSensors();
+                topics_[4]->publish(current_msg);
                 break;
 
-            case THERMISTORS: // Temp uint
-                data.thermistors[msg.id%LIMIT_SWITCHES] = readData(msg.data, msg.dlc);
-                break;
-
-            default:
-                ROS_WARN("Received frame has unregistered CAN ID %x", msg.id);
-                valid_frame=false;
-                break;
-        }
-
-
-
-/*
-        switch (msg.id)
-        {
-            case CAN_RX_GPS:
-                topic_idx = 0
-                break;
-
-            case CAN_RX_IMU:
-                topic_idx = 1;
-                break;
-
-            case CAN_RX_BMS:
-                topic_idx = 2;
-                break;
-
-            case CAN_RX_ARM:
-                topic_idx = 3;
+            case THERMISTORS:
+                ROS_INFO("Evaluating thermistors");
+                float thermResult;
+                memcpy (&thermResult, &msg.data, msg.dlc);
+                ROS_INFO("thermistor data: %f", thermResult);
+                sensorData_.setThermistors(thermResult, msg.id%THERMISTORS);
+                thermistor_msg.data = sensorData_.getThermistors();
+                topics_[5]->publish(thermistor_msg);
                 break;
 
             default:
                 ROS_WARN("Received frame has unregistered CAN ID %x", msg.id);
                 valid_frame = false;
                 break;
+
         }
-*/
-        if (valid_frame)
-        {
-            if (topic_idx < topics_.size())
-            {
-                if (topics_[topic_idx])
-                {
-                    topics_[topic_idx]->publish(msg);
-                }
-            }
-        }
+		ROS_INFO("Finished sending");
     }
 
     void SocketCANToTopic::stateCallback(const can::State & s)
@@ -294,3 +305,7 @@ namespace socketcan_bridge
         }
     }
 };  // namespace socketcan_bridge
+
+
+// cansend vcan0 384#1122334455667788
+// cansend vcan0 001#1111111111111111

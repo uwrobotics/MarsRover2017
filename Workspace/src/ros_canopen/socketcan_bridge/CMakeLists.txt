@@ -3,6 +3,7 @@ project(socketcan_bridge)
 
 find_package(catkin REQUIRED
   COMPONENTS
+    science_msgs
     can_msgs
     roscpp
     socketcan_interface
@@ -12,11 +13,12 @@ catkin_package(
   INCLUDE_DIRS
     include
   LIBRARIES
+    sensor_data
     socketcan_to_topic
     topic_to_socketcan
-    sensor_data
   CATKIN_DEPENDS
     can_msgs
+    science_msgs
     roscpp
     socketcan_interface
 )
@@ -27,11 +29,13 @@ include_directories(
 )
 
 
+
 # socketcan_to_topic
 add_library(socketcan_to_topic
   src/socketcan_to_topic.cpp
 )
 target_link_libraries(socketcan_to_topic
+  sensor_data
   ${catkin_LIBRARIES}
 )
 add_dependencies(socketcan_to_topic
@@ -77,6 +81,17 @@ target_link_libraries(topic_to_socketcan_node
 #   socketcan_to_topic
 #   ${catkin_LIBRARIES}
 # )
+
+# sensor_data
+add_library(sensor_data
+  src/sensor_data.cpp
+)
+target_link_libraries(sensor_data
+  ${catkin_LIBRARIES}
+)
+add_dependencies(sensor_data
+  ${catkin_EXPORTED_TARGETS}
+)
 
 # install(
 #   TARGETS

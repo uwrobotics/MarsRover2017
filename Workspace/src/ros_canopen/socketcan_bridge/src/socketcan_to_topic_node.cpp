@@ -50,7 +50,6 @@ int main(int argc, char *argv[])
     nh_param.param<std::string>("/receiver_interface", receiver_interface, "vcan0");
 
     boost::shared_ptr<can::ThreadedSocketCANInterface> driver = boost::make_shared<can::ThreadedSocketCANInterface>();
-
     if (!driver->init(receiver_interface, 0))  // initialize device at can_device, 0 for no loopback.
     {
         ROS_FATAL("Failed to initialize receiver_interface at %s", receiver_interface.c_str());
@@ -59,8 +58,8 @@ int main(int argc, char *argv[])
     else
     {
         ROS_INFO("CAN receiver successfully connected to %s.", receiver_interface.c_str());
+        ROS_INFO("TEST");
     }
-
     socketcan_bridge::SocketCANToTopic can_receiver(driver);
     can_receiver.init();
 

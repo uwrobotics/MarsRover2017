@@ -11,7 +11,7 @@
 /*    New IDs     */
 
 #define LIMIT_SWITCHES  	3
-#define I2C		      		8 	//TODO
+#define SCIENCE	      		7 	//TODO
 #define CURRENT_SENSORS     9 	//TODO
 #define THERMISTORS      	10 	//TODO
 

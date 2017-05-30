@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(can_msgs)
+project(science_msgs)
 
 find_package(catkin REQUIRED
   COMPONENTS
@@ -9,7 +9,8 @@ find_package(catkin REQUIRED
 
 add_message_files(DIRECTORY msg
   FILES
-    Frame.msg
+    Sensor.msg
+    Sci_Container.msg
 )
 
 generate_messages(

@@ -29,6 +29,7 @@
 #define SOCKETCAN_BRIDGE_SOCKETCAN_TO_TOPIC_H
 
 #include <socketcan_interface/socketcan.h>
+#include <socketcan_bridge/sensor_data.h>
 #include <can_msgs/Frame.h>
 #include <ros/ros.h>
 #include <can_node_ids/can_rx_id.h>
@@ -46,6 +47,7 @@ namespace socketcan_bridge
             void cleanup();
 
         private:
+            SensorData sensorData_;
             ros::NodeHandle nh_;
             boost::shared_ptr<can::DriverInterface> driver_;
             std::vector<ros::Publisher*> topics_;
