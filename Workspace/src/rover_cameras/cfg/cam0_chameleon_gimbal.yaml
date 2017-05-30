@@ -44,7 +44,7 @@ dictitems:
       parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
         state: []
       parent: 0
-      shutter_speed: 0.030008613586425783
+      shutter_speed: 0.01001066017150879
       state: true
       strobe1_delay: 0.0
       strobe1_duration: 1.0
@@ -61,7 +61,7 @@ dictitems:
       white_balance_red: 502
     state: []
   pan: 0
-  shutter_speed: 0.030008613586425783
+  shutter_speed: 0.01001066017150879
   strobe1_delay: 0.0
   strobe1_duration: 1.0
   strobe1_polarity: 0
