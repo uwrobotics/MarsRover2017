@@ -1,0 +1,8 @@
+prefix=/home/ivy/marsrover/MarsRover2017/Workspace/install
+
+Name: python_service_test
+Description: Description of python_service_test
+Version: 0.0.0
+Cflags: -I/home/ivy/marsrover/MarsRover2017/Workspace/install/include
+Libs: -L/home/ivy/marsrover/MarsRover2017/Workspace/install/lib 
+Requires: 

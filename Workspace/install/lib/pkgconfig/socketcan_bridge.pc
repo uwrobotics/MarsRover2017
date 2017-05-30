@@ -1,0 +1,8 @@
+prefix=/home/ivy/marsrover/MarsRover2017/Workspace/install
+
+Name: socketcan_bridge
+Description: Description of socketcan_bridge
+Version: 0.1.0
+Cflags: -I/home/ivy/marsrover/MarsRover2017/Workspace/install/include
+Libs: -L/home/ivy/marsrover/MarsRover2017/Workspace/install/lib -lsocketcan_to_topic -ltopic_to_socketcan
+Requires: can_msgs roscpp socketcan_interface

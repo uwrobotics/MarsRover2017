@@ -1,0 +1,8 @@
+prefix=/home/ivy/marsrover/MarsRover2017/Workspace/install
+
+Name: roboteq_driver
+Description: Description of roboteq_driver
+Version: 0.2.0
+Cflags: 
+Libs: -L/home/ivy/marsrover/MarsRover2017/Workspace/install/lib 
+Requires: 
