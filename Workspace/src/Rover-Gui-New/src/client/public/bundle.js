@@ -10372,14 +10372,13 @@ var ControlBox = function (_React$Component) {
             if (!this.panoService) {
                 this.panoService = new ROSLIB.Service({
                     ros: this.props.ros,
-                    name: '/panorama_service_name',
-                    serviceType: 'panorama_service_type'
+                    name: '/run_pano',
+                    serviceType: 'python_service_test/PanoService'
                 });
             }
 
             var panoServiceRequest = new ROSLIB.ServiceRequest({
-                a: 1,
-                b: 2
+                go: 1
             });
 
             this.panoService.callService(panoServiceRequest, function (result) {
@@ -10827,6 +10826,7 @@ var App = function (_React$Component) {
 
             ros.on('error', function (err) {
                 console.log('ROS Error', err);
+                console.log('Try running roslaunch rosbridge_server rosbridge_websocket.launch');
             });
 
             ros.connect('ws://localhost:9090');

@@ -3,11 +3,11 @@
 ###############################################################
 # 
 # @file      gimbal_control.py
-# @author    Ivy Xing
+# @author    Ivy Xing / Jerry Li
 # 
 # Description:
 # Gimbal control node that sends angles to CAN according to
-# buttons on the joystick.
+# gimbal ros topic
 # 
 # How to run this node:
 # - rosrun gimbal_control gimbal_control.py
@@ -19,6 +19,7 @@
 #   is pressed.
 # - Pan: 0 to 360. Angles wrap around.
 # - Tilt: -45 to 45. 
+# - Send -999 as an angle if you don't want it to move
 #
 ###############################################################
 
@@ -28,72 +29,53 @@ import roslib
 import struct
 import sys
 
-from sensor_msgs.msg import Joy
 from can_msgs.msg import Frame
+from std_msgs.msg import Int32MultiArray
 
 class GimbalController:
 	# Constructor
-	def __init__(self, sub_topic='/joy', pub_topic='/CAN_transmitter'):
+	def __init__(self, sub_topic='/gimbal_cmd', pub_topic='/CAN_transmitter'):
 		self._node = rospy.init_node('gimbal_control', anonymous=True)
-		self._joySub = rospy.Subscriber(sub_topic, Joy, self.joyCallback)
+		self._joySub = rospy.Subscriber(sub_topic, Int32MultiArray, self.gimbalCallback)
 		self._canPub = rospy.Publisher(pub_topic, Frame, queue_size=20)
-		self._started = False
 		self._pan = 90
 		self._tilt = 0
+		self._lastpan = 90
+		self._lasttilt = 0
 		self._id = 600 # CAN id
-		self._step = 15 # the angle to turn for each move
+		self.startGimbal();
 
 	# Set gimbal to the start position. Only called once at the start.
 	def startGimbal(self):
-		print 'starting'
-		self.sendAngle(self._pan, self._tilt, self._id)
+		print 'Initializing Gimbal'
+		self.sendAngle()
 
 	# Joystick ROS callback
-	def joyCallback(self, joyMsg):
-		# Start the gimbal the first time this is called
-		if not self._started:
-			self.startGimbal();
-			self._started = True;
-			return;
+	def gimbalCallback(self, gimbalMsg):
+		if gimbalMsg.data[0] != -999: #invalid angle
+			self._pan = gimbalMsg.data[0]
 
-		buttons = list(joyMsg.buttons)
-		# up: 2, down: 1, left: 3, right: 4
-		up = buttons[2]
-		down = buttons[1]
-		left = buttons[3]
-		right = buttons[4]
-
-		# calculate the next pan and tilt if any of the four buttons is pressed
-		if up + down + left + right != 0:
-			self._pan += self._step * (right - left)
-			# wrap around 360
-			self._pan %= 360
-
-			self._tilt += self._step * (up - down)
-			# limit tilt to max range
-			if self._tilt > 45:
-				self._tilt = 45
-			elif self._tilt < -45:
-				self._tilt = -45
-
-			self.sendAngle(self._pan, self._tilt, self._id)
+		if gimbalMsg.data[1] != -999:
+			self._tilt = gimbalMsg.data[1]
+		print 'Sending to Gimbal: Pan: %d Tilt: %d' % (self._pan, self._tilt)
+		self.sendAngle()
 
 	# Convert angles to CAN frame msg type
-	def angleToFrame(self, pan, tilt, id):
+	def angleToFrame(self):
 		frame = Frame()
-		frame.id = id
+		frame.id = self._id
 		frame.is_rtr = False
 		frame.is_extended = False
 		frame.is_error = False
 		frame.dlc = 8
-		data = bytearray(struct.pack('i', pan))
-		data.extend(bytearray(struct.pack('i', tilt)))
+		data = bytearray(struct.pack('i', self._pan))
+		data.extend(bytearray(struct.pack('i', self._tilt)))
 		frame.data = str(data)
 		return frame
 
 	# Publish angles to SocketCAN
-	def sendAngle(self, pan, tilt, id):
-		canFrame = self.angleToFrame(pan, tilt, id)
+	def sendAngle(self):
+		canFrame = self.angleToFrame()
 		self._canPub.publish(canFrame)
 
 

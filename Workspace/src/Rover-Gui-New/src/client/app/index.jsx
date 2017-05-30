@@ -75,6 +75,7 @@ class App extends React.Component {
         
         ros.on('error', (err) => {
             console.log('ROS Error', err);
+            console.log('Try running roslaunch rosbridge_server rosbridge_websocket.launch')
         });
         
         ros.connect('ws://localhost:9090');
