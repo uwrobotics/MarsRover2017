@@ -105,6 +105,8 @@ class MapBox extends React.Component {
             lat: 38.405905,
             long: -110.792088,
             angle: 0,
+            zoom: 16,
+            markerIcon: null,
         }
     };
     
@@ -117,18 +119,30 @@ class MapBox extends React.Component {
                 popupAnchor:  [0, -73]
             }
         });
+
+        let markIcon = L.Icon.extend({
+            options: {
+                iconSize:     [30, 50],
+                iconAnchor:   [36, 46],
+                popupAnchor:  [0, -73]
+            }
+        });
         
         let roverIcon = new roboIcon({iconUrl: 'app/roverIcon2.png'});
+        this.state.markerIcon = new markIcon({iconUrl: 'app/graphicdisplay/map/leaflet/images/marker-icon.png'});
         
-        let map = L.map(this.refs.map).setView([this.state.lat, this.state.long], 16);
+        this.state.map = L.map(this.refs.map).setView([this.state.lat, this.state.long], this.state.zoom);
+        var map = this.state.map
         
         L.tileLayer('app/Tiles/{z}/{x}/{y}.png', {edgeBufferTiles: 2}).addTo(map);
+        L.control.scale().addTo(map);
 
         let robotMarker = L.marker([this.state.lat, this.state.long], {icon: roverIcon, rotationAngle: this.state.angle}).addTo(map);
-        
+        map.setMinZoom(12);
+        map.setMaxZoom(17);
         this.setState({
             map,
-            robotMarker,
+            robotMarker
         });
     }
     
@@ -139,7 +153,7 @@ class MapBox extends React.Component {
     componentWillUpdate() {
         if (this.state.robotMarker) {
             if (this.refs.follow.checked) {
-                this.state.map.setView([this.state.lat, this.state.long], 16);
+                this.state.map.setView([this.state.lat, this.state.long], this.state.zoom);
             }
             this.state.robotMarker.setLatLng(new L.LatLng(this.state.lat, this.state.long));
             this.state.robotMarker.setRotationAngle(this.state.angle);
@@ -158,7 +172,7 @@ class MapBox extends React.Component {
         const lat = this.refs.LatF.value;
         const long = this.refs.LongF.value;
         let markers = this.state.markers;
-        markers.push(L.marker([lat,long]).addTo(this.state.map).bindPopup(lat+", "+long).openPopup());
+        markers.push(L.marker([lat,long], {icon:this.state.markerIcon}).addTo(this.state.map).bindPopup(lat+", "+long).openPopup());
         this.setState({ markers });
     }
 

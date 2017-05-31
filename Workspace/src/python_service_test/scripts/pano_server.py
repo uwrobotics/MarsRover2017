@@ -35,42 +35,58 @@ from python_service_test.srv import *
 import rospy
 import struct
 from can_msgs.msg import Frame
+from std_msgs.msg import Int32MultiArray
+from  std_srvs.srv import Empty
+import os
+from os.path import expanduser
 
 # service callback
 def run_pano_handle(req):
-    pan = Frame()
-    pan.id = 600
-    pan.is_rtr = False
-    pan.is_extended = False
-    pan.is_error = False
-    pan.dlc = 8
     params = rospy.get_param('pano_params') #[start_angle, stop_angle, num_photos]
     step = (params[1] - params[0]) / (params[2] - 1)
+    gimbal_msg = Int32MultiArray()
+    msg_array = [0, -999]#invalid tilt angle to signify to keep at the same angle
+
     for n in range(params[2]):
         # angle the gimbal will move to
         angle = params[0] + n * step
-        pan.data = str(bytearray(struct.pack('i', angle)))
-        data = str(struct.unpack('i', pan.data))
-        print "Data: " + data
+        msg_array[0] = angle
+        gimbal_msg.data = msg_array
+
         # move gimbal to desired positions
-        pub.publish(pan)
+        pub.publish(gimbal_msg)
         print "Published", "angle", n + 1
 
         # sleep for a certain amount of time
         wait_time = rospy.get_param('wait_time')
         rospy.sleep(wait_time) 
         # take picture here (manually)
+        rospy.wait_for_service('image_saver/save')
+        try:
+            capture = rospy.ServiceProxy('image_saver/save', Empty)
+            capture()
+        except rospy.ServiceException, e:
+            print "Error calling image_saver/save"
+            return -1
 
+    print "Done Panorama"
     return 1
 
 def pano_server():
     global pub
-    pub = rospy.Publisher('/CAN_transmitter', Frame)
+    pub = rospy.Publisher('/gimbal_cmd', Int32MultiArray)
     rospy.init_node('pano_server') #name of the service to be run, doesn't really matter
     s = rospy.Service('run_pano', PanoService, run_pano_handle)
-#"run_pano" is the thing that you call in a rosservice call (e.g. rosservice call /run_pano 1)
-#PanoService is the name of the .srv file in the srv folder
-#run_pano_handle is the name of the function to call when the service is called
+    #"run_pano" is the thing that you call in a rosservice call (e.g. rosservice call /run_pano 1)
+    #PanoService is the name of the .srv file in the srv folder
+    #run_pano_handle is the name of the function to call when the service is called
+
+    #images will be saved here
+    directory = expanduser("~") + '/pano_images'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    print directory
+
     print "Ready to run pano script."
     rospy.spin()
 
