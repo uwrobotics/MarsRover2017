@@ -148,6 +148,18 @@ void receiveMessage(const rover_autonomy::gps_coord::ConstPtr& ptr){
 
     for (int i=0; i<ptr->length && ros::ok(); i++){
         move(UTMEasts[i], UTMNorths[i]);
+
+        // tennis ball detection
+        for (angle = 0; angle < 360; angles+=15) {
+            // tell gimbal to go to an angle
+            // grab a frame
+            // get the tennis ball position
+            
+            
+        }
+
+        // find the tennis ball
+
     }
 
 }
