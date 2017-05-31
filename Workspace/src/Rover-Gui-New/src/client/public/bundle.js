@@ -10294,38 +10294,38 @@ module.exports = {
 /***/ (function(module, exports) {
 
 module.exports = {
-   "/topicNameWithArray": [
+  //  "/topicNameWithArray": [
+  //     {
+  //        "statePath": "path",
+  //        "stateSubPath": "string.here"
+  //     },
+  //     {
+  //        "statePath": "path",
+  //        "stateSubPath": "string.here"
+  //     }
+  //  ],
+  //  "/topicNameWithFloat": {
+  //    "statePath": "path",
+  //    "stateSubPath": "string.here",
+  //    "func": (a,b) => { return a + b }
+  // },
+   "/battery_data": 
       {
-         "statePath": "path",
-         "stateSubPath": "string.here"
-      },
-      {
-         "statePath": "path",
-         "stateSubPath": "string.here"
-      }
-   ],
-   "/topicNameWithFloat": {
-     "statePath": "path",
-     "stateSubPath": "string.here",
-     "func": (a,b) => { return a + b }
-  },
-   "/battery_data": [
-      {
-         "statePath": "battery",
-         "stateSubPath": "percent",
-         "func": (i) => { return _.toNumber(i).toFixed(2) }
-      },
-      {
-         "statePath": "battery",
-         "stateSubPath": "current",
-         "func": (i) => { return _.toNumber(i).toFixed(2) }
-      },
-      {
-         "statePath": "battery",
-         "stateSubPath": "voltage",
+         "statePath": "sensorData",
+         "stateSubPath": "sensorGroup1.sensors.G1T1.value",
          "func": (i) => { return _.toNumber(i).toFixed(2) }
       }
-   ]
+  //     {
+  //        "statePath": "battery",
+  //        "stateSubPath": "current",
+  //        "func": (i) => { return _.toNumber(i).toFixed(2) }
+  //     },
+  //     {
+  //        "statePath": "battery",
+  //        "stateSubPath": "voltage",
+  //        "func": (i) => { return _.toNumber(i).toFixed(2) }
+  //     }
+  //  ]
 };
 
 /***/ }),
@@ -10589,7 +10589,9 @@ var MapBox = function (_React$Component) {
             markers: [],
             lat: 38.405905,
             long: -110.792088,
-            angle: 0
+            angle: 0,
+            zoom: 16,
+            markerIcon: null
         };
         return _this;
     }
@@ -10606,14 +10608,26 @@ var MapBox = function (_React$Component) {
                 }
             });
 
-            var roverIcon = new roboIcon({ iconUrl: 'app/roverIcon2.png' });
+            var markIcon = _leaflet2.default.Icon.extend({
+                options: {
+                    iconSize: [30, 50],
+                    iconAnchor: [36, 46],
+                    popupAnchor: [0, -73]
+                }
+            });
 
-            var map = _leaflet2.default.map(this.refs.map).setView([this.state.lat, this.state.long], 16);
+            var roverIcon = new roboIcon({ iconUrl: 'app/roverIcon2.png' });
+            this.state.markerIcon = new markIcon({ iconUrl: 'app/graphicdisplay/map/leaflet/images/marker-icon.png' });
+
+            this.state.map = _leaflet2.default.map(this.refs.map).setView([this.state.lat, this.state.long], this.state.zoom);
+            var map = this.state.map;
 
             _leaflet2.default.tileLayer('app/Tiles/{z}/{x}/{y}.png', { edgeBufferTiles: 2 }).addTo(map);
+            _leaflet2.default.control.scale().addTo(map);
 
             var robotMarker = _leaflet2.default.marker([this.state.lat, this.state.long], { icon: roverIcon, rotationAngle: this.state.angle }).addTo(map);
-
+            map.setMinZoom(12);
+            map.setMaxZoom(17);
             this.setState({
                 map: map,
                 robotMarker: robotMarker
@@ -10629,7 +10643,7 @@ var MapBox = function (_React$Component) {
         value: function componentWillUpdate() {
             if (this.state.robotMarker) {
                 if (this.refs.follow.checked) {
-                    this.state.map.setView([this.state.lat, this.state.long], 16);
+                    this.state.map.setView([this.state.lat, this.state.long], this.state.zoom);
                 }
                 this.state.robotMarker.setLatLng(new _leaflet2.default.LatLng(this.state.lat, this.state.long));
                 this.state.robotMarker.setRotationAngle(this.state.angle);
@@ -10650,7 +10664,7 @@ var MapBox = function (_React$Component) {
             var lat = this.refs.LatF.value;
             var long = this.refs.LongF.value;
             var markers = this.state.markers;
-            markers.push(_leaflet2.default.marker([lat, long]).addTo(this.state.map).bindPopup(lat + ", " + long).openPopup());
+            markers.push(_leaflet2.default.marker([lat, long], { icon: this.state.markerIcon }).addTo(this.state.map).bindPopup(lat + ", " + long).openPopup());
             this.setState({ markers: markers });
         }
     }, {
@@ -10791,6 +10805,12 @@ var App = function (_React$Component) {
     }
 
     _createClass(App, [{
+        key: 'componentDidUpdate',
+        value: function componentDidUpdate(prevProps, prevState) {
+            // console.log('battery update');
+            // console.log('1: %f', this.state.battery.percent);
+        }
+    }, {
         key: 'simulateUpdates',
         value: function simulateUpdates() {
             var _this2 = this;
@@ -10831,60 +10851,89 @@ var App = function (_React$Component) {
 
             ros.connect('ws://localhost:9090');
 
-            this.initializeRosSubscribers(ros);
+            this.initializeRosSubscribers(ros, this);
+        }
+    }, {
+        key: 'updateDials',
+        value: function updateDials() {
+            var sensorData = this.state.sensorData;
+
+            //update battery data
+            sensorData.sensorGroup2.sensors.G2T1.value = this.state.battery.percent;
+            sensorData.sensorGroup2.sensors.G2T2.value = this.state.battery.current;
+            sensorData.sensorGroup2.sensors.G2T3.value = this.state.battery.voltage;
+
+            this.setState({ sensorData: sensorData });
         }
     }, {
         key: 'initializeRosSubscribers',
-        value: function initializeRosSubscribers(ros) {
+        value: function initializeRosSubscribers(ros, thisClass) {
 
-            var mappings = _topicFeeds2.default;
-
-            _.forEach(mappings, function (topic, topicName) {
-
-                var listener = void 0;
-
-                if (_.isArray(topic)) {
-
-                    listener = new ROSLIB.Topic({
-                        ros: ros,
-                        name: topicName,
-                        messageType: 'std_msgs/Float32MultiArray'
-                    });
-
-                    listener.subscribe(function (data) {
-                        var _this3 = this;
-
-                        _.forEach(topic, function (element, key) {
-                            var defaultFunc = function defaultFunc(val) {
-                                val;
-                            };
-                            var transFunc = topic.func || defaultFunc;
-                            var newData = {};
-                            newData[topic.statePath] = _this3.state[topic.statePath];
-                            _.set(newData[topic.statePath], topic.stateSubPath, transFunc(data[key]));
-                            _this3.setState(newData);
-                        });
-                    });
-                } else {
-                    listener = new ROSLIB.Topic({
-                        ros: ros,
-                        name: topicName,
-                        messageType: 'std_msgs/Float32'
-                    });
-
-                    listener.subscribe(function (data) {
-
-                        var defaultFunc = function defaultFunc(val) {
-                            val;
-                        };
-                        var transFunc = topic.func || defaultFunc;
-                        var newData = {};
-                        newData[topic.statePath] = this.state[topic.statePath];
-                        _.set(newData[topic.statePath], topic.stateSubPath, transFunc(data[key]));
-                        this.setState(newData);
-                    });
-                }
+            var listener = new ROSLIB.Topic({
+                ros: this.state.ros,
+                name: '/battery_data',
+                messageType: 'std_msgs/Float32MultiArray'
             });
+
+            listener.subscribe(function (message) {
+                console.log("got battery message");
+                thisClass.setState({
+                    battery: {
+                        percent: +message.data[0].toFixed(2),
+                        current: +message.data[1].toFixed(2),
+                        voltage: +message.data[2].toFixed(2)
+                    }
+
+                }, thisClass.updateDials);
+            });
+            // var that = this;
+
+            // const mappings = topicFeeds;
+
+
+            // _.forEach(mappings, (topic, topicName) => {
+
+            //     let listener;
+
+            //     if (_.isArray(topic)) {
+
+            //         listener = new ROSLIB.Topic({
+            //             ros,
+            //             name: topicName,
+            //             messageType: 'std_msgs/Float32MultiArray'
+            //         });
+
+            //         listener.subscribe(function(data) {
+            //             _.forEach(topic, (element, key) => {
+            //                 const defaultFunc = (val) => { val };
+            //                 const transFunc = topic.func || defaultFunc;
+            //                 const newData = {};
+            //                 newData[topic.statePath] = that.state[topic.statePath];
+            //                 _.set(newData[topic.statePath], topic.stateSubPath, transFunc(data[key]));
+            //                 that.setState(newData);
+            //             });
+            //         });
+
+
+            //     } else {
+            //         listener = new ROSLIB.Topic({
+            //             ros,
+            //             name: topicName,
+            //             messageType: 'std_msgs/Float32'
+            //         });
+
+            //         listener.subscribe(function(data) {
+
+            //             const defaultFunc = (val) => { val };
+            //             const transFunc = topic.func || defaultFunc;
+            //             const newData = {};
+            //             newData[topic.statePath] = that.state[topic.statePath];
+            //             _.set(newData[topic.statePath], topic.stateSubPath, transFunc(data));
+            //             that.setState(newData);
+            //         });
+            //     }
+
+            // });
         }
     }, {
         key: 'render',
