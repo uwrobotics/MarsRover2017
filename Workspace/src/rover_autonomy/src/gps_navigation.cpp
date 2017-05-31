@@ -14,7 +14,7 @@
 // NOTE: Make sure the "broadcast_utm_transform" parameter is set to "true" in localization.launch
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-const int MAX_LENGTH=10;
+const int MAX_LENGTH=5;
 
 void dividePath(double destX, double destY, double currX, double currY, std::vector<double> &divideX, std::vector<double> &divideY, int divisions){
     for (int x=1; x<=divisions; x++){
@@ -76,8 +76,8 @@ void move(double latitude, double longitude){
         double xTemp = xTargets[x];
         double yTemp = yTargets[x];
         ss << "xTarget: " << xTemp << ", yTarget: " << yTemp << ", divisions: " << divisions;
+        ROS_INFO("Sending goal (x,y) = (%.2f, %.2f) divided by %d ", xTemp, yTemp, divisions);
         msg.data = ss.str();
-        ROS_INFO("Sending goal: [%s]", msg.data.c_str());
         ac.sendGoal(goal);
 
         ac.waitForResult();
