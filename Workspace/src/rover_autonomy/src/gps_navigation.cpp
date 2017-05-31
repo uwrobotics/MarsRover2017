@@ -58,7 +58,7 @@ void move(double UTMEast, double UTMNorth){
 
     // Move rover sequentially to each waypoint
 
-    ROS_INFO("Beginning movement");
+    ROS_WARN("Moving to next waypoint... (%d divisions)", divisions);
 
     visualization_msgs::Marker divisions_viz;
     divisions_viz.header.frame_id = "utm";
@@ -85,7 +85,7 @@ void move(double UTMEast, double UTMNorth){
 
     divisions_viz_pub.publish(divisions_viz);
 
-    for (int i=0; i < divisions; i++) {
+    for (int i=0; i < divisions && ros::ok(); i++) {
 
         move_base_msgs::MoveBaseGoal goal;
         goal.target_pose.header.frame_id = "utm";
@@ -101,17 +101,16 @@ void move(double UTMEast, double UTMNorth){
         double xTemp = xTargets[i];
         double yTemp = yTargets[i];
         ss << "xTarget: " << xTemp << ", yTarget: " << yTemp << ", divisions: " << divisions;
-        ROS_INFO("Sending goal (x,y) = (%.2f, %.2f) divided by %d ", xTemp, yTemp, divisions);
+        ROS_INFO("Sending goal (x,y) = (%.2f, %.2f)", xTemp, yTemp);
         msg.data = ss.str();
         ac.sendGoal(goal);
 
         ac.waitForResult();
-
     }
     if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-        ROS_INFO("Movement successful");
+        ROS_WARN("Completed waypoint");
     else
-        ROS_INFO("Movement failed");
+        ROS_ERROR("Failed to complete waypoint");
 }
 
 
@@ -147,7 +146,7 @@ void receiveMessage(const rover_autonomy::gps_coord::ConstPtr& ptr){
 
     waypoints_viz_pub.publish(waypoints_viz);
 
-    for (int i=0; i<ptr->length; i++){
+    for (int i=0; i<ptr->length && ros::ok(); i++){
         move(UTMEasts[i], UTMNorths[i]);
     }
 
