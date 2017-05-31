@@ -9,7 +9,6 @@ import SensorDisplay from './sensordisplay/sensordisplay.jsx';
 import GraphicDisplay from './graphicdisplay/graphicdisplay.jsx';
 
 import sensorDisplays from './config/sensorDisplays.js';
-import topicFeeds from './config/topicFeeds.js';
 
 const MAX_TEMPERATURE = 50; //deg C
 
@@ -102,13 +101,13 @@ class App extends React.Component {
     
     initializeRosSubscribers(ros,thisClass) {
 
-        var listener = new ROSLIB.Topic({
+        var batteryListener = new ROSLIB.Topic({
             ros : this.state.ros,
             name : '/battery_data',
             messageType : 'std_msgs/Float32MultiArray'
         });
-        
-        listener.subscribe(function(message) {
+
+        batteryListener.subscribe(function(message) {
             console.log("got battery message");
             thisClass.setState(
             {
@@ -119,56 +118,7 @@ class App extends React.Component {
                 }
 
             }, thisClass.updateDials);
-        });
-        // var that = this;
-        
-        // const mappings = topicFeeds;
-        
-        
-        // _.forEach(mappings, (topic, topicName) => {
-            
-        //     let listener;
-            
-        //     if (_.isArray(topic)) {
-                
-        //         listener = new ROSLIB.Topic({
-        //             ros,
-        //             name: topicName,
-        //             messageType: 'std_msgs/Float32MultiArray'
-        //         });
-                
-        //         listener.subscribe(function(data) {
-        //             _.forEach(topic, (element, key) => {
-        //                 const defaultFunc = (val) => { val };
-        //                 const transFunc = topic.func || defaultFunc;
-        //                 const newData = {};
-        //                 newData[topic.statePath] = that.state[topic.statePath];
-        //                 _.set(newData[topic.statePath], topic.stateSubPath, transFunc(data[key]));
-        //                 that.setState(newData);
-        //             });
-        //         });
-                
-                
-        //     } else {
-        //         listener = new ROSLIB.Topic({
-        //             ros,
-        //             name: topicName,
-        //             messageType: 'std_msgs/Float32'
-        //         });
-                
-        //         listener.subscribe(function(data) {
-                    
-        //             const defaultFunc = (val) => { val };
-        //             const transFunc = topic.func || defaultFunc;
-        //             const newData = {};
-        //             newData[topic.statePath] = that.state[topic.statePath];
-        //             _.set(newData[topic.statePath], topic.stateSubPath, transFunc(data));
-        //             that.setState(newData);
-        //         });
-        //     }
-            
-        // });
-        
+        });        
     }
     
     
