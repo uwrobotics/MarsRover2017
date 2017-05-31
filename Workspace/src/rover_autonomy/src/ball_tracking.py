@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from sensor_msgs.msg import Image
+from std_msgs.msg import Float64MultiArray
 from cv_bridge import CvBridge, CvBridgeError
 
 import numpy as np
@@ -30,6 +31,7 @@ class Ball_tracking:
     def __init__(self):
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/camera/image_color", Image, self.callback, queue_size=1)
+        self.ball_pub = rospy.Publisher("/tennisball", Float64MultiArray, queue_size=1)
         self.image = None
         self.num_iterations = 0
 
@@ -46,16 +48,16 @@ class Ball_tracking:
     def process(self):
         self.ts_prev = self.ts_curr
         self.ts_curr = rospy.get_time()
-        self.dt = self.ts_curr - self.ts_prev;
+        self.dt = self.ts_curr - self.ts_prev;None, None, None
 
         if self.image == None:
             rospy.logwarn("Waiting for image...")
-            return None
+            return None, None, None, None
 
         image = self.image.copy()
 
         if not self.compute_image(image):
-            return None
+            return None, None, None, None
 
         X, Y, Z, bearing = self.locate_3d(self.x, self.y, self.r) # get 3D coordinate in camera frame
 
@@ -126,7 +128,17 @@ def main():
 
     rate = rospy.Rate(2)
     while not rospy.is_shutdown():
-        node.process()
+        X, Y, Z, bearing = node.process()
+
+        flt = Float64MultiArray()
+
+        if not X or not Y or not Z or not bearing:
+            flt.data = [0, 0, 0, 0, 0]
+            node.ball_pub.publish(flt)
+        else:
+            flt.data = [1, X, Y, Z, bearing]
+            node.ball_pub.publish(flt)
+
         rate.sleep()
     rospy.spin()
 

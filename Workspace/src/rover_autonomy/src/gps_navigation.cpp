@@ -154,7 +154,7 @@ void receiveMessage(const rover_autonomy::gps_coord::ConstPtr& ptr){
             // tell gimbal to go to an angle
             // grab a frame
             // get the tennis ball position
-            
+
             
         }
 
@@ -164,7 +164,7 @@ void receiveMessage(const rover_autonomy::gps_coord::ConstPtr& ptr){
 
 }
 
-int main(int argc, char** argv){
+main(int argc, char** argv){
     ros::init(argc, argv, "gps_navigation");
     ros::NodeHandle n;
 
