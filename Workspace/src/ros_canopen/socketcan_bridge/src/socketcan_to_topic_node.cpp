@@ -58,7 +58,6 @@ int main(int argc, char *argv[])
     else
     {
         ROS_INFO("CAN receiver successfully connected to %s.", receiver_interface.c_str());
-        ROS_INFO("TEST");
     }
     socketcan_bridge::SocketCANToTopic can_receiver(driver);
     can_receiver.init();

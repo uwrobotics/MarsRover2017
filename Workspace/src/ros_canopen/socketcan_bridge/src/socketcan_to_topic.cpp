@@ -261,8 +261,8 @@ namespace socketcan_bridge
                     ROS_INFO ("Processing sensor data");
 #endif
                     float sensorValue;
+                    uint32_t uvSensorValue;
                     uint32_t timeStamp;
-                    memcpy (&sensorValue, &msg.data, 4);
 #if DEBUG
                     ROS_INFO ("Sensor value: %f", sensorValue);
 #endif
@@ -270,10 +270,22 @@ namespace socketcan_bridge
 #if DEBUG
                     ROS_INFO ("Sensor time stamp: %x", timeStamp);
 #endif
-                    science_msgs::Sensor sensor;
-                    sensor.data = sensorValue;
-                    sensor.stamp = timeStamp;
-                    sensorData_.setScienceContainer(sensor, msg.id%SCIENCE);
+                    if (msg.id%SCIENCE == 3 || msg.id%SCIENCE == 4)
+                    {
+                        memcpy (&uvSensorValue, &msg.data, 4);
+                        science_msgs::UVSensor sensor;
+                        sensor.data = sensorValue;
+                        sensor.stamp = timeStamp;
+                        sensorData_.setScienceContainer(sensor, msg.id%SCIENCE);
+                    }
+                    else
+                    {
+                        memcpy (&sensorValue, &msg.data, 4);
+                        science_msgs::Sensor sensor;
+                        sensor.data = sensorValue;
+                        sensor.stamp = timeStamp;
+                        sensorData_.setScienceContainer(sensor, msg.id%SCIENCE);
+                    }
                 }
                 science_msg = sensorData_.getScienceContainer();
 #if DEBUG

@@ -19,6 +19,7 @@ namespace socketcan_bridge
             void setCurrentSensors(float value, uint8_t id);
             void setScienceContainer(uint32_t sciLimSwitch);
             void setScienceContainer(science_msgs::Sensor sensor, uint8_t id);
+            void setScienceContainer(science_msgs::UVSensor sensor, uint8_t id);
             // void setLimitSwitches(uint32_t value, uint8_t id);
             std::vector <float> getThermistors(void);
             std::vector <float> getCurrentSensors(void);

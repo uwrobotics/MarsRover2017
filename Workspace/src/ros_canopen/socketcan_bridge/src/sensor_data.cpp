@@ -42,17 +42,7 @@ namespace socketcan_bridge // TODO Use this class for sending limit switch data
 
     void SensorData::setScienceContainer(science_msgs::Sensor sensor, uint8_t id)
     {
-        if (id == 3)
-        {
-            container_.UVSensor.data = sensor.data;
-            container_.UVSensor.stamp = sensor.stamp;
-        }
-        else if (id == 4)
-        {
-            container_.gasSensor.data = sensor.data;
-            container_.gasSensor.stamp = sensor.stamp;
-        }
-        else if (id%2 == 0)
+        if (id%2 == 0)
         {
             tempSensors_[id/2-3].data = sensor.data;
             tempSensors_[id/2-3].stamp = sensor.stamp;
@@ -66,6 +56,19 @@ namespace socketcan_bridge // TODO Use this class for sending limit switch data
         }
     }
 
+    void SensorData::setScienceContainer(science_msgs::UVSensor sensor, uint8_t id)
+    {
+        if (id == 3)
+        {
+            container_.uvSensor.data = sensor.data;
+            container_.uvSensor.stamp = sensor.stamp;
+        }
+        else if (id == 4)
+        {
+            container_.gasSensor.data = sensor.data;
+            container_.gasSensor.stamp = sensor.stamp;
+        }
+    }
     // void SensorData::setLimitSwitches(uint32_t value, uint8_t id)
     // {
     // 	limitSwitches_[id] = value;

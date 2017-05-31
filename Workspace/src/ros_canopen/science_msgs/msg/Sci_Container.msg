@@ -1,5 +1,5 @@
 uint32 limitSwitch
-Sensor UVSensor
-Sensor gasSensor
+UVSensor uvSensor
+UVSensor gasSensor
 Sensor[] tempSensors
 Sensor[] humiditySensors
