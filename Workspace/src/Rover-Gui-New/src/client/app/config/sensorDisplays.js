@@ -1,19 +1,28 @@
 module.exports = {
    "sensorGroup1": {
-      "groupDisplayName": "Group 1",
+      "groupDisplayName": "Battery",
       "sensors": {
-         "G1T1": {
-            "displayName": "G1 Temp 1",
-            "type": "temp",
+         "D1": {
+            "displayName": "Battery %",
+            "type": "none",
             "minValue": 0,
             "warnValue": 60,
             "criticalValue": 80,
             "maxValue": 100,
             "value": 40
          },
-         "G1T2": {
-            "displayName": "G1 Current 1",
+         "D2": {
+            "displayName": "Battery Current",
             "type": "current",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 40
+         },
+         "D3": {
+            "displayName": "Battery Voltage",
+            "type": "voltage",
             "minValue": 0,
             "warnValue": 60,
             "criticalValue": 80,
@@ -23,48 +32,84 @@ module.exports = {
       }
    },
    "sensorGroup2": {
-      "groupDisplayName": "Group 2",
+      "groupDisplayName": "Left Drive",
       "sensors": {
-         "G2T1": {
-            "displayName": "G2 Temp1",
-            "type": "temp",
+         "D1": {
+            "displayName": "Current",
+            "type": "current",
             "minValue": 0,
             "warnValue": 60,
             "criticalValue": 80,
             "maxValue": 100,
-            "value": 72
+            "value": 0
          },
-         "G2T2": {
-            "displayName": "G2 Temp2",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 94
-         },
-         "G2T3": {
-            "displayName": "G2 Temp3",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 40
-         }
-      }
-   },
-   "sensorGroup3": {
-      "groupDisplayName": "Sensor Group 3 Name Here",
-      "sensors": {
-         "G3T1": {
-            "displayName": "G3 Voltage 1",
+         "D2": {
+            "displayName": "Voltage",
             "type": "voltage",
             "minValue": 0,
             "warnValue": 60,
             "criticalValue": 80,
             "maxValue": 100,
-            "value": 40
+            "value": 0
+         },
+         "D3": {
+            "displayName": "Velocity",
+            "type": "none",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
+         },
+         "D4": {
+            "displayName": "Temperature",
+            "type": "temp",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
+         }
+      }
+   },
+   "sensorGroup3": {
+      "groupDisplayName": "Right Drive",
+      "sensors": {
+         "D1": {
+            "displayName": "Current",
+            "type": "current",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
+         },
+         "D2": {
+            "displayName": "Voltage",
+            "type": "voltage",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
+         },
+         "D3": {
+            "displayName": "Velocity",
+            "type": "none",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
+         },
+         "D4": {
+            "displayName": "Temperature",
+            "type": "temp",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
          }
       }
    },
