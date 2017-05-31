@@ -37,9 +37,9 @@ const int CLAW_OPEN = 1.0; //Must either be 1 or -1, change so that pressing Rig
 const int NUM_AXES_DATA = 3;
 const int NUM_BUTTONS_DATA = 10;
 const int NUM_BYTES_IN_FLOAT = 4;
-const int ID_WRIST_FRAME = 68;
-const int ID_FOREARM_FRAME = 69;
-const int ID_SHOULDER_FRAME = 70;
+const int ID_WRIST_FRAME = 502;
+const int ID_FOREARM_FRAME = 501;
+const int ID_SHOULDER_FRAME = 500;
 
 
 float dutyWriteClaw = 0;
