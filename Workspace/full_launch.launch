@@ -1,0 +1,36 @@
+<launch>
+    <machine name="archieleepc" address="192.168.3.10" env-loader="/opt/ros/indigo/env.sh"/>
+    <machine name="ubuntu-TP" address="192.168.2.10" env-loader="/opt/ros/indigo/env.sh"/>
+
+    <!-- Cameras -->
+    <include file="$(find rover_camera)/launch/pg_cam.launch"/>
+
+    <!-- CAN -->
+    <include file="$(find socketcan_bridge)/launch/can_interface.launch"/>
+
+    <!-- Arm -->
+    <include file="$(find arm_control)/launch/arm_control.launch"/>
+
+    <!-- Gimbal -->
+    <node machine="archieleepc" pkg="gimbal_control" type="gimbal_control.py" name="gimbal_control" respawn="true"/>
+
+    <!-- Teleop -->
+    <include file="$(find teleop_twist_joy)/launch/teleop.launch"/>
+    <include file="$(find roboteq_driver)/launch/example.launch"/>
+    <node pkg="roboteq_driver" type="driver_node" name="driver_node" respawn="true"/>
+    <node pkg="rover_joy" type="rover_joy_node" name="rover_joy" respawn ="true"/>
+    <include file="$(find twist_mux)/launch/rover_twist_mux.launch"/>
+
+    <!-- Autonomy -->
+    <node pkg="rover_joy" type="rover_encoder_odom" name="rover_encoder_odom" respawn="true"/>
+    <include file="$(find rover_autonomy)/launch/localization.launch"/>
+    <include file="$(find rover_autonomy)/launch/navigation.launch"/>
+    <node pkg="rover_autonomy" type="fake_laser.py" name="fake_laser" respawn="true"/>
+    <node pkg="rover_autonomy" type="gps_navigation_node" name="gps_navigation" respawn="true"/>
+    <include file="$(find microstrain_3dm_gx5_45)/launch/microstrain_3dm-gx3-35.launch"/>
+
+    <!-- Camera Config/Image View -->
+    <include file="$(find rover_camera)/launch/pg_cam_config.launch"/>
+    <node machine="ubuntu-TP" pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view" respawn="true"/>
+
+</launch>

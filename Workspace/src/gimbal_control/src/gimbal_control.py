@@ -38,9 +38,9 @@ class GimbalController:
 		self._node = rospy.init_node('gimbal_control', anonymous=True)
 		self._joySub = rospy.Subscriber(sub_topic, Int32MultiArray, self.gimbalCallback)
 		self._canPub = rospy.Publisher(pub_topic, Frame, queue_size=20)
-		self._pan = 90
+		self._pan = 0
 		self._tilt = 0
-		self._lastpan = 90
+		self._lastpan = 0
 		self._lasttilt = 0
 		self._id = 600 # CAN id
 		self.startGimbal();
@@ -53,10 +53,31 @@ class GimbalController:
 	# Joystick ROS callback
 	def gimbalCallback(self, gimbalMsg):
 		if gimbalMsg.data[0] != -999: #invalid angle
-			self._pan = gimbalMsg.data[0]
+			if gimbalMsg.data[0] == 1000: #increment
+				self._pan += 10
+			elif gimbalMsg.data[0] == 1001: #decrement
+				self._pan -= 10
+			else:
+				self._pan = gimbalMsg.data[0]
+
+		if self._pan < -180:
+			self._pan = -180
+		if self._pan > 180:
+			self._pan = 180
 
 		if gimbalMsg.data[1] != -999:
-			self._tilt = gimbalMsg.data[1]
+			if gimbalMsg.data[1] == 1000: #increment
+				self._tilt += 10
+			elif gimbalMsg.data[1] == 1001: #decrement
+				self._tilt -= 10
+			else:
+				self._tilt = gimbalMsg.data[1]
+		
+		if self._tilt < -60:
+			self._tilt = -60
+		if self._tilt > 60:
+			self._tilt = 60
+
 		print 'Sending to Gimbal: Pan: %d Tilt: %d' % (self._pan, self._tilt)
 		self.sendAngle()
 

@@ -1,12 +1,14 @@
 <launch>
-        <!-- Joy -->
-        <node pkg="joy" type="joy_node" name="joy0" ns="joy0" respawn="true" output="screen">
-                <param name="dev" value="/dev/input/js1"/>
-        </node>
+    <machine name="archieleepc" address="192.168.3.10" env-loader="/opt/ros/indigo/env.sh"/>
 
-        <node pkg="joy" type="joy_node" name="joy1" ns="joy1" respawn="true" output="screen">
-                <param name="dev" value="/dev/input/js2"/>
-        </node>
+    <!-- Joy -->
+    <node machine="archieleepc" pkg="joy" type="joy_node" name="joy0" ns="joy0" respawn="true" output="screen">
+            <param name="dev" value="/dev/input/js1"/>
+    </node>
 
-        <node pkg="arm_control" type="arm_control" name="arm_control" respawn="true" output="screen"/>
+    <node machine="archieleepc" pkg="joy" type="joy_node" name="joy1" ns="joy1" respawn="true" output="screen">
+            <param name="dev" value="/dev/input/js2"/>
+    </node>
+
+    <node machine="archieleepc" pkg="arm_control" type="arm_control" name="arm_control" respawn="true" output="screen"/>
 </launch>

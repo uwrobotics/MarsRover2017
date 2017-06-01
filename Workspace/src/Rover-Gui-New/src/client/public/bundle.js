@@ -9951,13 +9951,124 @@ var GraphicDisplay = function (_React$Component) {
     }
 
     _createClass(GraphicDisplay, [{
+        key: 'moveUp',
+
+
+        //1000 to go 10 degrees positive (CCW (left) pan, down tilt)
+        //1001 to go down 10 degrees
+        value: function moveUp() {
+            //ros = this.props.ros;
+            console.log('moving up');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [-999, 1001]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
+        key: 'moveLeft',
+        value: function moveLeft() {
+            //ros = this.props.ros;
+            console.log('moving left');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [1000, -999]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
+        key: 'moveRight',
+        value: function moveRight() {
+            //ros = this.props.ros;
+            console.log('moving right');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [1001, -999]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
+        key: 'moveDown',
+        value: function moveDown() {
+            //ros = this.props.ros;
+            console.log('moving down');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [-999, 1000]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
+        key: 'moveReset',
+        value: function moveReset() {
+            //ros = this.props.ros;
+            console.log('resetting gimbal');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [0, 0]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
         key: 'render',
         value: function render() {
             return _react2.default.createElement(
                 'div',
                 { className: 'graphicdisplay' },
                 _react2.default.createElement(_controlbox2.default, { ros: this.props.ros, dir: this.props.dir }),
-                _react2.default.createElement(_map2.default, { lat: this.props.lat, lon: this.props.lon, dir: this.props.dir })
+                _react2.default.createElement(_map2.default, { lat: this.props.lat, lon: this.props.lon, dir: this.props.dir }),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'buttons' },
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveUp.bind(this) },
+                        'UP'
+                    ),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveLeft.bind(this) },
+                        'LEFT'
+                    ),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveRight.bind(this) },
+                        'RIGHT'
+                    ),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveDown.bind(this) },
+                        'DOWN'
+                    ),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveReset.bind(this) },
+                        'Reset to 0,0'
+                    )
+                )
             );
         }
     }]);
@@ -10810,6 +10921,18 @@ var App = function (_React$Component) {
                 voltage: 0,
                 velocity: 0,
                 temperature: 0
+            },
+            limitWrist: {
+                sw1: 0,
+                sw2: 0
+            },
+            limitForearm: {
+                sw1: 0,
+                sw2: 0
+            },
+            limitShoulder: {
+                sw1: 0,
+                sw2: 0
             }
         };
         _this.setUpROS(_this.state.ros);
@@ -10914,6 +11037,36 @@ var App = function (_React$Component) {
                         voltage: msg.supply_voltage,
                         velocity: msg.measured_velocity,
                         temperature: msg.channel_temperature
+                    }
+                }, thisClass.updateDials);
+            });
+
+            var navsatListener = new ROSLIB.Topic({
+                ros: this.state.ros,
+                name: '/navsat/fix',
+                messageType: 'sensor_msgs/NavSatFix'
+            });
+            navsatListener.subscribe(function (msg) {
+                console.log("got gps");
+                thisClass.setState({
+                    gps: {
+                        lat: msg.latitude,
+                        lon: msg.longitude
+                    }
+                }, thisClass.updateDials);
+            });
+
+            var limitWristListener = new ROSLIB.Topic({
+                ros: this.state.ros,
+                name: '/switchesWristFlags',
+                messageType: 'std_msgs/UInt8'
+            });
+            limitWristListener.subscribe(function (msg) {
+                console.log("got gps");
+                thisClass.setState({
+                    limitWrist: {
+                        sw1: 1,
+                        sw2: 1
                     }
                 }, thisClass.updateDials);
             });
@@ -14321,7 +14474,7 @@ exports = module.exports = __webpack_require__(14)(true);
 
 
 // module
-exports.push([module.i, ".graphicdisplay {\n  min-width: 700px;\n  max-width: 700px;\n  flex-grow: 0;\n  height: 100%;\n  background-color: #0E1820;\n  border-left: 4px solid #eee;\n  display: flex;\n  flex-direction: column;\n  padding: 0 6px 0 6px;\n}\n", "", {"version":3,"sources":["/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/graphicdisplay.less","/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/graphicdisplay.less"],"names":[],"mappings":"AAAA;EACI,iBAAA;EACA,iBAAA;EACA,aAAA;EACA,aAAA;EACA,0BAAA;EACA,4BAAA;EACA,cAAA;EACA,uBAAA;EACA,qBAAA;CCCH","file":"graphicdisplay.less","sourcesContent":[".graphicdisplay {\n    min-width: 700px;\n    max-width: 700px;\n    flex-grow: 0;\n    height: 100%;\n    background-color: #0E1820;\n    border-left: 4px solid #eee;\n    display: flex;\n    flex-direction: column;\n    padding: 0 6px 0 6px;\n}",".graphicdisplay {\n  min-width: 700px;\n  max-width: 700px;\n  flex-grow: 0;\n  height: 100%;\n  background-color: #0E1820;\n  border-left: 4px solid #eee;\n  display: flex;\n  flex-direction: column;\n  padding: 0 6px 0 6px;\n}\n"],"sourceRoot":""}]);
+exports.push([module.i, ".graphicdisplay {\n  min-width: 700px;\n  max-width: 700px;\n  flex-grow: 0;\n  height: 100%;\n  background-color: #0E1820;\n  border-left: 4px solid #eee;\n  display: flex;\n  flex-direction: column;\n  padding: 0 6px 0 6px;\n}\n.buttons {\n  text-align: center;\n  width: 480px;\n}\n", "", {"version":3,"sources":["/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/graphicdisplay.less","/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/graphicdisplay.less"],"names":[],"mappings":"AAAA;EACI,iBAAA;EACA,iBAAA;EACA,aAAA;EACA,aAAA;EACA,0BAAA;EACA,4BAAA;EACA,cAAA;EACA,uBAAA;EACA,qBAAA;CCCH;ADED;EACI,mBAAA;EACA,aAAA;CCAH","file":"graphicdisplay.less","sourcesContent":[".graphicdisplay {\n    min-width: 700px;\n    max-width: 700px;\n    flex-grow: 0;\n    height: 100%;\n    background-color: #0E1820;\n    border-left: 4px solid #eee;\n    display: flex;\n    flex-direction: column;\n    padding: 0 6px 0 6px;\n}\n\n.buttons{\n    text-align:center;\n    width:480px;\n}",".graphicdisplay {\n  min-width: 700px;\n  max-width: 700px;\n  flex-grow: 0;\n  height: 100%;\n  background-color: #0E1820;\n  border-left: 4px solid #eee;\n  display: flex;\n  flex-direction: column;\n  padding: 0 6px 0 6px;\n}\n.buttons {\n  text-align: center;\n  width: 480px;\n}\n"],"sourceRoot":""}]);
 
 // exports
 
