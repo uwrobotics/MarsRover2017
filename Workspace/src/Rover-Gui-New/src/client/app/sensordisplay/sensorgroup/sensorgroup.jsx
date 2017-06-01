@@ -65,6 +65,16 @@ class SensorGroup extends React.Component {
                     units='V' 
                     displayName={sensor.displayName}
                 />)
+            } else if (sensor.type === 'none') {
+                return (<DialGraph 
+                    currentValue={sensor.value} 
+                    minValue={sensor.minValue}
+                    warnValue={sensor.warnValue}
+                    criticalValue={sensor.criticalValue}
+                    maxValue={sensor.maxValue}
+                    units='' 
+                    displayName={sensor.displayName}
+                />)
             }
         })
     }

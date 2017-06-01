@@ -18,6 +18,11 @@ typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseCl
 const int MAX_LENGTH=5;
 ros::Publisher waypoints_viz_pub, divisions_viz_pub;
 
+bool received_new_point = false;
+std::vector<double> way_pts_utm_east;
+std::vector<double> way_pts_utm_north;
+int num_waypoints = 0;
+
 void dividePath(double destX, double destY, double currX, double currY, std::vector<double> &divideX, std::vector<double> &divideY, int divisions){
     for (int x=1; x<=divisions; x++){
         divideX[x-1]=currX*(1-(x*1.0)/divisions) + destX * (x*1.0)/divisions;
@@ -108,15 +113,16 @@ void move(double UTMEast, double UTMNorth){
         ac.waitForResult();
     }
     if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-        ROS_WARN("Completed waypoint");
+        ROS_WARN("Completed move_base nav to waypoint");
     else
-        ROS_ERROR("Failed to complete waypoint");
+        ROS_ERROR("Failed move move_base nav waypoint");
 }
 
 
 void receiveMessage(const rover_autonomy::gps_coord::ConstPtr& ptr){
-    std::vector<double> UTMEasts(ptr->length);
-    std::vector<double> UTMNorths(ptr->length);
+    // std::vector<double> UTMEasts(ptr->length);
+    // std::vector<double> UTMNorths(ptr->length);
+    num_waypoints = ptr->length;
 
     visualization_msgs::Marker waypoints_viz;
     waypoints_viz.header.frame_id = "utm";
@@ -134,25 +140,43 @@ void receiveMessage(const rover_autonomy::gps_coord::ConstPtr& ptr){
 
     for (int i = 0; i < ptr->length; i++) {
         std::string UTMZone;
+        double utm_east, utm_north;
         RobotLocalization::NavsatConversions::LLtoUTM(ptr->latitudes[i], ptr->longitudes[i],
-            UTMNorths[i], UTMEasts[i], UTMZone); // Converts lat/long to UTM east/west
+            utm_north, utm_east, UTMZone); // Converts lat/long to UTM east/west
+
+        way_pts_utm_east.push_back(utm_east);
+        way_pts_utm_north.push_back(utm_north);
 
         geometry_msgs::Point pt_viz;
-        pt_viz.x = UTMEasts[i];
-        pt_viz.y = UTMNorths[i];
+        pt_viz.x = utm_east;
+        pt_viz.y = utm_north;
         pt_viz.z = 0;
         waypoints_viz.points.push_back(pt_viz);
     }
 
     waypoints_viz_pub.publish(waypoints_viz);
 
-    for (int i=0; i<ptr->length && ros::ok(); i++){
-        move(UTMEasts[i], UTMNorths[i]);
-    }
+    received_new_point = true;
+
+    // for (int i=0; i<ptr->length && ros::ok(); i++){
+    //     move(UTMEasts[i], UTMNorths[i]);
+
+    //     // tennis ball detection
+    //     for (angle = 0; angle < 360; angles+=15) {
+    //         // tell gimbal to go to an angle
+    //         // grab a frame
+    //         // get the tennis ball position
+
+            
+    //     }
+
+    //     // find the tennis ball
+
+    // }
 
 }
 
-int main(int argc, char** argv){
+main(int argc, char** argv){
     ros::init(argc, argv, "gps_navigation");
     ros::NodeHandle n;
 
@@ -160,7 +184,68 @@ int main(int argc, char** argv){
     waypoints_viz_pub = n.advertise<visualization_msgs::Marker>("waypoints_viz", 1, true);
     divisions_viz_pub = n.advertise<visualization_msgs::Marker>("divisions_viz", 1, true);
 
-    ros::spin();
+    ros::Rate loop_rate(10);    //20Hz update rate
+
+    const int STATE_WAITING_FOR_WAYPOINTS = 0, 
+              STATE_MOVE_BASE_NAV = 1,
+              STATE_TENNIS_BALL_NAV = 2,
+              STATE_TEAR_DOWN = 3;
+    int state = STATE_WAITING_FOR_WAYPOINTS;
+    int idx_waypoint = 0;
+
+    while (ros::ok()) {
+        loop_rate.sleep(); //Maintain the loop rate
+        ros::spinOnce();   //Check for new messages
+        
+        if (state == STATE_WAITING_FOR_WAYPOINTS) {
+            ROS_WARN("state = STATE_WAITING_FOR_WAYPOINTS");
+
+            if (received_new_point) {
+                idx_waypoint = 0;
+
+                received_new_point = false;
+                state = STATE_MOVE_BASE_NAV;
+                ROS_WARN("Switching to STATE_MOVE_BASE_NAV");
+            }
+        }
+
+        else if (state == STATE_MOVE_BASE_NAV) {
+            ROS_WARN("state = STATE_MOVE_BASE_NAV");
+            move(way_pts_utm_east[idx_waypoint], way_pts_utm_north[idx_waypoint]);
+            state = STATE_TENNIS_BALL_NAV;
+            ROS_WARN("Switching to STATE_TENNIS_BALL_NAV");
+        }
+
+        else if (state == STATE_TENNIS_BALL_NAV) {
+            ROS_WARN("state = STATE_TENNIS_BALL_NAV");
+
+            for (angle = 0; angle < 360; angles+=15) {
+            }
+            
+            idx_waypoint++;
+
+            if (idx_waypoint >= num_waypoints) {
+                state = STATE_TEAR_DOWN;
+
+                ROS_WARN("Switching to STATE_TEAR_DOWN");
+            }
+
+        }
+
+        else if (state == STATE_TEAR_DOWN) {
+            ROS_WARN("state = STATE_TEAR_DOWN");
+            idx_waypoint = 0;
+            way_pts_utm_north.clear();
+            way_pts_utm_east.clear();
+            state = STATE_WAITING_FOR_WAYPOINTS;
+            ROS_WARN("Switching to STATE_WAITING_FOR_WAYPOINTS");
+        }
+
+        else {
+            ROS_ERROR("This should never happen.");
+        }
+
+    }
 
     return 0;
 }
