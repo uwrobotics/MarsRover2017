@@ -1,9 +1,9 @@
 <launch>
-    <machine name="archieleepc" address="192.168.3.10" env-loader="/opt/ros/indigo/env.sh"/>
-    <machine name="ubuntu-TP" address="192.168.2.10" env-loader="/opt/ros/indigo/env.sh"/>
+    <machine name="archieleepc" user="archie" address="192.168.3.10" env-loader="/home/archie/git/robotics/MarsRover2017/Workspace/devel/env.sh"/>
+    <machine name="ubuntu-TP" user="lichunshang" address="192.168.2.10" env-loader="/home/lichunshang/Documents/MarsRover2017/Workspace/devel/env.sh"/>
 
     <!-- Cameras -->
-    <include file="$(find rover_camera)/launch/pg_cam.launch"/>
+    <include file="$(find rover_cameras)/launch/pg_cam.launch"/>
 
     <!-- CAN -->
     <include file="$(find socketcan_bridge)/launch/can_interface.launch"/>
@@ -11,8 +11,17 @@
     <!-- Arm -->
     <include file="$(find arm_control)/launch/arm_control.launch"/>
 
-    <!-- Gimbal -->
-    <node machine="archieleepc" pkg="gimbal_control" type="gimbal_control.py" name="gimbal_control" respawn="true"/>
+    <!-- Image saver -->
+    <node pkg="image_view" type="image_saver" name="image_saver" args="/cam0/image_raw" respawn="true">
+         <param name="save_all_image" value="false"/>
+         <param name="filename_format" value="$HOME/pano_images/image%04i.jpg"/>
+    </node>
+
+    <group>
+        <machine name="archieleepc" user="archie" address="192.168.3.10" env-loader="/home/archie/git/robotics/MarsRover2017/Workspace/devel/env.sh"/>
+        <node pkg="gimbal_control" type="gimbal_control.py" name="gimbal_control" respawn="true"/>
+    </group>
+
 
     <!-- Teleop -->
     <include file="$(find teleop_twist_joy)/launch/teleop.launch"/>
@@ -30,7 +39,7 @@
     <include file="$(find microstrain_3dm_gx5_45)/launch/microstrain_3dm-gx3-35.launch"/>
 
     <!-- Camera Config/Image View -->
-    <include file="$(find rover_camera)/launch/pg_cam_config.launch"/>
-    <node machine="ubuntu-TP" pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view" respawn="true"/>
+    <include file="$(find rover_cameras)/launch/pg_cam_config.launch"/>
+    <!--<node machine="ubuntu-TP" pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view" respawn="true"/>-->
 
 </launch>
