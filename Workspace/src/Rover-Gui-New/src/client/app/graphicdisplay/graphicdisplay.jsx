@@ -66,6 +66,19 @@ class GraphicDisplay extends React.Component {
         });
         gimbal.publish(msg);
     }
+    moveReset(){
+        //ros = this.props.ros;
+        console.log('resetting gimbal');
+        var gimbal = new ROSLIB.Topic({
+            ros: this.props.ros,
+            name: '/gimbal_cmd',
+            messageType: 'std_msgs/Int32MultiArray',
+        })
+        var msg = new ROSLIB.Message({
+            data: [0, 0],
+        });
+        gimbal.publish(msg);
+    }
 
 
     render() {
@@ -77,7 +90,8 @@ class GraphicDisplay extends React.Component {
                     <button onClick={this.moveUp.bind(this)}>UP</button><br></br>
                     <button onClick={this.moveLeft.bind(this)}>LEFT</button>
                     <button onClick={this.moveRight.bind(this)}>RIGHT</button><br></br>
-                    <button onClick={this.moveDown.bind(this)}>DOWN</button>
+                    <button onClick={this.moveDown.bind(this)}>DOWN</button><br></br>
+                    <button onClick={this.moveReset.bind(this)}>Reset to 0,0</button>
                 </div>
             </div>
         );

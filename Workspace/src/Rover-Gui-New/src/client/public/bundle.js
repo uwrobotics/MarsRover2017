@@ -10015,6 +10015,21 @@ var GraphicDisplay = function (_React$Component) {
             gimbal.publish(msg);
         }
     }, {
+        key: 'moveReset',
+        value: function moveReset() {
+            //ros = this.props.ros;
+            console.log('resetting gimbal');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [0, 0]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
         key: 'render',
         value: function render() {
             return _react2.default.createElement(
@@ -10046,6 +10061,12 @@ var GraphicDisplay = function (_React$Component) {
                         'button',
                         { onClick: this.moveDown.bind(this) },
                         'DOWN'
+                    ),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveReset.bind(this) },
+                        'Reset to 0,0'
                     )
                 )
             );
