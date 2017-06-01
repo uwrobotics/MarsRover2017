@@ -215,8 +215,12 @@ main(int argc, char** argv){
         else if (state == STATE_MOVE_BASE_NAV) {
             ROS_WARN("state = STATE_MOVE_BASE_NAV");
             move(way_pts_utm_east[idx_waypoint], way_pts_utm_north[idx_waypoint]);
+
             state = STATE_TENNIS_BALL_SEARCH;
             ROS_WARN("Switching to STATE_TENNIS_BALL_SEARCH");
+
+            // state = STATE_TEAR_DOWN;
+            // ROS_WARN("Switching to STATE_TEAR_DOWN");
         }
 
         else if (state == STATE_TENNIS_BALL_SEARCH) {
@@ -237,10 +241,13 @@ main(int argc, char** argv){
                 gimbal_pub.publish(pub_data);
 
                 // wait for 2 seconds
-                ros::Duration(2).sleep();
+                // ros::Duration(2).sleep();
 
                 // read the ball position
                 if (ball_valid) {
+                    ball_valid_cpy = ball_valid;
+                    ball_dist_cpy = ball_dist;
+                    ball_bearing_cpy = ball_bearing;
                     break;
                 }
             }
@@ -265,11 +272,15 @@ main(int argc, char** argv){
         }
 
         else if (state == STATE_TENNIS_BALL_NAV_YAW) {
-
+            ROS_WARN("state = STATE_TENNIS_BALL_NAV_YAW");
+            state = STATE_TENNIS_BALL_NAV_YAW;
+            ROS_WARN("Switching to STATE_TENNIS_BALL_NAV_YAW");
         }
 
         else if (state == STATE_TENNIS_BALL_NAV_DIST) {
-
+            ROS_WARN("state = STATE_TENNIS_BALL_NAV_DIST");
+            state = STATE_TEAR_DOWN;
+            ROS_WARN("Switching to STATE_TEAR_DOWN");
         }
 
         else if (state == STATE_TEAR_DOWN) {
