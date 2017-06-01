@@ -24,8 +24,8 @@ def main():
         scan.time_increment = 0;
         scan.scan_time = 0
         scan.range_min = 0.10000000149
-        scan.range_max = 30.0
-        scan.ranges = [10] * 720
+        scan.range_max = 40.0
+        scan.ranges = [30] * 720
 
         pub.publish(scan)
 
