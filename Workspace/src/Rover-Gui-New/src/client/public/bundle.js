@@ -9951,13 +9951,124 @@ var GraphicDisplay = function (_React$Component) {
     }
 
     _createClass(GraphicDisplay, [{
+        key: 'moveUp',
+
+
+        //1000 to go 10 degrees positive (CCW (left) pan, down tilt)
+        //1001 to go down 10 degrees
+        value: function moveUp() {
+            //ros = this.props.ros;
+            console.log('moving up');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [-999, 1001]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
+        key: 'moveLeft',
+        value: function moveLeft() {
+            //ros = this.props.ros;
+            console.log('moving left');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [1000, -999]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
+        key: 'moveRight',
+        value: function moveRight() {
+            //ros = this.props.ros;
+            console.log('moving right');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [1001, -999]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
+        key: 'moveDown',
+        value: function moveDown() {
+            //ros = this.props.ros;
+            console.log('moving down');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [-999, 1000]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
+        key: 'moveReset',
+        value: function moveReset() {
+            //ros = this.props.ros;
+            console.log('resetting gimbal');
+            var gimbal = new ROSLIB.Topic({
+                ros: this.props.ros,
+                name: '/gimbal_cmd',
+                messageType: 'std_msgs/Int32MultiArray'
+            });
+            var msg = new ROSLIB.Message({
+                data: [0, 0]
+            });
+            gimbal.publish(msg);
+        }
+    }, {
         key: 'render',
         value: function render() {
             return _react2.default.createElement(
                 'div',
                 { className: 'graphicdisplay' },
                 _react2.default.createElement(_controlbox2.default, { ros: this.props.ros, dir: this.props.dir }),
-                _react2.default.createElement(_map2.default, { lat: this.props.lat, lon: this.props.lon, dir: this.props.dir })
+                _react2.default.createElement(_map2.default, { lat: this.props.lat, lon: this.props.lon, dir: this.props.dir }),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'buttons' },
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveUp.bind(this) },
+                        'UP'
+                    ),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveLeft.bind(this) },
+                        'LEFT'
+                    ),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveRight.bind(this) },
+                        'RIGHT'
+                    ),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveDown.bind(this) },
+                        'DOWN'
+                    ),
+                    _react2.default.createElement('br', null),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: this.moveReset.bind(this) },
+                        'Reset to 0,0'
+                    )
+                )
             );
         }
     }]);
@@ -10132,20 +10243,29 @@ webpackContext.id = 87;
 
 module.exports = {
    "sensorGroup1": {
-      "groupDisplayName": "Group 1",
+      "groupDisplayName": "Battery",
       "sensors": {
-         "G1T1": {
-            "displayName": "G1 Temp 1",
-            "type": "temp",
+         "D1": {
+            "displayName": "Battery %",
+            "type": "none",
             "minValue": 0,
             "warnValue": 60,
             "criticalValue": 80,
             "maxValue": 100,
             "value": 40
          },
-         "G1T2": {
-            "displayName": "G1 Current 1",
+         "D2": {
+            "displayName": "Battery Current",
             "type": "current",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 40
+         },
+         "D3": {
+            "displayName": "Battery Voltage",
+            "type": "voltage",
             "minValue": 0,
             "warnValue": 60,
             "criticalValue": 80,
@@ -10155,48 +10275,84 @@ module.exports = {
       }
    },
    "sensorGroup2": {
-      "groupDisplayName": "Group 2",
+      "groupDisplayName": "Left Drive",
       "sensors": {
-         "G2T1": {
-            "displayName": "G2 Temp1",
-            "type": "temp",
+         "D1": {
+            "displayName": "Current",
+            "type": "current",
             "minValue": 0,
             "warnValue": 60,
             "criticalValue": 80,
             "maxValue": 100,
-            "value": 72
+            "value": 0
          },
-         "G2T2": {
-            "displayName": "G2 Temp2",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 94
-         },
-         "G2T3": {
-            "displayName": "G2 Temp3",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 40
-         }
-      }
-   },
-   "sensorGroup3": {
-      "groupDisplayName": "Sensor Group 3 Name Here",
-      "sensors": {
-         "G3T1": {
-            "displayName": "G3 Voltage 1",
+         "D2": {
+            "displayName": "Voltage",
             "type": "voltage",
             "minValue": 0,
             "warnValue": 60,
             "criticalValue": 80,
             "maxValue": 100,
-            "value": 40
+            "value": 0
+         },
+         "D3": {
+            "displayName": "Velocity",
+            "type": "none",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
+         },
+         "D4": {
+            "displayName": "Temperature",
+            "type": "temp",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
+         }
+      }
+   },
+   "sensorGroup3": {
+      "groupDisplayName": "Right Drive",
+      "sensors": {
+         "D1": {
+            "displayName": "Current",
+            "type": "current",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
+         },
+         "D2": {
+            "displayName": "Voltage",
+            "type": "voltage",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
+         },
+         "D3": {
+            "displayName": "Velocity",
+            "type": "none",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
+         },
+         "D4": {
+            "displayName": "Temperature",
+            "type": "temp",
+            "minValue": 0,
+            "warnValue": 60,
+            "criticalValue": 80,
+            "maxValue": 100,
+            "value": 0
          }
       }
    },
@@ -10753,43 +10909,38 @@ var App = function (_React$Component) {
                 maxCurrent: 100,
                 maxVoltage: 12,
                 minVoltage: 10
+            },
+            roboteq_ch1: {
+                current: 0,
+                voltage: 0,
+                velocity: 0,
+                temperature: 0
+            },
+            roboteq_ch2: {
+                current: 0,
+                voltage: 0,
+                velocity: 0,
+                temperature: 0
+            },
+            limitWrist: {
+                sw1: 0,
+                sw2: 0
+            },
+            limitForearm: {
+                sw1: 0,
+                sw2: 0
+            },
+            limitShoulder: {
+                sw1: 0,
+                sw2: 0
             }
         };
         _this.setUpROS(_this.state.ros);
-        _this.simulateUpdates();
 
         return _this;
     }
 
     _createClass(App, [{
-        key: 'componentDidUpdate',
-        value: function componentDidUpdate(prevProps, prevState) {
-            // console.log('battery update');
-            // console.log('1: %f', this.state.battery.percent);
-        }
-    }, {
-        key: 'simulateUpdates',
-        value: function simulateUpdates() {
-            var _this2 = this;
-
-            var inte = setInterval(function () {
-                var rand = Math.random();
-                var incAmount = rand > 0.5 ? -0.3 : 0.3;
-
-                var sensorData = _this2.state.sensorData;
-                sensorData.sensorGroup5.sensors.G5T2.value += incAmount;
-
-                if (sensorData.sensorGroup5.sensors.G5T2.value > 100) {
-                    sensorData.sensorGroup5.sensors.G5T2.value = 0;
-                }
-                if (sensorData.sensorGroup5.sensors.G5T2.value < 0) {
-                    sensorData.sensorGroup5.sensors.G5T2.value = 100;
-                }
-
-                _this2.setState({ sensorData: sensorData });
-            }, 30);
-        }
-    }, {
         key: 'setUpROS',
         value: function setUpROS(ros) {
 
@@ -10815,10 +10966,22 @@ var App = function (_React$Component) {
         value: function updateDials() {
             var sensorData = this.state.sensorData;
 
-            //update battery data
-            sensorData.sensorGroup2.sensors.G2T1.value = this.state.battery.percent;
-            sensorData.sensorGroup2.sensors.G2T2.value = this.state.battery.current;
-            sensorData.sensorGroup2.sensors.G2T3.value = this.state.battery.voltage;
+            //update battery data - example
+            sensorData.sensorGroup1.sensors.D1.value = this.state.battery.percent;
+            sensorData.sensorGroup1.sensors.D2.value = this.state.battery.current;
+            sensorData.sensorGroup1.sensors.D3.value = this.state.battery.voltage;
+
+            //update roboteq left data
+            sensorData.sensorGroup2.sensors.D1.value = this.state.roboteq_ch1.current;
+            sensorData.sensorGroup2.sensors.D2.value = this.state.roboteq_ch1.voltage;
+            sensorData.sensorGroup2.sensors.D3.value = this.state.roboteq_ch1.velocity;
+            sensorData.sensorGroup2.sensors.D4.value = this.state.roboteq_ch1.temperature;
+
+            //update roboteq right data
+            sensorData.sensorGroup3.sensors.D1.value = this.state.roboteq_ch2.current;
+            sensorData.sensorGroup3.sensors.D2.value = this.state.roboteq_ch2.voltage;
+            sensorData.sensorGroup3.sensors.D3.value = this.state.roboteq_ch2.velocity;
+            sensorData.sensorGroup3.sensors.D4.value = this.state.roboteq_ch2.temperature;
 
             this.setState({ sensorData: sensorData });
         }
@@ -10826,21 +10989,85 @@ var App = function (_React$Component) {
         key: 'initializeRosSubscribers',
         value: function initializeRosSubscribers(ros, thisClass) {
 
+            //example code
             var batteryListener = new ROSLIB.Topic({
                 ros: this.state.ros,
                 name: '/battery_data',
                 messageType: 'std_msgs/Float32MultiArray'
             });
-
-            batteryListener.subscribe(function (message) {
+            batteryListener.subscribe(function (msg) {
                 console.log("got battery message");
                 thisClass.setState({
                     battery: {
-                        percent: +message.data[0].toFixed(2),
-                        current: +message.data[1].toFixed(2),
-                        voltage: +message.data[2].toFixed(2)
+                        percent: +msg.data[0].toFixed(2),
+                        current: +msg.data[1].toFixed(2),
+                        voltage: +msg.data[2].toFixed(2)
                     }
+                }, thisClass.updateDials);
+            });
 
+            //actual devices
+            var roboteqLeftListener = new ROSLIB.Topic({
+                ros: this.state.ros,
+                name: '/left/feedback',
+                messageType: 'roboteq_msgs/Feedback'
+            });
+            roboteqLeftListener.subscribe(function (msg) {
+                console.log("got roboteq left");
+                thisClass.setState({
+                    roboteq_ch1: {
+                        current: msg.motor_current,
+                        voltage: msg.supply_voltage,
+                        velocity: msg.measured_velocity,
+                        temperature: msg.channel_temperature
+                    }
+                }, thisClass.updateDials);
+            });
+
+            var roboteqRightListener = new ROSLIB.Topic({
+                ros: this.state.ros,
+                name: '/right/feedback',
+                messageType: 'roboteq_msgs/Feedback'
+            });
+            roboteqRightListener.subscribe(function (msg) {
+                console.log("got roboteq right");
+                thisClass.setState({
+                    roboteq_ch2: {
+                        current: msg.motor_current,
+                        voltage: msg.supply_voltage,
+                        velocity: msg.measured_velocity,
+                        temperature: msg.channel_temperature
+                    }
+                }, thisClass.updateDials);
+            });
+
+            var navsatListener = new ROSLIB.Topic({
+                ros: this.state.ros,
+                name: '/navsat/fix',
+                messageType: 'sensor_msgs/NavSatFix'
+            });
+            navsatListener.subscribe(function (msg) {
+                console.log("got gps");
+                thisClass.setState({
+                    gps: {
+                        lat: msg.latitude,
+                        lon: msg.longitude
+                    }
+                }, thisClass.updateDials);
+            });
+
+            var limitWristListener = new ROSLIB.Topic({
+                ros: this.state.ros,
+                name: '/switchesWristFlags',
+                messageType: 'std_msgs/UInt8'
+            });
+            limitWristListener.subscribe(function (msg) {
+                console.log("got gps");
+                thisClass.setState({
+                    limitWrist: {
+                        sw1: 1,
+                        sw2: 1
+                    }
                 }, thisClass.updateDials);
             });
         }
@@ -11098,6 +11325,16 @@ var SensorGroup = function (_React$Component) {
                         criticalValue: sensor.criticalValue,
                         maxValue: sensor.maxValue,
                         units: 'V',
+                        displayName: sensor.displayName
+                    });
+                } else if (sensor.type === 'none') {
+                    return _react2.default.createElement(_dialgraph2.default, {
+                        currentValue: sensor.value,
+                        minValue: sensor.minValue,
+                        warnValue: sensor.warnValue,
+                        criticalValue: sensor.criticalValue,
+                        maxValue: sensor.maxValue,
+                        units: '',
                         displayName: sensor.displayName
                     });
                 }
@@ -14237,7 +14474,7 @@ exports = module.exports = __webpack_require__(14)(true);
 
 
 // module
-exports.push([module.i, ".graphicdisplay {\n  min-width: 700px;\n  max-width: 700px;\n  flex-grow: 0;\n  height: 100%;\n  background-color: #0E1820;\n  border-left: 4px solid #eee;\n  display: flex;\n  flex-direction: column;\n  padding: 0 6px 0 6px;\n}\n", "", {"version":3,"sources":["/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/graphicdisplay.less","/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/graphicdisplay.less"],"names":[],"mappings":"AAAA;EACI,iBAAA;EACA,iBAAA;EACA,aAAA;EACA,aAAA;EACA,0BAAA;EACA,4BAAA;EACA,cAAA;EACA,uBAAA;EACA,qBAAA;CCCH","file":"graphicdisplay.less","sourcesContent":[".graphicdisplay {\n    min-width: 700px;\n    max-width: 700px;\n    flex-grow: 0;\n    height: 100%;\n    background-color: #0E1820;\n    border-left: 4px solid #eee;\n    display: flex;\n    flex-direction: column;\n    padding: 0 6px 0 6px;\n}",".graphicdisplay {\n  min-width: 700px;\n  max-width: 700px;\n  flex-grow: 0;\n  height: 100%;\n  background-color: #0E1820;\n  border-left: 4px solid #eee;\n  display: flex;\n  flex-direction: column;\n  padding: 0 6px 0 6px;\n}\n"],"sourceRoot":""}]);
+exports.push([module.i, ".graphicdisplay {\n  min-width: 700px;\n  max-width: 700px;\n  flex-grow: 0;\n  height: 100%;\n  background-color: #0E1820;\n  border-left: 4px solid #eee;\n  display: flex;\n  flex-direction: column;\n  padding: 0 6px 0 6px;\n}\n.buttons {\n  text-align: center;\n  width: 480px;\n}\n", "", {"version":3,"sources":["/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/graphicdisplay.less","/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/graphicdisplay.less"],"names":[],"mappings":"AAAA;EACI,iBAAA;EACA,iBAAA;EACA,aAAA;EACA,aAAA;EACA,0BAAA;EACA,4BAAA;EACA,cAAA;EACA,uBAAA;EACA,qBAAA;CCCH;ADED;EACI,mBAAA;EACA,aAAA;CCAH","file":"graphicdisplay.less","sourcesContent":[".graphicdisplay {\n    min-width: 700px;\n    max-width: 700px;\n    flex-grow: 0;\n    height: 100%;\n    background-color: #0E1820;\n    border-left: 4px solid #eee;\n    display: flex;\n    flex-direction: column;\n    padding: 0 6px 0 6px;\n}\n\n.buttons{\n    text-align:center;\n    width:480px;\n}",".graphicdisplay {\n  min-width: 700px;\n  max-width: 700px;\n  flex-grow: 0;\n  height: 100%;\n  background-color: #0E1820;\n  border-left: 4px solid #eee;\n  display: flex;\n  flex-direction: column;\n  padding: 0 6px 0 6px;\n}\n.buttons {\n  text-align: center;\n  width: 480px;\n}\n"],"sourceRoot":""}]);
 
 // exports
 

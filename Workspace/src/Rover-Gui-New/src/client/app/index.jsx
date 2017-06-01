@@ -36,36 +36,34 @@ class App extends React.Component {
                 maxVoltage: 12,
                 minVoltage: 10,
             },
+            roboteq_ch1: {
+                current: 0,
+                voltage: 0,
+                velocity: 0,
+                temperature: 0,
+            },
+            roboteq_ch2: {
+                current: 0,
+                voltage: 0,
+                velocity: 0,
+                temperature: 0,
+            },
+            limitWrist: {
+                sw1: 0,
+                sw2: 0,
+            },
+            limitForearm: {
+                sw1: 0,
+                sw2: 0,
+            },
+            limitShoulder: {
+                sw1: 0,
+                sw2: 0,
+            },
         };
         this.setUpROS(this.state.ros);
-        this.simulateUpdates();
                
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        // console.log('battery update');
-        // console.log('1: %f', this.state.battery.percent);
-    }
-    
-    simulateUpdates() {
-        let inte = setInterval(() => {
-            let rand = Math.random();
-            let incAmount = rand > 0.5 ? -0.3 : 0.3;
-            
-            let sensorData = this.state.sensorData;
-            sensorData.sensorGroup5.sensors.G5T2.value += incAmount;
-            
-            if (sensorData.sensorGroup5.sensors.G5T2.value > 100) {
-                sensorData.sensorGroup5.sensors.G5T2.value = 0;
-            }
-            if (sensorData.sensorGroup5.sensors.G5T2.value < 0) {
-                sensorData.sensorGroup5.sensors.G5T2.value = 100;
-            }
-                                    
-            this.setState({ sensorData });
-        }, 30); 
-    }
-    
+    }    
     
     setUpROS(ros) {
         
@@ -91,35 +89,113 @@ class App extends React.Component {
     updateDials(){
         let sensorData = this.state.sensorData;
 
-        //update battery data
-        sensorData.sensorGroup2.sensors.G2T1.value = this.state.battery.percent;
-        sensorData.sensorGroup2.sensors.G2T2.value = this.state.battery.current;
-        sensorData.sensorGroup2.sensors.G2T3.value = this.state.battery.voltage;
+        //update battery data - example
+        sensorData.sensorGroup1.sensors.D1.value = this.state.battery.percent;
+        sensorData.sensorGroup1.sensors.D2.value = this.state.battery.current;
+        sensorData.sensorGroup1.sensors.D3.value = this.state.battery.voltage;
+
+        //update roboteq left data
+        sensorData.sensorGroup2.sensors.D1.value = this.state.roboteq_ch1.current;
+        sensorData.sensorGroup2.sensors.D2.value = this.state.roboteq_ch1.voltage;
+        sensorData.sensorGroup2.sensors.D3.value = this.state.roboteq_ch1.velocity;
+        sensorData.sensorGroup2.sensors.D4.value = this.state.roboteq_ch1.temperature;
+
+        //update roboteq right data
+        sensorData.sensorGroup3.sensors.D1.value = this.state.roboteq_ch2.current;
+        sensorData.sensorGroup3.sensors.D2.value = this.state.roboteq_ch2.voltage;
+        sensorData.sensorGroup3.sensors.D3.value = this.state.roboteq_ch2.velocity;
+        sensorData.sensorGroup3.sensors.D4.value = this.state.roboteq_ch2.temperature;
 
         this.setState({ sensorData });
     }
     
     initializeRosSubscribers(ros,thisClass) {
 
+        //example code
         var batteryListener = new ROSLIB.Topic({
             ros : this.state.ros,
             name : '/battery_data',
             messageType : 'std_msgs/Float32MultiArray'
         });
-
-        batteryListener.subscribe(function(message) {
+        batteryListener.subscribe(function(msg) {
             console.log("got battery message");
-            thisClass.setState(
-            {
+            thisClass.setState({
                 battery: {
-                    percent: +message.data[0].toFixed(2),
-                    current: +message.data[1].toFixed(2),
-                    voltage: +message.data[2].toFixed(2),
+                    percent: +msg.data[0].toFixed(2),
+                    current: +msg.data[1].toFixed(2),
+                    voltage: +msg.data[2].toFixed(2),
                 }
-
             }, thisClass.updateDials);
-        });        
+        });
+
+        //actual devices
+        var roboteqLeftListener = new ROSLIB.Topic({
+            ros : this.state.ros,
+            name : '/left/feedback',
+            messageType : 'roboteq_msgs/Feedback'
+        });
+        roboteqLeftListener.subscribe(function(msg) {
+            console.log("got roboteq left");
+            thisClass.setState({
+                roboteq_ch1: {
+                    current: msg.motor_current,
+                    voltage: msg.supply_voltage,
+                    velocity: msg.measured_velocity,
+                    temperature: msg.channel_temperature,
+                }
+            }, thisClass.updateDials);
+        });
+
+        
+        var roboteqRightListener = new ROSLIB.Topic({
+            ros : this.state.ros,
+            name : '/right/feedback',
+            messageType : 'roboteq_msgs/Feedback'
+        });
+        roboteqRightListener.subscribe(function(msg) {
+            console.log("got roboteq right");
+            thisClass.setState({
+                roboteq_ch2: {
+                    current: msg.motor_current,
+                    voltage: msg.supply_voltage,
+                    velocity: msg.measured_velocity,
+                    temperature: msg.channel_temperature,
+                }
+            }, thisClass.updateDials);
+        });  
+
+        var navsatListener = new ROSLIB.Topic({
+            ros : this.state.ros,
+            name : '/navsat/fix',
+            messageType : 'sensor_msgs/NavSatFix'
+        });
+        navsatListener.subscribe(function(msg) {
+            console.log("got gps");
+            thisClass.setState({
+                gps: {
+                    lat: msg.latitude,
+                    lon: msg.longitude,
+                }
+            }, thisClass.updateDials);
+        });  
+
+        var limitWristListener = new ROSLIB.Topic({
+            ros : this.state.ros,
+            name : '/switchesWristFlags',
+            messageType : 'std_msgs/UInt8'
+        });
+        limitWristListener.subscribe(function(msg) {
+            console.log("got gps");
+            thisClass.setState({
+                limitWrist: {
+                    sw1: 1,
+                    sw2: 1,
+                }
+            }, thisClass.updateDials);
+        });  
+
     }
+    
     
     
     render() {
