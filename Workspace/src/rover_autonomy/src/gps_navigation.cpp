@@ -11,6 +11,7 @@
 #include <tf2_ros/buffer.h>
 #include <rover_autonomy/gps_coord.h>
 #include <visualization_msgs/Marker.h>
+#include <std_msgs/Int32MultiArray.h>
 
 // NOTE: Make sure the "broadcast_utm_transform" parameter is set to "true" in localization.launch
 
@@ -22,6 +23,8 @@ bool received_new_point = false;
 std::vector<double> way_pts_utm_east;
 std::vector<double> way_pts_utm_north;
 int num_waypoints = 0;
+int ball_bearing = 0, ball_dist = 0;
+bool ball_valid = false;
 
 void dividePath(double destX, double destY, double currX, double currY, std::vector<double> &divideX, std::vector<double> &divideY, int divisions){
     for (int x=1; x<=divisions; x++){
@@ -157,30 +160,26 @@ void receiveMessage(const rover_autonomy::gps_coord::ConstPtr& ptr){
     waypoints_viz_pub.publish(waypoints_viz);
 
     received_new_point = true;
+}
 
-    // for (int i=0; i<ptr->length && ros::ok(); i++){
-    //     move(UTMEasts[i], UTMNorths[i]);
+void tennisball_callback(const std_msgs::Int32MultiArray data) {
+    if (data.data[0]) {
+        ball_valid = true;
+    } else {
+        ball_valid = false;
+    }
 
-    //     // tennis ball detection
-    //     for (angle = 0; angle < 360; angles+=15) {
-    //         // tell gimbal to go to an angle
-    //         // grab a frame
-    //         // get the tennis ball position
-
-            
-    //     }
-
-    //     // find the tennis ball
-
-    // }
-
+    ball_bearing = data.data[4];
+    ball_dist = data.data[3];
 }
 
 main(int argc, char** argv){
     ros::init(argc, argv, "gps_navigation");
     ros::NodeHandle n;
 
-    ros::Subscriber sub = n.subscribe("/rover_autonomy/coordinates", 1000, receiveMessage);
+    ros::Subscriber sub = n.subscribe("/rover_autonomy/coordinates", 1, receiveMessage);
+    ros::Subscriber tennisball_sub = n.subscribe("/tennisball", 1, tennisball_callback);
+    ros::Publisher gimbal_pub = n.advertise<std_msgs::Int32MultiArray>("gimbal_cmd", 1, true);
     waypoints_viz_pub = n.advertise<visualization_msgs::Marker>("waypoints_viz", 1, true);
     divisions_viz_pub = n.advertise<visualization_msgs::Marker>("divisions_viz", 1, true);
 
@@ -188,10 +187,14 @@ main(int argc, char** argv){
 
     const int STATE_WAITING_FOR_WAYPOINTS = 0, 
               STATE_MOVE_BASE_NAV = 1,
-              STATE_TENNIS_BALL_NAV = 2,
-              STATE_TEAR_DOWN = 3;
+              STATE_TENNIS_BALL_SEARCH = 2,
+              STATE_TENNIS_BALL_NAV_YAW = 3,
+              STATE_TENNIS_BALL_NAV_DIST = 4,
+              STATE_TEAR_DOWN = 5;
     int state = STATE_WAITING_FOR_WAYPOINTS;
     int idx_waypoint = 0;
+
+    double yaw_offset, dist_offset;
 
     while (ros::ok()) {
         loop_rate.sleep(); //Maintain the loop rate
@@ -212,23 +215,60 @@ main(int argc, char** argv){
         else if (state == STATE_MOVE_BASE_NAV) {
             ROS_WARN("state = STATE_MOVE_BASE_NAV");
             move(way_pts_utm_east[idx_waypoint], way_pts_utm_north[idx_waypoint]);
-            state = STATE_TENNIS_BALL_NAV;
-            ROS_WARN("Switching to STATE_TENNIS_BALL_NAV");
+            state = STATE_TENNIS_BALL_SEARCH;
+            ROS_WARN("Switching to STATE_TENNIS_BALL_SEARCH");
         }
 
-        else if (state == STATE_TENNIS_BALL_NAV) {
-            ROS_WARN("state = STATE_TENNIS_BALL_NAV");
+        else if (state == STATE_TENNIS_BALL_SEARCH) {
+            ROS_WARN("state = STATE_TENNIS_BALL_SEARCH");
 
-            for (angle = 0; angle < 360; angles+=15) {
+            bool ball_valid_cpy = false;
+            double ball_dist_cpy = 0, ball_bearing_cpy = 0;
+
+            int gimbal_angle;
+            for (gimbal_angle = -180; gimbal_angle < 180; gimbal_angle+=30) {
+                //publish to 
+                std_msgs::Int32MultiArray pub_data;
+                pub_data.data = std::vector<int>(2);
+
+                pub_data.data[0] = -5;
+                pub_data.data[0] = gimbal_angle;
+
+                gimbal_pub.publish(pub_data);
+
+                // wait for 2 seconds
+                ros::Duration(2).sleep();
+
+                // read the ball position
+                if (ball_valid) {
+                    break;
+                }
             }
-            
-            idx_waypoint++;
 
-            if (idx_waypoint >= num_waypoints) {
-                state = STATE_TEAR_DOWN;
-
-                ROS_WARN("Switching to STATE_TEAR_DOWN");
+            if (!ball_valid_cpy) {
+                // cannot find the ball, assume we are at the target
+                idx_waypoint++;
+                if (idx_waypoint >= num_waypoints) {
+                    state = STATE_TEAR_DOWN;
+                    ROS_WARN("Switching to STATE_TEAR_DOWN");
+                } else {
+                    state = STATE_MOVE_BASE_NAV;
+                    ROS_WARN("Switching to STATE_MOVE_BASE_NAV");
+                }
+            } 
+            else {
+                yaw_offset = gimbal_angle * M_PI / 180 + ball_bearing_cpy;
+                dist_offset = ball_dist_cpy;
+                state = STATE_TENNIS_BALL_NAV_YAW;
+                ROS_WARN("Switching to STATE_TENNIS_BALL_NAV_YAW");
             }
+        }
+
+        else if (state == STATE_TENNIS_BALL_NAV_YAW) {
+
+        }
+
+        else if (state == STATE_TENNIS_BALL_NAV_DIST) {
 
         }
 

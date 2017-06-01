@@ -126,7 +126,7 @@ def main():
     node = Ball_tracking()
     rospy.init_node('ball_tracking', anonymous=True)
 
-    rate = rospy.Rate(2)
+    rate = rospy.Rate(4)
     while not rospy.is_shutdown():
         X, Y, Z, bearing = node.process()
 
