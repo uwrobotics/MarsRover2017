@@ -47,7 +47,19 @@ class App extends React.Component {
                 voltage: 0,
                 velocity: 0,
                 temperature: 0,
-            }
+            },
+            limitWrist: {
+                sw1: 0,
+                sw2: 0,
+            },
+            limitForearm: {
+                sw1: 0,
+                sw2: 0,
+            },
+            limitShoulder: {
+                sw1: 0,
+                sw2: 0,
+            },
         };
         this.setUpROS(this.state.ros);
                
@@ -151,7 +163,39 @@ class App extends React.Component {
                 }
             }, thisClass.updateDials);
         });  
+
+        var navsatListener = new ROSLIB.Topic({
+            ros : this.state.ros,
+            name : '/navsat/fix',
+            messageType : 'sensor_msgs/NavSatFix'
+        });
+        navsatListener.subscribe(function(msg) {
+            console.log("got gps");
+            thisClass.setState({
+                gps: {
+                    lat: msg.latitude,
+                    lon: msg.longitude,
+                }
+            }, thisClass.updateDials);
+        });  
+
+        var limitWristListener = new ROSLIB.Topic({
+            ros : this.state.ros,
+            name : '/switchesWristFlags',
+            messageType : 'std_msgs/UInt8'
+        });
+        limitWristListener.subscribe(function(msg) {
+            console.log("got gps");
+            thisClass.setState({
+                limitWrist: {
+                    sw1: 1,
+                    sw2: 1,
+                }
+            }, thisClass.updateDials);
+        });  
+
     }
+    
     
     
     render() {
