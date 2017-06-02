@@ -4,6 +4,8 @@
 
     <include file="$(find rover_cameras)/launch/pg_cam.launch"/>
 
+    <include file="$(find rover_cameras)/launch/uvc_cam.launch"/>
+
     <!-- roslaunch rover_cameras pg_cam_config.launch -->
     <!-- <include file="$(find rover_cameras)/launch/pg_cam_config.launch"/> -->
 
