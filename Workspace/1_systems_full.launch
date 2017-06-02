@@ -1,0 +1,17 @@
+<launch>
+    <machine name="archieleepc" user="archie" address="192.168.3.10" env-loader="/home/archie/git/robotics/MarsRover2017/Workspace/devel/env.sh"/>
+    <machine name="ubuntu-TP" user="lichunshang" address="192.168.2.10" env-loader="/home/lichunshang/Documents/MarsRover2017/Workspace/devel/env.sh"/>
+
+    <!-- Teleop -->
+    <include file="$(find teleop_twist_joy)/launch/teleop.launch"/>
+    <include file="$(find roboteq_driver)/launch/example.launch"/>
+    <node pkg="roboteq_driver" type="driver_node" name="driver_node" respawn="true"/>
+    <node pkg="rover_joy" type="rover_joy_node" name="rover_joy" respawn ="true"/>
+    <include file="$(find twist_mux)/launch/rover_twist_mux.launch"/>
+
+    <!-- Image saver -->
+    <node pkg="image_view" type="image_saver" name="image_saver" args="/cam0/image_raw" respawn="true">
+         <param name="save_all_image" value="false"/>
+         <param name="filename_format" value="$HOME/pano_images/image%04i.jpg"/>
+    </node>
+</launch>

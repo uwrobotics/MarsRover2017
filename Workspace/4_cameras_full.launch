@@ -1,0 +1,10 @@
+<launch>
+    <machine name="archieleepc" user="archie" address="192.168.3.10" env-loader="/home/archie/git/robotics/MarsRover2017/Workspace/devel/env.sh"/>
+    <machine name="ubuntu-TP" user="lichunshang" address="192.168.2.10" env-loader="/home/lichunshang/Documents/MarsRover2017/Workspace/devel/env.sh"/>
+
+    <include file="$(find rover_cameras)/launch/pg_cam.launch"/>
+
+    <!-- roslaunch rover_cameras pg_cam_config.launch -->
+    <!-- <include file="$(find rover_cameras)/launch/pg_cam_config.launch"/> -->
+
+</launch>

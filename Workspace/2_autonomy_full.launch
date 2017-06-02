@@ -1,0 +1,11 @@
+<launch>
+    <machine name="archieleepc" user="archie" address="192.168.3.10" env-loader="/home/archie/git/robotics/MarsRover2017/Workspace/devel/env.sh"/>
+    <machine name="ubuntu-TP" user="lichunshang" address="192.168.2.10" env-loader="/home/lichunshang/Documents/MarsRover2017/Workspace/devel/env.sh"/>
+
+    <node pkg="rover_joy" type="rover_encoder_odom" name="rover_encoder_odom" respawn="true"/>
+    <include file="$(find rover_autonomy)/launch/localization.launch"/>
+    <include file="$(find rover_autonomy)/launch/navigation.launch"/>
+    <node pkg="rover_autonomy" type="fake_laser.py" name="fake_laser" respawn="true"/>
+    <node pkg="rover_autonomy" type="gps_navigation_node" name="gps_navigation" respawn="true"/>
+    <include file="$(find microstrain_3dm_gx5_45)/launch/microstrain_3dm-gx3-35.launch"/>
+</launch>
