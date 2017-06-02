@@ -63,15 +63,15 @@ class DrillController:
             else:
                 self._drill_duty = 0
 
-            if msg.buttons[0] == 0 and msg.buttons[1] == 0 and msg.buttons[2] == 0:
-                if self._sent_zero == False:
-                    self.sendCAN(False)
-                    self._sent_zero = True
-                    print 'Sending to Drill: Drill: 0 Elevator: 0'
-            else:
-                print 'Sending to Drill: Drill: %f Elevator: %d' % (self._drill_duty, self._elevator_dir)
-                self.sendCAN(True)
-                self._sent_zero = False
+            # if msg.buttons[0] == 0 and msg.buttons[1] == 0 and msg.buttons[2] == 0:
+            #     if self._sent_zero == False:
+            #         self.sendCAN(False)
+            #         self._sent_zero = True
+            #         print 'Sending to Drill: Drill: 0 Elevator: 0'
+            # else:
+            print 'Sending to Drill: Drill: %f Elevator: %d' % (self._drill_duty, self._elevator_dir)
+            self.sendCAN(True)
+                # self._sent_zero = False
 
     def sendCAN(self, sendData):
         frame = Frame()
