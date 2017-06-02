@@ -2,13 +2,13 @@
 dictitems:
   auto_exposure: true
   auto_gain: true
-  auto_shutter: false
+  auto_shutter: true
   auto_white_balance: false
   brightness: 1.3671875
   enable_strobe1: false
   enable_trigger: false
   enable_trigger_delay: false
-  exposure: 1.35
+  exposure: 0.5
   format7_color_coding: raw8
   format7_roi_height: 0
   format7_roi_width: 0
@@ -21,13 +21,13 @@ dictitems:
     dictitems:
       auto_exposure: true
       auto_gain: true
-      auto_shutter: false
+      auto_shutter: true
       auto_white_balance: false
       brightness: 1.3671875
       enable_strobe1: false
       enable_trigger: false
       enable_trigger_delay: false
-      exposure: 1.35
+      exposure: 0.5
       format7_color_coding: raw8
       format7_roi_height: 0
       format7_roi_width: 0
