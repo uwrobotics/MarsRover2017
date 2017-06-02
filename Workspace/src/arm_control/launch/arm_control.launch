@@ -1,14 +1,14 @@
 <launch>
-    <include file="$(find socketcan_bridge)/launch/can_interface.launch"/>
+    <machine name="archieleepc" user="archie" address="192.168.3.10" env-loader="/home/archie/git/robotics/MarsRover2017/Workspace/devel/env.sh"/>
 
     <!-- Joy -->
-    <node pkg="joy" type="joy_node" name="joy" respawn="true" output="screen">
-        <param name="dev" value="/dev/input/logitech"/>
+    <node machine="archieleepc" pkg="joy" type="joy_node" name="joy0" ns="joy0" respawn="true" output="screen">
+            <param name="dev" value="/dev/input/js0"/>
     </node>
 
-    <!-- Arm Control -->
-    <node pkg="arm_control" type="arm_control.py" name="arm_control" respawn="true" output="screen"/>
+    <node machine="archieleepc" pkg="joy" type="joy_node" name="joy1" ns="joy1" respawn="true" output="screen">
+            <param name="dev" value="/dev/input/js1"/>
+    </node>
 
-    <!-- Debug -->
-    <node pkg="arm_control" type="listener.py" name="arm_control_listener" respawn="true" output="screen"/>
+    <node machine="archieleepc" pkg="arm_control" type="arm_control" name="arm_control" respawn="true" output="screen"/>
 </launch>

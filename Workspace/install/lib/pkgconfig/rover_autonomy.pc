@@ -1,0 +1,8 @@
+prefix=/home/ivy/marsrover/MarsRover2017/Workspace/install
+
+Name: rover_autonomy
+Description: Description of rover_autonomy
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ivy/marsrover/MarsRover2017/Workspace/install/lib 
+Requires: 

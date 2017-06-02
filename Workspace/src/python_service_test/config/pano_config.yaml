@@ -1,0 +1,6 @@
+#######################
+##    pano Config    ##
+#######################
+
+pano_params: [0, 180, 5] #[start_angle, stop_angle, num_photos]
+wait_time: 5. #the time to wait after each step in seconds

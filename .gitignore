@@ -6,3 +6,6 @@ devel/
 .catkin_workspace
 src/serial
 .tags
+.DS_Store
+Workspace/src/Rover-Gui-New/src/client/app/Tiles
+.vscode

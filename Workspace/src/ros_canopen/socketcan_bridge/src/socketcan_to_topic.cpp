@@ -346,4 +346,3 @@ namespace socketcan_bridge
         }
     }
 };  // namespace socketcan_bridge
-

@@ -1,0 +1,6 @@
+Need openCV to build the cpp file
+to run command is:
+./pano "path to image 1" "path to image 2" ...
+will output the stitched image as stitch.jpg
+code based off code from http://study.marearts.com/2013/11/opencv-stitching-example-stitcher-class.html
+can also get images to stitch together from that website

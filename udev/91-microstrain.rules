@@ -1,0 +1,1 @@
+KERNEL=="ttyACM*", ATTRS{manufacturer}=="MicroStrain, Inc. ", ATTRS{product}=="3DM-GX3-35 Orientation Sensor", SYMLINK+="microstrain", MODE:="0666"

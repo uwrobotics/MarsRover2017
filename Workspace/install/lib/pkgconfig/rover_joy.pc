@@ -1,0 +1,8 @@
+prefix=/home/ivy/marsrover/MarsRover2017/Workspace/install
+
+Name: rover_joy
+Description: Description of rover_joy
+Version: 0.0.0
+Cflags: -I/home/ivy/marsrover/MarsRover2017/Workspace/install/include
+Libs: -L/home/ivy/marsrover/MarsRover2017/Workspace/install/lib 
+Requires: 

@@ -29,7 +29,6 @@ include_directories(
 )
 
 
-
 # socketcan_to_topic
 add_library(socketcan_to_topic
   src/socketcan_to_topic.cpp
