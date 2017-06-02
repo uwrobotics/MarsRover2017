@@ -5,9 +5,9 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "simple_ros_pub");
 	ros::NodeHandle n;
-	ros::Publisher chatter_pub = n.advertise<std_msgs::Float32MultiArray>("battery_data", 1000);
+	ros::Publisher chatter_pub = n.advertise<std_msgs::Float32MultiArray>("battery_data", 100000);
 	ros::Publisher pub2 = n.advertise<std_msgs::Float32MultiArray>("temperature_data", 1000);
-	ros::Rate loop_rate(2);
+	ros::Rate loop_rate(50);
 	float p = 100;
 	float c = 0;
 	float v = 12;
@@ -21,6 +21,10 @@ int main(int argc, char** argv)
 		p -= 0.5;
 		c += 0.5;
 		v -= 0.011;
+
+		if (p < 0) p = 100;
+		if (c > 100) c = 0;
+		if (v < 0) v = 12;
 		
 		if(cnt >= 4){
 		outside -= 0.2;

@@ -26,17 +26,29 @@
  */
 
 #include <socketcan_bridge/socketcan_to_topic.h>
+#include <socketcan_bridge/sensor_data.h>
 #include <socketcan_interface/string.h>
 #include <can_msgs/Frame.h>
+#include <science_msgs/Sci_Container.h>
+#include <science_msgs/Sensor.h>
+#include <std_msgs/Float32MultiArray.h>
+#include <std_msgs/UInt8.h>
 #include <limits.h>
 #include <linux/can.h>
+#include <vector>
+
+
+#define DEBUG   0
 
 namespace socketcan_bridge
 {
+
+    can_msgs::Frame msg;
+
     SocketCANToTopic::SocketCANToTopic(boost::shared_ptr<can::DriverInterface> driver)
     {
         driver_ = driver;
-
+        sensorData_ = SensorData(3, 20, 20); // In order: limit switch, current sensor, thermistor
         ros::Publisher* pPub = new ros::Publisher;
         if (!pPub)
         {
@@ -51,7 +63,7 @@ namespace socketcan_bridge
 
     SocketCANToTopic::~SocketCANToTopic()
     {
-        cleanup();
+        this->cleanup();
     }
 
     void SocketCANToTopic::cleanup()
@@ -123,7 +135,13 @@ namespace socketcan_bridge
             }
 
             // Advertise topic and push into vector of pointers
-            *pPub = nh_.advertise<can_msgs::Frame>(topic_list[i], 10);
+            // Change publisher type based on topic id
+            if (i==3)
+                *pPub = nh_.advertise<science_msgs::Sci_Container>(topic_list[i], 10);
+            else if (i>3)
+                *pPub = nh_.advertise<std_msgs::Float32MultiArray>(topic_list[i], 10);
+            else
+                *pPub = nh_.advertise<std_msgs::UInt8>(topic_list[i], 10);
             topics_.push_back(pPub);
         }
 
@@ -138,7 +156,7 @@ namespace socketcan_bridge
         m.is_rtr = f.is_rtr;
         m.is_extended = f.is_extended;
 
-        for (int i = 0; i < 8; i++)  // always copy all data, regardless of dlc.
+        for (int i = 0; i < m.dlc; i++)  // copy data based on dlc
         {
             m.data[i] = f.data[i];
         }
@@ -182,22 +200,126 @@ namespace socketcan_bridge
 
         int topic_idx = INT_MAX;
         bool valid_frame = true;
-        switch (msg.id)
-        {
-            case CAN_RX_GPS:
-                topic_idx = 0;
+
+#if DEBUG
+        ROS_INFO ("dlc: %x", msg.dlc);
+#endif
+
+        ros::NodeHandle handle;
+
+        ros::Publisher intPub;
+        ros::Publisher sciencePub;
+        ros::Publisher floatPub;
+
+        std_msgs::UInt8 switch_msg;
+        std_msgs::Float32MultiArray current_msg;
+        std_msgs::Float32MultiArray thermistor_msg;
+        science_msgs::Sci_Container science_msg;
+
+        switch((msg.id)/100){
+            case LIMIT_SWITCHES: // Bit vector corresponding to each pair of limit switches
+#if DEBUG
+                ROS_INFO("Evaluating arm limit switches");
+#endif
+                uint8_t intResult;
+                memcpy (&intResult, &msg.data, msg.dlc);
+#if DEBUG
+                ROS_INFO("limit switch: %x", intResult);
+#endif
+                switch_msg.data = intResult;
+                if (msg.id % LIMIT_SWITCHES == 0)
+                {
+                    topic_idx = 0;
+                }
+                else if (msg.id % LIMIT_SWITCHES == 1)
+                {
+                    topic_idx = 1;
+                }
+                else if (msg.id % LIMIT_SWITCHES == 2)
+                {
+                    topic_idx = 2;
+                }
+                topics_[topic_idx]->publish(switch_msg);
                 break;
 
-            case CAN_RX_IMU:
-                topic_idx = 1;
+            case SCIENCE: // Custom object containing limit switch and sensor information
+#if DEBUG
+                ROS_INFO ("Evaluating science");
+#endif
+                if (msg.id % SCIENCE == 2)
+                {
+#if DEBUG
+                    ROS_INFO ("Processing science limit switch data");
+#endif
+                    uint32_t scienceLimitSwitch;
+                    memcpy (&scienceLimitSwitch, &msg.data, msg.dlc);
+                    sensorData_.setScienceContainer(scienceLimitSwitch);
+                }
+                else // Sensor
+                {
+#if DEBUG
+                    ROS_INFO ("Processing sensor data");
+#endif
+                    float sensorValue;
+                    uint32_t uvSensorValue;
+                    uint32_t timeStamp;
+#if DEBUG
+                    ROS_INFO ("Sensor value: %f", sensorValue);
+#endif
+                    memcpy (&timeStamp, &msg.data[4], 4);
+#if DEBUG
+                    ROS_INFO ("Sensor time stamp: %x", timeStamp);
+#endif
+                    if (msg.id%SCIENCE == 3 || msg.id%SCIENCE == 4)
+                    {
+                        memcpy (&uvSensorValue, &msg.data, 4);
+                        science_msgs::UVSensor sensor;
+                        sensor.data = sensorValue;
+                        sensor.stamp = timeStamp;
+                        sensorData_.setScienceContainer(sensor, msg.id%SCIENCE);
+                    }
+                    else
+                    {
+                        memcpy (&sensorValue, &msg.data, 4);
+                        science_msgs::Sensor sensor;
+                        sensor.data = sensorValue;
+                        sensor.stamp = timeStamp;
+                        sensorData_.setScienceContainer(sensor, msg.id%SCIENCE);
+                    }
+                }
+                science_msg = sensorData_.getScienceContainer();
+#if DEBUG
+                ROS_INFO ("Publishing science data");
+#endif
+                topics_[3]->publish(science_msg);
                 break;
 
-            case CAN_RX_BMS:
-                topic_idx = 2;
+            case CURRENT_SENSORS: // float for current sensor readings
+#if DEBUG
+                ROS_INFO("Evaluating current sensors");
+#endif
+                float currentResult;
+                memcpy (&currentResult, &msg.data, msg.dlc);
+#if DEBUG
+                ROS_INFO("current data: %f", currentResult);
+#endif
+                sensorData_.setCurrentSensors(currentResult, msg.id % CURRENT_SENSORS);
+                current_msg.data = sensorData_.getCurrentSensors();
+                topics_[4]->publish(current_msg);
                 break;
 
-            case CAN_RX_ARM:
-                topic_idx = 3;
+            case THERMISTORS: // float for thermistor readings
+#if DEBUG
+                ROS_INFO("Evaluating thermistors");
+#endif
+                float thermResult;
+                memcpy (&thermResult, &msg.data, msg.dlc);
+#if DEBUG
+                ROS_INFO("thermistor data: %f", thermResult);
+#endif
+                sensorData_.setThermistors(thermResult, msg.id % THERMISTORS);
+                thermistor_msg.data = sensorData_.getThermistors();
+                topics_[5]->publish(thermistor_msg);
                 break;
 
             default:
@@ -205,17 +327,9 @@ namespace socketcan_bridge
                 valid_frame = false;
                 break;
         }
-
-        if (valid_frame)
-        {
-            if (topic_idx < topics_.size())
-            {
-                if (topics_[topic_idx])
-                {
-                    topics_[topic_idx]->publish(msg);
-                }
-            }
-        }
+#if DEBUG
+        ROS_INFO("Finished sending");
+#endif
     }
 
     void SocketCANToTopic::stateCallback(const can::State & s)

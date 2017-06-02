@@ -5,6 +5,10 @@ class ControlBox extends React.Component {
     constructor(props) {
         super(props);
         this.panoService;
+        this.sciService;
+        this.state = {
+            science: 'Start Science'
+        }
     };
     
     takePanorama() {
@@ -27,6 +31,31 @@ class ControlBox extends React.Component {
         
     };
 
+    startScience(){
+        if (this.state.science == 'Start Science'){
+            this.setState({science:'Stop Science'});
+            console.log('start science');
+        } else {
+            this.setState({science:'Start Science'});
+            console.log('stop science')
+        }
+
+        if (!this.sciService) {
+            this.sciService = new ROSLIB.Service({
+                ros : this.props.ros,
+                name : '/start_science',
+                serviceType : 'std_srvs/Trigger'
+            });
+        }
+        
+        let sciServiceReq = new ROSLIB.ServiceRequest({
+        });
+        
+        this.sciService.callService(sciServiceReq, (result) => {
+            console.log('Panorama Service Response', result);
+        });
+
+    }
     render() {
         
         return (
@@ -34,6 +63,11 @@ class ControlBox extends React.Component {
                 <div className='subbox pano'>
                     <div className='panobutton' onClick={this.takePanorama.bind(this)}>
                         Take Panorama
+                    </div>
+                </div>
+                <div className='subbox science'>
+                    <div className='scienceButton' onClick={this.startScience.bind(this)}>
+                        {this.state.science}
                     </div>
                 </div>
                 <div className='subbox feeds'>

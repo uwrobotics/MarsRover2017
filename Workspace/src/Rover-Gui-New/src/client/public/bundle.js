@@ -10479,6 +10479,10 @@ var ControlBox = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (ControlBox.__proto__ || Object.getPrototypeOf(ControlBox)).call(this, props));
 
         _this.panoService;
+        _this.sciService;
+        _this.state = {
+            science: 'Start Science'
+        };
         return _this;
     }
 
@@ -10503,6 +10507,31 @@ var ControlBox = function (_React$Component) {
             });
         }
     }, {
+        key: 'startScience',
+        value: function startScience() {
+            if (this.state.science == 'Start Science') {
+                this.setState({ science: 'Stop Science' });
+                console.log('start science');
+            } else {
+                this.setState({ science: 'Start Science' });
+                console.log('stop science');
+            }
+
+            if (!this.sciService) {
+                this.sciService = new ROSLIB.Service({
+                    ros: this.props.ros,
+                    name: '/start_science',
+                    serviceType: 'std_srvs/Trigger'
+                });
+            }
+
+            var sciServiceReq = new ROSLIB.ServiceRequest({});
+
+            this.sciService.callService(sciServiceReq, function (result) {
+                console.log('Panorama Service Response', result);
+            });
+        }
+    }, {
         key: 'render',
         value: function render() {
 
@@ -10516,6 +10545,15 @@ var ControlBox = function (_React$Component) {
                         'div',
                         { className: 'panobutton', onClick: this.takePanorama.bind(this) },
                         'Take Panorama'
+                    )
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'subbox science' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'scienceButton', onClick: this.startScience.bind(this) },
+                        this.state.science
                     )
                 ),
                 _react2.default.createElement(
@@ -10744,7 +10782,7 @@ var MapBox = function (_React$Component) {
 
             var robotMarker = _leaflet2.default.marker([this.state.lat, this.state.long], { icon: roverIcon, rotationAngle: this.state.angle }).addTo(map);
             map.setMinZoom(12);
-            map.setMaxZoom(17);
+            map.setMaxZoom(18);
             this.setState({
                 map: map,
                 robotMarker: robotMarker
@@ -10993,8 +11031,8 @@ var App = function (_React$Component) {
             var batteryListener = new ROSLIB.Topic({
                 ros: this.state.ros,
                 name: '/battery_data',
-                messageType: 'std_msgs/Float32MultiArray'
-            });
+                messageType: 'std_msgs/Float32MultiArray',
+                throttle_rate: 500 });
             batteryListener.subscribe(function (msg) {
                 console.log("got battery message");
                 thisClass.setState({
@@ -11010,8 +11048,8 @@ var App = function (_React$Component) {
             var roboteqLeftListener = new ROSLIB.Topic({
                 ros: this.state.ros,
                 name: '/left/feedback',
-                messageType: 'roboteq_msgs/Feedback'
-            });
+                messageType: 'roboteq_msgs/Feedback',
+                throttle_rate: 500 });
             roboteqLeftListener.subscribe(function (msg) {
                 console.log("got roboteq left");
                 thisClass.setState({
@@ -11027,8 +11065,8 @@ var App = function (_React$Component) {
             var roboteqRightListener = new ROSLIB.Topic({
                 ros: this.state.ros,
                 name: '/right/feedback',
-                messageType: 'roboteq_msgs/Feedback'
-            });
+                messageType: 'roboteq_msgs/Feedback',
+                throttle_rate: 500 });
             roboteqRightListener.subscribe(function (msg) {
                 console.log("got roboteq right");
                 thisClass.setState({
@@ -11044,8 +11082,8 @@ var App = function (_React$Component) {
             var navsatListener = new ROSLIB.Topic({
                 ros: this.state.ros,
                 name: '/navsat/fix',
-                messageType: 'sensor_msgs/NavSatFix'
-            });
+                messageType: 'sensor_msgs/NavSatFix',
+                throttle_rate: 500 });
             navsatListener.subscribe(function (msg) {
                 console.log("got gps");
                 thisClass.setState({
@@ -11059,8 +11097,8 @@ var App = function (_React$Component) {
             var limitWristListener = new ROSLIB.Topic({
                 ros: this.state.ros,
                 name: '/switchesWristFlags',
-                messageType: 'std_msgs/UInt8'
-            });
+                messageType: 'std_msgs/UInt8',
+                throttle_rate: 500 });
             limitWristListener.subscribe(function (msg) {
                 console.log("got gps");
                 thisClass.setState({
@@ -14460,7 +14498,7 @@ exports = module.exports = __webpack_require__(14)(true);
 
 
 // module
-exports.push([module.i, ".controlbox {\n  width: 100%;\n  height: 70px;\n  background-color: #eee;\n  margin: 6px 0 3px 0;\n  border-radius: 5px;\n  display: flex;\n  align-items: center;\n  justify-content: space-around;\n}\n.controlbox .subbox {\n  width: 100px;\n  height: 100%;\n  border-left: 4px solid #0E1820;\n  border-right: 4px solid #0E1820;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-around;\n}\n.controlbox .subbox .panobutton {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  color: #eee;\n  width: 86%;\n  height: 60px;\n  background-color: #006600;\n  border-radius: 6px;\n  border: 3px solid #0E1820;\n  cursor: pointer;\n  text-align: center;\n}\n.controlbox .subbox .panobutton:hover {\n  background-color: #009933;\n}\n.controlbox .subbox.feeds {\n  justify-content: flex-start;\n  padding: 0px 10px 0px 10px;\n}\n.controlbox .subbox.feeds p {\n  display: block;\n  font-size: 14px;\n  text-align: center;\n  padding: 0;\n  margin: 4px 0 4px 0;\n}\n.controlbox .subbox.feeds select {\n  margin-bottom: 4px;\n}\n", "", {"version":3,"sources":["/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/controlbox/controlbox.less","/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/controlbox/controlbox.less"],"names":[],"mappings":"AAAA;EACI,YAAA;EACA,aAAA;EACA,uBAAA;EACA,oBAAA;EACA,mBAAA;EACA,cAAA;EACA,oBAAA;EACA,8BAAA;CCCH;ADTD;EAUQ,aAAA;EACA,aAAA;EACA,+BAAA;EACA,gCAAA;EACA,cAAA;EACA,uBAAA;EACA,oBAAA;EACA,8BAAA;CCEP;ADnBD;EAmBY,cAAA;EACA,uBAAA;EACA,oBAAA;EACA,wBAAA;EACA,YAAA;EACA,WAAA;EACA,aAAA;EACA,0BAAA;EACA,mBAAA;EACA,0BAAA;EACA,gBAAA;EACA,mBAAA;CCGX;ADFW;EACI,0BAAA;CCIf;ADDO;EACI,4BAAA;EACA,2BAAA;CCGX;ADLO;EAIQ,eAAA;EACA,gBAAA;EACA,mBAAA;EACA,WAAA;EACA,oBAAA;CCIf;ADZO;EAWQ,mBAAA;CCIf","file":"controlbox.less","sourcesContent":[".controlbox {\n    width: 100%;\n    height: 70px;\n    background-color: #eee;\n    margin: 6px 0 3px 0;\n    border-radius: 5px;\n    display: flex;\n    align-items: center;\n    justify-content: space-around;\n    .subbox {\n        width: 100px;\n        height: 100%;\n        border-left: 4px solid #0E1820;\n        border-right: 4px solid #0E1820;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-around;\n        .panobutton {\n            display: flex;\n            flex-direction: column;\n            align-items: center;\n            justify-content: center;\n            color: #eee;\n            width: 86%;\n            height: 60px;\n            background-color: #006600;\n            border-radius: 6px;\n            border: 3px solid #0E1820;\n            cursor: pointer;\n            text-align: center;\n            &:hover {\n                background-color: #009933;\n            }\n        }\n        &.feeds {\n            justify-content: flex-start;\n            padding: 0px 10px 0px 10px;\n            p {\n                display: block;\n                font-size: 14px;\n                text-align: center;\n                padding: 0;\n                margin: 4px 0 4px 0;\n            }\n            select {\n                margin-bottom: 4px;\n            }\n        }\n    }\n}",".controlbox {\n  width: 100%;\n  height: 70px;\n  background-color: #eee;\n  margin: 6px 0 3px 0;\n  border-radius: 5px;\n  display: flex;\n  align-items: center;\n  justify-content: space-around;\n}\n.controlbox .subbox {\n  width: 100px;\n  height: 100%;\n  border-left: 4px solid #0E1820;\n  border-right: 4px solid #0E1820;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-around;\n}\n.controlbox .subbox .panobutton {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  color: #eee;\n  width: 86%;\n  height: 60px;\n  background-color: #006600;\n  border-radius: 6px;\n  border: 3px solid #0E1820;\n  cursor: pointer;\n  text-align: center;\n}\n.controlbox .subbox .panobutton:hover {\n  background-color: #009933;\n}\n.controlbox .subbox.feeds {\n  justify-content: flex-start;\n  padding: 0px 10px 0px 10px;\n}\n.controlbox .subbox.feeds p {\n  display: block;\n  font-size: 14px;\n  text-align: center;\n  padding: 0;\n  margin: 4px 0 4px 0;\n}\n.controlbox .subbox.feeds select {\n  margin-bottom: 4px;\n}\n"],"sourceRoot":""}]);
+exports.push([module.i, ".controlbox {\n  width: 100%;\n  height: 70px;\n  background-color: #eee;\n  margin: 6px 0 3px 0;\n  border-radius: 5px;\n  display: flex;\n  align-items: center;\n  justify-content: space-around;\n}\n.controlbox .subbox {\n  width: 100px;\n  height: 100%;\n  border-left: 4px solid #0E1820;\n  border-right: 4px solid #0E1820;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-around;\n}\n.controlbox .subbox .panobutton {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  color: #eee;\n  width: 86%;\n  height: 60px;\n  background-color: #006600;\n  border-radius: 6px;\n  border: 3px solid #0E1820;\n  cursor: pointer;\n  text-align: center;\n}\n.controlbox .subbox .panobutton:hover {\n  background-color: #009933;\n}\n.controlbox .subbox .scienceButton {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  color: #eee;\n  width: 86%;\n  height: 60px;\n  background-color: #006600;\n  border-radius: 6px;\n  border: 3px solid #0E1820;\n  cursor: pointer;\n  text-align: center;\n}\n.controlbox .subbox .scienceButton:hover {\n  background-color: #009933;\n}\n.controlbox .subbox.feeds {\n  justify-content: flex-start;\n  padding: 0px 10px 0px 10px;\n}\n.controlbox .subbox.feeds p {\n  display: block;\n  font-size: 14px;\n  text-align: center;\n  padding: 0;\n  margin: 4px 0 4px 0;\n}\n.controlbox .subbox.feeds select {\n  margin-bottom: 4px;\n}\n", "", {"version":3,"sources":["/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/controlbox/controlbox.less","/home/jerry/rover2017/Workspace/src/Rover-Gui-New/src/client/app/graphicdisplay/controlbox/controlbox.less"],"names":[],"mappings":"AAAA;EACI,YAAA;EACA,aAAA;EACA,uBAAA;EACA,oBAAA;EACA,mBAAA;EACA,cAAA;EACA,oBAAA;EACA,8BAAA;CCCH;ADTD;EAUQ,aAAA;EACA,aAAA;EACA,+BAAA;EACA,gCAAA;EACA,cAAA;EACA,uBAAA;EACA,oBAAA;EACA,8BAAA;CCEP;ADnBD;EAmBY,cAAA;EACA,uBAAA;EACA,oBAAA;EACA,wBAAA;EACA,YAAA;EACA,WAAA;EACA,aAAA;EACA,0BAAA;EACA,mBAAA;EACA,0BAAA;EACA,gBAAA;EACA,mBAAA;CCGX;ADFW;EACI,0BAAA;CCIf;ADpCD;EAoCY,cAAA;EACA,uBAAA;EACA,oBAAA;EACA,wBAAA;EACA,YAAA;EACA,WAAA;EACA,aAAA;EACA,0BAAA;EACA,mBAAA;EACA,0BAAA;EACA,gBAAA;EACA,mBAAA;CCGX;ADFW;EACI,0BAAA;CCIf;ADDO;EACI,4BAAA;EACA,2BAAA;CCGX;ADLO;EAIQ,eAAA;EACA,gBAAA;EACA,mBAAA;EACA,WAAA;EACA,oBAAA;CCIf;ADZO;EAWQ,mBAAA;CCIf","file":"controlbox.less","sourcesContent":[".controlbox {\n    width: 100%;\n    height: 70px;\n    background-color: #eee;\n    margin: 6px 0 3px 0;\n    border-radius: 5px;\n    display: flex;\n    align-items: center;\n    justify-content: space-around;\n    .subbox {\n        width: 100px;\n        height: 100%;\n        border-left: 4px solid #0E1820;\n        border-right: 4px solid #0E1820;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-around;\n        .panobutton {\n            display: flex;\n            flex-direction: column;\n            align-items: center;\n            justify-content: center;\n            color: #eee;\n            width: 86%;\n            height: 60px;\n            background-color: #006600;\n            border-radius: 6px;\n            border: 3px solid #0E1820;\n            cursor: pointer;\n            text-align: center;\n            &:hover {\n                background-color: #009933;\n            }\n        }\n        .scienceButton {\n            display: flex;\n            flex-direction: column;\n            align-items: center;\n            justify-content: center;\n            color: #eee;\n            width: 86%;\n            height: 60px;\n            background-color: #006600;\n            border-radius: 6px;\n            border: 3px solid #0E1820;\n            cursor: pointer;\n            text-align: center;\n            &:hover {\n                background-color: #009933;\n            }\n        }\n        &.feeds {\n            justify-content: flex-start;\n            padding: 0px 10px 0px 10px;\n            p {\n                display: block;\n                font-size: 14px;\n                text-align: center;\n                padding: 0;\n                margin: 4px 0 4px 0;\n            }\n            select {\n                margin-bottom: 4px;\n            }\n        }\n    }\n}",".controlbox {\n  width: 100%;\n  height: 70px;\n  background-color: #eee;\n  margin: 6px 0 3px 0;\n  border-radius: 5px;\n  display: flex;\n  align-items: center;\n  justify-content: space-around;\n}\n.controlbox .subbox {\n  width: 100px;\n  height: 100%;\n  border-left: 4px solid #0E1820;\n  border-right: 4px solid #0E1820;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-around;\n}\n.controlbox .subbox .panobutton {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  color: #eee;\n  width: 86%;\n  height: 60px;\n  background-color: #006600;\n  border-radius: 6px;\n  border: 3px solid #0E1820;\n  cursor: pointer;\n  text-align: center;\n}\n.controlbox .subbox .panobutton:hover {\n  background-color: #009933;\n}\n.controlbox .subbox .scienceButton {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  color: #eee;\n  width: 86%;\n  height: 60px;\n  background-color: #006600;\n  border-radius: 6px;\n  border: 3px solid #0E1820;\n  cursor: pointer;\n  text-align: center;\n}\n.controlbox .subbox .scienceButton:hover {\n  background-color: #009933;\n}\n.controlbox .subbox.feeds {\n  justify-content: flex-start;\n  padding: 0px 10px 0px 10px;\n}\n.controlbox .subbox.feeds p {\n  display: block;\n  font-size: 14px;\n  text-align: center;\n  padding: 0;\n  margin: 4px 0 4px 0;\n}\n.controlbox .subbox.feeds select {\n  margin-bottom: 4px;\n}\n"],"sourceRoot":""}]);
 
 // exports
 

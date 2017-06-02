@@ -139,7 +139,7 @@ class MapBox extends React.Component {
 
         let robotMarker = L.marker([this.state.lat, this.state.long], {icon: roverIcon, rotationAngle: this.state.angle}).addTo(map);
         map.setMinZoom(12);
-        map.setMaxZoom(17);
+        map.setMaxZoom(18);
         this.setState({
             map,
             robotMarker
