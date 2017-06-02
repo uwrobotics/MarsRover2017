@@ -43,7 +43,7 @@ class GimbalController:
 		self._lastpan = 0
 		self._lasttilt = 0
 		self._id = 600 # CAN id
-		self.startGimbal();
+		self.startGimbal()
 
 	# Set gimbal to the start position. Only called once at the start.
 	def startGimbal(self):

@@ -115,7 +115,8 @@ class App extends React.Component {
         var batteryListener = new ROSLIB.Topic({
             ros : this.state.ros,
             name : '/battery_data',
-            messageType : 'std_msgs/Float32MultiArray'
+            messageType : 'std_msgs/Float32MultiArray',
+            throttle_rate: 500, // 500ms between messages means more responsive
         });
         batteryListener.subscribe(function(msg) {
             console.log("got battery message");
@@ -132,7 +133,8 @@ class App extends React.Component {
         var roboteqLeftListener = new ROSLIB.Topic({
             ros : this.state.ros,
             name : '/left/feedback',
-            messageType : 'roboteq_msgs/Feedback'
+            messageType : 'roboteq_msgs/Feedback',
+            throttle_rate: 500, // 500ms between messages means more responsive
         });
         roboteqLeftListener.subscribe(function(msg) {
             console.log("got roboteq left");
@@ -150,7 +152,8 @@ class App extends React.Component {
         var roboteqRightListener = new ROSLIB.Topic({
             ros : this.state.ros,
             name : '/right/feedback',
-            messageType : 'roboteq_msgs/Feedback'
+            messageType : 'roboteq_msgs/Feedback',
+            throttle_rate: 500, // 500ms between messages means more responsive
         });
         roboteqRightListener.subscribe(function(msg) {
             console.log("got roboteq right");
@@ -167,7 +170,8 @@ class App extends React.Component {
         var navsatListener = new ROSLIB.Topic({
             ros : this.state.ros,
             name : '/navsat/fix',
-            messageType : 'sensor_msgs/NavSatFix'
+            messageType : 'sensor_msgs/NavSatFix',
+            throttle_rate: 500, // 500ms between messages means more responsive
         });
         navsatListener.subscribe(function(msg) {
             console.log("got gps");
@@ -182,7 +186,8 @@ class App extends React.Component {
         var limitWristListener = new ROSLIB.Topic({
             ros : this.state.ros,
             name : '/switchesWristFlags',
-            messageType : 'std_msgs/UInt8'
+            messageType : 'std_msgs/UInt8',
+            throttle_rate: 500, // 500ms between messages means more responsive
         });
         limitWristListener.subscribe(function(msg) {
             console.log("got gps");
