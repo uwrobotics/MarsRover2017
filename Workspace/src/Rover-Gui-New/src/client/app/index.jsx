@@ -48,7 +48,7 @@ class App extends React.Component {
                 velocity: 0,
                 temperature: 0,
             },
-            limitWrist: {
+            limitTurntable: {
                 sw1: 0,
                 sw2: 0,
             },
@@ -105,6 +105,16 @@ class App extends React.Component {
         sensorData.sensorGroup3.sensors.D2.value = this.state.roboteq_ch2.voltage;
         sensorData.sensorGroup3.sensors.D3.value = this.state.roboteq_ch2.velocity;
         sensorData.sensorGroup3.sensors.D4.value = this.state.roboteq_ch2.temperature;
+
+        //update limit switch data
+        sensorData.sensorGroup4.sensors.D1.value = this.state.limitTurntable.sw1;
+        sensorData.sensorGroup4.sensors.D2.value = this.state.limitTurntable.sw2;
+
+        sensorData.sensorGroup5.sensors.D1.value = this.state.limitForearm.sw1;
+        sensorData.sensorGroup5.sensors.D2.value = this.state.limitForearm.sw2;
+
+        sensorData.sensorGroup6.sensors.D1.value = this.state.limitShoulder.sw1;
+        sensorData.sensorGroup6.sensors.D2.value = this.state.limitShoulder.sw2;
 
         this.setState({ sensorData });
     }
@@ -183,21 +193,53 @@ class App extends React.Component {
             }, thisClass.updateDials);
         });  
 
-        var limitWristListener = new ROSLIB.Topic({
+        var limitTurntableListener = new ROSLIB.Topic({
             ros : this.state.ros,
-            name : '/switchesWristFlags',
+            name : '/switchesTurntableFlags',
             messageType : 'std_msgs/UInt8',
             throttle_rate: 500, // 500ms between messages means more responsive
         });
-        limitWristListener.subscribe(function(msg) {
+        limitTurntableListener.subscribe(function(msg) {
             console.log("got gps");
             thisClass.setState({
-                limitWrist: {
-                    sw1: 1,
-                    sw2: 1,
+                limitTurntable: {
+                    sw1: msg.data & 0x1,
+                    sw2: (msg.data >> 1) & 0x1,
                 }
             }, thisClass.updateDials);
         });  
+
+        var limitForearmListener = new ROSLIB.Topic({
+            ros : this.state.ros,
+            name : '/switchesForearmFlags',
+            messageType : 'std_msgs/UInt8',
+            throttle_rate: 500, // 500ms between messages means more responsive
+        });
+        limitForearmListener.subscribe(function(msg) {
+            console.log("got gps");
+            thisClass.setState({
+                limitForearm: {
+                    sw1: msg.data & 0x1,
+                    sw2: (msg.data >> 1) & 0x1,
+                }
+            }, thisClass.updateDials);
+        });  
+
+        var limitShoulderListener = new ROSLIB.Topic({
+            ros : this.state.ros,
+            name : '/switchesShoulderFlags',
+            messageType : 'std_msgs/UInt8',
+            throttle_rate: 500, // 500ms between messages means more responsive
+        });
+        limitShoulderListener.subscribe(function(msg) {
+            thisClass.setState({
+                limitShoulder: {
+                    sw1: msg.data & 0x1,
+                    sw2: (msg.data >> 1) & 0x1,
+                }
+            }, thisClass.updateDials);
+        });  
+        
 
     }
     

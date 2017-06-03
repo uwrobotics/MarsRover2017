@@ -7,4 +7,4 @@
 /transmitter_interface:  "can0"
 
 # Topics
-/receiver_list:          ["/switchesWristFlags", "/switchesForearmFlags", "switchesShoulderFlags", "/science", "/current_sensors", "/thermistors"]
+/receiver_list:          ["/switchesTurntableFlags", "/switchesForearmFlags", "switchesShoulderFlags", "/science", "/current_sensors", "/thermistors"]

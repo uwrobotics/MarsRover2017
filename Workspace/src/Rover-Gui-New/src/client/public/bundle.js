@@ -10274,6 +10274,76 @@ module.exports = {
          }
       }
    },
+
+   "sensorGroup4": {
+      "groupDisplayName": "Turntable Limit Switches",
+      "sensors": {
+         "D1": {
+            "displayName": "Clockwise",
+            "type": "none",
+            "minValue": 0,
+            "warnValue": 1,
+            "criticalValue": 1,
+            "maxValue": 1,
+            "value": 0
+         },
+         "D2": {
+            "displayName": "Counter Clockwise",
+            "type": "none",
+            "minValue": 0,
+            "warnValue": 1,
+            "criticalValue": 1,
+            "maxValue": 1,
+            "value": 0
+         }
+      }
+   },
+   "sensorGroup5": {
+      "groupDisplayName": "Forearm Limit Switches",
+      "sensors": {
+         "D1": {
+            "displayName": "Closed",
+            "type": "none",
+            "minValue": 0,
+            "warnValue": 1,
+            "criticalValue": 1,
+            "maxValue": 1,
+            "value": 0
+         },
+         "D2": {
+            "displayName": "Open",
+            "type": "none",
+            "minValue": 0,
+            "warnValue": 1,
+            "criticalValue": 1,
+            "maxValue": 1,
+            "value": 0
+         }
+      }
+   },
+   "sensorGroup6": {
+      "groupDisplayName": "Shoulder Limit Switches",
+      "sensors": {
+         "D1": {
+            "displayName": "Closed",
+            "type": "none",
+            "minValue": 0,
+            "warnValue": 1,
+            "criticalValue": 1,
+            "maxValue": 1,
+            "value": 0
+         },
+         "D2": {
+            "displayName": "Open",
+            "type": "none",
+            "minValue": 0,
+            "warnValue": 1,
+            "criticalValue": 1,
+            "maxValue": 1,
+            "value": 0
+         }
+      }
+   },
    "sensorGroup2": {
       "groupDisplayName": "Left Drive",
       "sensors": {
@@ -10353,93 +10423,6 @@ module.exports = {
             "criticalValue": 80,
             "maxValue": 100,
             "value": 0
-         }
-      }
-   },
-   "sensorGroup4": {
-      "groupDisplayName": "Group 4",
-      "sensors": {
-         "G4T1": {
-            "displayName": "G4 Temp1",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 40
-         },
-         "G4T2": {
-            "displayName": "G4 Temp2",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 40
-         }
-      }
-   },
-   "sensorGroup5": {
-      "groupDisplayName": "Group 5",
-      "sensors": {
-         "G5T1": {
-            "displayName": "G5 Temp1",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 40
-         },
-         "G5T2": {
-            "displayName": "Test Output 1",
-            "type": "voltage",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 40
-         },
-         "G5T3": {
-            "displayName": "G5 Temp3",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 40
-         },
-         "G5T4": {
-            "displayName": "G5 Temp4",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 40
-         }
-      }
-   },
-   "sensorGroup6": {
-      "groupDisplayName": "Group 6",
-      "sensors": {
-         "G4T1": {
-            "displayName": "G4 Temp1",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 40
-         },
-         "G4T2": {
-            "displayName": "G4 Temp2",
-            "type": "temp",
-            "minValue": 0,
-            "warnValue": 60,
-            "criticalValue": 80,
-            "maxValue": 100,
-            "value": 40
          }
       }
    }
@@ -10960,7 +10943,7 @@ var App = function (_React$Component) {
                 velocity: 0,
                 temperature: 0
             },
-            limitWrist: {
+            limitTurntable: {
                 sw1: 0,
                 sw2: 0
             },
@@ -11020,6 +11003,16 @@ var App = function (_React$Component) {
             sensorData.sensorGroup3.sensors.D2.value = this.state.roboteq_ch2.voltage;
             sensorData.sensorGroup3.sensors.D3.value = this.state.roboteq_ch2.velocity;
             sensorData.sensorGroup3.sensors.D4.value = this.state.roboteq_ch2.temperature;
+
+            //update limit switch data
+            sensorData.sensorGroup4.sensors.D1.value = this.state.limitTurntable.sw1;
+            sensorData.sensorGroup4.sensors.D2.value = this.state.limitTurntable.sw2;
+
+            sensorData.sensorGroup5.sensors.D1.value = this.state.limitForearm.sw1;
+            sensorData.sensorGroup5.sensors.D2.value = this.state.limitForearm.sw2;
+
+            sensorData.sensorGroup6.sensors.D1.value = this.state.limitShoulder.sw1;
+            sensorData.sensorGroup6.sensors.D2.value = this.state.limitShoulder.sw2;
 
             this.setState({ sensorData: sensorData });
         }
@@ -11094,17 +11087,46 @@ var App = function (_React$Component) {
                 }, thisClass.updateDials);
             });
 
-            var limitWristListener = new ROSLIB.Topic({
+            var limitTurntableListener = new ROSLIB.Topic({
                 ros: this.state.ros,
-                name: '/switchesWristFlags',
+                name: '/switchesTurntableFlags',
                 messageType: 'std_msgs/UInt8',
                 throttle_rate: 500 });
-            limitWristListener.subscribe(function (msg) {
+            limitTurntableListener.subscribe(function (msg) {
                 console.log("got gps");
                 thisClass.setState({
-                    limitWrist: {
-                        sw1: 1,
-                        sw2: 1
+                    limitTurntable: {
+                        sw1: msg.data & 0x1,
+                        sw2: msg.data >> 1 & 0x1
+                    }
+                }, thisClass.updateDials);
+            });
+
+            var limitForearmListener = new ROSLIB.Topic({
+                ros: this.state.ros,
+                name: '/switchesForearmFlags',
+                messageType: 'std_msgs/UInt8',
+                throttle_rate: 500 });
+            limitForearmListener.subscribe(function (msg) {
+                console.log("got gps");
+                thisClass.setState({
+                    limitForearm: {
+                        sw1: msg.data & 0x1,
+                        sw2: msg.data >> 1 & 0x1
+                    }
+                }, thisClass.updateDials);
+            });
+
+            var limitShoulderListener = new ROSLIB.Topic({
+                ros: this.state.ros,
+                name: '/switchesShoulderFlags',
+                messageType: 'std_msgs/UInt8',
+                throttle_rate: 500 });
+            limitShoulderListener.subscribe(function (msg) {
+                thisClass.setState({
+                    limitShoulder: {
+                        sw1: msg.data & 0x1,
+                        sw2: msg.data >> 1 & 0x1
                     }
                 }, thisClass.updateDials);
             });
