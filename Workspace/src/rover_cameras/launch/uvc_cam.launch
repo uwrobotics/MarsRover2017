@@ -1,0 +1,13 @@
+<launch>
+  <group ns="cam4">
+    <!-- rosrun libuvc_camera camera_node _vendor:="0x045e" -->
+
+    <node pkg="libuvc_camera" type="camera_node" name="uvc_cam" respawn="true">
+        <param name="vendor" value="0x045e"/>
+        <param name="width" value="320"/>
+        <param name="height" value="240"/>
+    </node>
+
+    <node pkg="image_proc" type="image_proc" name="uvc_image_proc"/>
+  </group>
+</launch>
