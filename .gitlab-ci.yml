@@ -6,7 +6,6 @@ services:
 
 before_script:
   - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "docker load -i {file} "; fi
-  - apt-get install bash
 
 stages:
   - build
@@ -15,7 +14,7 @@ stages:
 kinetic:
   stage: build
   script:
-    - bash docker/docker-build.sh ${DISTRO}
+    - sh docker/docker-build.sh ${DISTRO}
   only:
     - master
     - devel
