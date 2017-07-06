@@ -14,7 +14,7 @@ stages:
 kinetic:
   stage: build
   script:
-    - bash docker/docker-run.sh ${DISTRO}
+    - bash docker/docker-build.sh ${DISTRO}
   only:
     - master
     - devel
