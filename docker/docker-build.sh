@@ -1,8 +1,8 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-cp -r ${DIR}/scripts ${DIR}/${1}/scripts
+echo $DIR
+cp -r ${DIR}/../scripts ${DIR}/${1}/scripts
 
 docker build -t uwrt/ubuntu:${1} ${DIR}/${1}
 
