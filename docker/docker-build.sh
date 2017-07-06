@@ -4,7 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cp -r ${DIR}/scripts ${DIR}/${1}/scripts
 
-docker build -t uwrt/ubuntu:${1} ${DIR}/${1}
+docker build -t uwrt/ubuntu:${1} ${DIR}/docker/${1}
 
 RES=$?
 
