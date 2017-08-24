@@ -1,0 +1,12 @@
+<launch>
+	<!-- <node pkg="rover_autonomy" type="ball_tracking.py" name="ball_tracking">
+		<remap from="/camera/image_color" to="/image_raw"/>
+	</node> -->
+
+	<node pkg="rover_autonomy" type="ball_tracking_new.py" name="ball_tracking">
+		<remap from="/camera/image_color" to="/image_raw"/>
+	</node>
+
+	<node pkg="rover_autonomy" type="ball_following.py" name="ball_following"/>
+
+</launch>

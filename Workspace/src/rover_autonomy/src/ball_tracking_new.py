@@ -13,8 +13,8 @@ do_visualization_img_proc = True
 do_visualization_final_result = True
 
 # detection parameters
-greenLower = (30, 70, 0)
-greenUpper = (45, 255, 255)
+greenLower = (20, 35, 10)
+greenUpper = (50, 255, 255)
 
 # dialation_radius_correction = 0.5
 
@@ -66,7 +66,7 @@ class Ball_tracking:
         self.num_iterations += 1
 
         if do_visualization_final_result:
-            cv2.circle(image, (int(self.x), int(self.y)), int(self.r), (0, 0, 255), -1) # visualization
+            cv2.circle(image, (int(self.x), int(self.y)), int(self.r), (0, 0, 255), 2) # visualization
             text = "Position=(%.3f,%.3f,%.3f) Bearing=%.3f" % (X, Y, Z, bearing * 180 / math.pi)
             cv2.putText(image, text, (10, 500), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0))
             cv2.imshow("Final Results", image)
@@ -85,13 +85,12 @@ class Ball_tracking:
     def compute_image(self, image):
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
+        hsv = cv2.GaussianBlur(hsv, (11, 11), 0)
         # construct a mask for the color "green", then perform
         # a series of dilations and erosions to remove any small
         # blobs left in the mask
         mask = cv2.inRange(hsv, greenLower, greenUpper)
-        kernel = np.ones((2,2),np.uint8)
-        # mask = cv2.erode(mask, kernel, iterations=2)
-        # mask = cv2.dilate(mask, kernel, iterations=1)
+
 
         #use colored image for visualization
         if do_visualization_img_proc:
@@ -102,23 +101,79 @@ class Ball_tracking:
             cv2.imshow("Input Image", image)
             cv2.waitKey(3)
 
+
+
+        kernel1 = np.ones((3,3),np.uint8)
+        kernel2 = np.ones((1,1),np.uint8)
+        mask = cv2.erode(mask, kernel1, iterations=5)
+        mask = cv2.dilate(mask, kernel1, iterations=5)
+        # mask = cv2.dilate(mask, kernel2, iterations=5)
+        # mask = cv2.erode(mask, kernel2, iterations=5)
+        # mask = cv2.GaussianBlur(mask, (5, 5), 0)
+
+
         # find contours in the mask and initialize the current
         # (x, y) center of the ball
         contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2]
-        contours = sorted(contours, key=lambda c: cv2.contourArea(c), reverse=True)
+        # contours = sorted(contours, key=lambda c: cv2.contourArea(c), reverse=True)
+
+        contours[:] = [contour for contour in contours if 8 < len(
+            cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)) < 25 and cv2.contourArea(
+            contour) < 50000 and cv2.contourArea(contour) > 200]
+
+        mask[:,:] = 0
+        cv2.drawContours(mask, contours, -1, (255,0,0), thickness = cv2.cv.CV_FILLED)
+        cv2.imshow("Contours", mask)
 
         if len(contours) <= 0:
             rospy.logwarn("No valid contours.")
             return False
 
-        if cv2.contourArea(contours[0]) > 100000:
-            rospy.logwarn("Contour area too large.")
+
+
+        circles = cv2.HoughCircles(mask, cv2.cv.CV_HOUGH_GRADIENT, 4, 10, minRadius = min_radius)
+
+        if circles == None or len(circles[0]) <= 0:
+            rospy.logwarn("No valid circles.")
             return False
 
-        ((self.x, self.y), self.r) = cv2.minEnclosingCircle(contours[0])
-        if self.r < min_radius:
-            rospy.logwarn("Enclosed circle is less than minimum radius.")
+        inContour = False
+        for i in range(min(len(circles[0]), 5)):
+            self.x = circles[0][i][0]
+            self.y = circles[0][i][1]
+            self.r = circles[0][i][2]
+            area = 3.14 * self.r * self.r
+
+            if area > 50000:
+                # rospy.logwarn("Contour area too large.")
+                continue
+
+            if self.r < min_radius:
+                # rospy.logwarn("Enclosed circle is less than minimum radius.")
+                continue
+
+            for contour in contours:
+                contourArea = cv2.contourArea(contour)
+                if cv2.pointPolygonTest(contour, (self.x, self.y), False) > 0 and contourArea > area * 0.8 and contourArea < area * 1.2:
+                    inContour = True
+                    ((self.x, self.y), self.r) = cv2.minEnclosingCircle(contour)
+                    break
+
+            if inContour:
+                break
+
+        if not inContour:
+            rospy.logwarn("Not in contour.")
             return False
+
+
+
+
+        # blobDetector = cv2.SimpleBlobDetector()
+        # keypoints = blobDetector.detect(mask)
+        # im_with_keypoints = cv2.drawKeypoints(mask, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        # cv2.imshow("Keypoints", im_with_keypoints)
+
 
         return True
 
